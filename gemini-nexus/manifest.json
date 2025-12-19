@@ -1,12 +1,10 @@
-
 {
   "manifest_version": 3,
   "name": "Gemini Nexus",
-  "version": "1.2.0",
-  "permissions": ["sidePanel", "storage", "contextMenus"],
+  "version": "2.0.0",
+  "permissions": ["sidePanel", "storage", "contextMenus", "scripting"],
   "host_permissions": [
     "https://gemini.google.com/*",
-    "https://bard.google.com/*",
     "<all_urls>"
   ],
   "background": {
@@ -33,7 +31,7 @@
     }
   },
   "side_panel": {
-    "default_path": "sidepanel.html"
+    "default_path": "sidepanel/index.html"
   },
   "sandbox": {
     "pages": ["sandbox.html"]
@@ -43,32 +41,37 @@
       "matches": ["<all_urls>"],
       "js": [
         "content/overlay.js", 
-        "content_observer.js", 
-        "content_toolbar_icons.js",
-        "content_toolbar_styles_core.js",
-        "content_toolbar_styles_widget.js",
-        "content_toolbar_styles_panel.js",
-        "content_toolbar_styles_markdown.js",
-        "content_toolbar_styles.js",
-        "content_toolbar_markdown_utils.js",
-        "content_toolbar_markdown_highlight.js",
-        "content_toolbar_markdown_parser.js",
-        "content_toolbar_markdown.js",
-        "content_toolbar_drag.js",
-        "content_toolbar_templates.js",
-        "content_toolbar_view_utils.js",
-        "content_toolbar_view_widget.js",
-        "content_toolbar_view_window.js",
-        "content_toolbar_view.js",
-        "content_toolbar_ui_events.js",
-        "content_toolbar_ui.js", 
-        "content_toolbar_actions.js",
-        "content_toolbar_image.js",
-        "content_toolbar_stream.js", 
-        "content_toolbar.js", 
+        "content/toolbar/icons.js",
+        "content/toolbar/styles/core.js",
+        "content/toolbar/styles/widget.js",
+        "content/toolbar/styles/panel.js",
+        "content/toolbar/styles/markdown.js",
+        "content/toolbar/styles/index.js",
+        "content/toolbar/markdown/utils.js",
+        "content/toolbar/markdown/highlight.js",
+        "content/toolbar/markdown/parser.js",
+        "content/toolbar/markdown/renderer.js",
+        "content/toolbar/drag.js",
+        "content/toolbar/templates.js",
+        "content/toolbar/view/utils.js",
+        "content/toolbar/view/widget.js",
+        "content/toolbar/view/window.js",
+        "content/toolbar/view/index.js",
+        "content/toolbar/events.js",
+        "content/toolbar/ui.js", 
+        "content/toolbar/actions.js",
+        "content/toolbar/image.js",
+        "content/toolbar/stream.js", 
+        "content/toolbar/index.js", 
         "content/index.js"
       ],
       "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["logo.png"],
+      "matches": ["<all_urls>"]
     }
   ],
   "content_security_policy": {

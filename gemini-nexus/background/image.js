@@ -44,45 +44,52 @@ export class ImageHandler {
         }
     }
 
-    // Capture the visible tab and return base64
-    captureScreenshot() {
-        return new Promise((resolve) => {
-            chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
-                if (chrome.runtime.lastError || !dataUrl) {
-                    resolve({
-                        action: "FETCH_IMAGE_RESULT",
-                        error: "Capture failed"
-                    });
-                    return;
-                }
-                
-                resolve({
-                    action: "FETCH_IMAGE_RESULT",
-                    base64: dataUrl,
-                    type: "image/png",
-                    name: "screenshot.png"
-                });
-            });
-        });
-    }
-
-    // Used when content script selects an area
-    captureArea(area) {
+    // Internal helper for capturing visible tab
+    _captureTab() {
         return new Promise((resolve) => {
             chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
                 if (chrome.runtime.lastError || !dataUrl) {
                     console.error("Capture failed:", chrome.runtime.lastError);
                     resolve(null);
-                    return;
+                } else {
+                    resolve(dataUrl);
                 }
-                
-                // Return data to UI for cropping
-                resolve({
-                    action: "CROP_SCREENSHOT",
-                    image: dataUrl,
-                    area: area
-                });
             });
         });
+    }
+
+    // Capture the visible tab and return base64
+    async captureScreenshot() {
+        const dataUrl = await this._captureTab();
+        
+        if (!dataUrl) {
+            return {
+                action: "FETCH_IMAGE_RESULT",
+                error: "Capture failed"
+            };
+        }
+        
+        return {
+            action: "FETCH_IMAGE_RESULT",
+            base64: dataUrl,
+            type: "image/png",
+            name: "screenshot.png"
+        };
+    }
+
+    // Used when content script selects an area
+    async captureArea(area) {
+        const dataUrl = await this._captureTab();
+        
+        if (!dataUrl) {
+            return null;
+        }
+        
+        // Return data to UI for cropping
+        return {
+            action: "CROP_SCREENSHOT",
+            image: dataUrl,
+            area: area
+        };
     }
 }

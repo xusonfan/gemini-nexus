@@ -1,3 +1,4 @@
+
 // background/menus.js
 
 /**
@@ -11,6 +12,13 @@ export function setupContextMenus(imageHandler) {
         chrome.contextMenus.create({
             id: "gemini-nexus-parent",
             title: "Gemini Nexus",
+            contexts: ["all"]
+        });
+
+        chrome.contextMenus.create({
+            id: "menu-page-chat",
+            parentId: "gemini-nexus-parent",
+            title: "Chat with Page",
             contexts: ["all"]
         });
 
@@ -39,6 +47,19 @@ export function setupContextMenus(imageHandler) {
     // Handle Context Menu Clicks
     chrome.contextMenus.onClicked.addListener(async (info, tab) => {
         if (!tab) return;
+
+        if (info.menuItemId === "menu-page-chat") {
+            // 1. Open Side Panel
+            await chrome.sidePanel.open({ tabId: tab.id, windowId: tab.windowId });
+            
+            // 2. Activate Page Context Mode
+            setTimeout(() => {
+                chrome.runtime.sendMessage({ 
+                    action: "TOGGLE_PAGE_CONTEXT", 
+                    enable: true 
+                });
+            }, 500);
+        }
 
         if (info.menuItemId === "menu-ocr" || info.menuItemId === "menu-snip") {
             const mode = info.menuItemId === "menu-ocr" ? "ocr" : "snip";

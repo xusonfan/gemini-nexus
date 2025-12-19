@@ -1,95 +1,67 @@
 
+
 // sandbox/index.js
-import { ImageManager } from '../image_manager.js';
-import { SessionManager } from './session_manager.js';
-import { UIController } from '../ui_controller.js';
-import { AppController } from '../app_controller.js';
-import { sendToBackground, requestSessionsFromStorage } from '../messaging.js';
-import { renderAppLayout } from '../ui_layout.js';
+import { ImageManager } from './core/image_manager.js';
+import { SessionManager } from './core/session_manager.js';
+import { UIController } from './ui/controller.js';
+import { AppController } from './app_controller.js';
+import { sendToBackground, requestSessionsFromStorage } from '../lib/messaging.js';
+import { configureMarkdown } from './renderer.js';
 
 // --- Initialization ---
 
 let app;
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 0. Render App Layout
-    renderAppLayout(document.body);
+// Init Managers immediately (Script is type="module", so DOM is ready)
+const sessionManager = new SessionManager();
 
-    // 1. Initialize Managers
-    const sessionManager = new SessionManager();
-    
-    // UI Controller will handle Settings and Viewer internal DOM creation
-    const ui = new UIController({
-        historyListEl: document.getElementById('history-list'),
-        sidebar: document.getElementById('history-sidebar'),
-        sidebarOverlay: document.getElementById('sidebar-overlay'),
-        statusDiv: document.getElementById('status'),
-        historyDiv: document.getElementById('chat-history'),
-        inputFn: document.getElementById('prompt'),
-        sendBtn: document.getElementById('send'),
-        historyToggleBtn: document.getElementById('history-toggle'),
-        closeSidebarBtn: document.getElementById('close-sidebar')
-    });
-
-    const imageManager = new ImageManager({
-        imageInput: document.getElementById('image-input'),
-        imagePreview: document.getElementById('image-preview'),
-        previewThumb: document.getElementById('preview-thumb'),
-        removeImgBtn: document.getElementById('remove-img'),
-        inputWrapper: document.querySelector('.input-wrapper'),
-        inputFn: document.getElementById('prompt')
-    }, {
-        onUrlDrop: (url) => {
-            ui.updateStatus("Loading image...");
-            sendToBackground({ action: "FETCH_IMAGE", url: url });
-        }
-    });
-
-    // 2. Initialize Controller
-    app = new AppController(sessionManager, ui, imageManager);
-
-    // 3. Configure Marked with Highlight.js
-    if (typeof marked !== 'undefined') {
-        const renderer = new marked.Renderer();
-        const originalCodeRenderer = renderer.code;
-        
-        renderer.code = function(code, language) {
-            if (typeof hljs !== 'undefined') {
-                const validLang = hljs.getLanguage(language) ? language : 'plaintext';
-                try {
-                    const highlighted = hljs.highlight(code, { language: validLang }).value;
-                    return `<pre><code class="hljs language-${validLang}">${highlighted}</code></pre>`;
-                } catch (e) {
-                    // Fallback to default if highlighting fails
-                }
-            }
-            // Fallback
-            if (originalCodeRenderer) {
-                return originalCodeRenderer.call(this, code, language);
-            }
-            return `<pre><code>${code}</code></pre>`;
-        };
-
-        marked.setOptions({ 
-            breaks: true, 
-            gfm: true,
-            renderer: renderer
-        });
-    }
-
-    // 4. Bind Global Events
-    bindAppEvents(app, ui);
-    
-    // 5. Start
-    requestSessionsFromStorage();
+const ui = new UIController({
+    historyListEl: document.getElementById('history-list'),
+    sidebar: document.getElementById('history-sidebar'),
+    sidebarOverlay: document.getElementById('sidebar-overlay'),
+    statusDiv: document.getElementById('status'),
+    historyDiv: document.getElementById('chat-history'),
+    inputFn: document.getElementById('prompt'),
+    sendBtn: document.getElementById('send'),
+    historyToggleBtn: document.getElementById('history-toggle'),
+    closeSidebarBtn: document.getElementById('close-sidebar')
 });
+
+const imageManager = new ImageManager({
+    imageInput: document.getElementById('image-input'),
+    imagePreview: document.getElementById('image-preview'),
+    previewThumb: document.getElementById('preview-thumb'),
+    removeImgBtn: document.getElementById('remove-img'),
+    inputWrapper: document.querySelector('.input-wrapper'),
+    inputFn: document.getElementById('prompt')
+}, {
+    onUrlDrop: (url) => {
+        ui.updateStatus("Loading image...");
+        sendToBackground({ action: "FETCH_IMAGE", url: url });
+    }
+});
+
+// Initialize Controller
+app = new AppController(sessionManager, ui, imageManager);
+
+// Configure Markdown
+configureMarkdown();
+
+// Bind Events
+bindAppEvents(app, ui);
+
+// --- Critical Optimization: Signal Ready & Request Data Immediately ---
+// 1. Tell parent (sidepanel/index.js) to hide skeleton loader
+window.parent.postMessage({ action: 'UI_READY' }, '*');
+
+// 2. Request data (will be served from sidepanel pre-fetch cache)
+requestSessionsFromStorage();
 
 
 // --- Event Binding ---
 
 function bindAppEvents(app, ui) {
     // New Chat Buttons
-    document.getElementById('new-chat-btn').addEventListener('click', () => app.handleNewChat());
     document.getElementById('new-chat-header-btn').addEventListener('click', () => app.handleNewChat());
 
     // Tools

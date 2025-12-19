@@ -3,7 +3,7 @@
 #chat-history { 
     flex: 1; 
     overflow-y: auto; 
-    padding: 20px 20px 0 20px; 
+    padding: 80px 20px 0 20px; 
     padding-bottom: 140px; /* Space for input */
     display: flex; 
     flex-direction: column; 
@@ -12,7 +12,7 @@
 }
 
 #chat-history::-webkit-scrollbar { width: 6px; }
-#chat-history::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+#chat-history::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
 
 /* Base Message Style */
 .msg { 
@@ -33,13 +33,12 @@
 /* --- User Message (Bubble) --- */
 .msg.user { 
     align-self: flex-end; 
-    background: var(--primary);
-    color: var(--on-primary);
+    background: var(--bg-user-msg);
+    color: var(--text-user-msg);
     padding: 12px 20px; 
-    border-radius: 24px 24px 4px 24px; /* Sharper bottom-right corner */
+    border-radius: 24px; 
     max-width: 85%; 
     white-space: pre-wrap; 
-    box-shadow: 0 1px 2px rgba(0,0,0,0.12);
 }
 
 .msg.user .copy-btn {
@@ -152,7 +151,7 @@
 /* Mobile Adjustments */
 @media (max-width: 600px) {
     #chat-history {
-        padding: 16px 16px 0 16px;
+        padding: 80px 16px 0 16px;
         padding-bottom: 120px;
     }
 }

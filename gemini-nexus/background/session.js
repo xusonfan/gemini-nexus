@@ -1,5 +1,6 @@
+
 // background/session.js
-import { sendGeminiMessage } from '../gemini_api.js';
+import { sendGeminiMessage } from '../services/gemini_api.js';
 
 export class GeminiSessionManager {
     constructor() {
@@ -86,14 +87,20 @@ export class GeminiSessionManager {
 
             console.error("Gemini Error:", error);
             
-            if(error.message && error.message.includes("未登录")) {
+            let errorMessage = error.message || "Unknown error";
+
+            if(errorMessage.includes("未登录")) {
                 this.currentContext = null;
                 await chrome.storage.local.remove(['geminiContext']);
+            }
+            
+            if (errorMessage.includes("Failed to fetch")) {
+                errorMessage = "Network error: Unable to connect to Gemini. Please check your internet connection.";
             }
 
             return {
                 action: "GEMINI_REPLY",
-                text: "Error: " + (error.message || "Unknown error"),
+                text: "Error: " + errorMessage,
                 status: "error"
             };
         } finally {

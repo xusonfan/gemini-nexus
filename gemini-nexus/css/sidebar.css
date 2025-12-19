@@ -1,4 +1,5 @@
 
+
 /* Sidebar Styles */
 .sidebar {
     position: fixed;
@@ -10,38 +11,14 @@
     z-index: 200;
     box-shadow: 4px 0 12px rgba(0,0,0,0.05);
     transform: translateX(-100%);
-    transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), background-color 0.2s;
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), background-color 0.2s;
     display: flex;
     flex-direction: column;
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     padding-top: 16px; /* Top spacing */
 }
 
 .sidebar.open { 
     transform: translateX(0); 
-}
-
-/* Close Button (Floating Top Right) */
-.sidebar-close-float {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    background: transparent;
-    border: none;
-    color: var(--text-tertiary);
-    cursor: pointer;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    z-index: 10;
-    transition: background 0.2s, color 0.2s;
-}
-.sidebar-close-float:hover {
-    background: rgba(0,0,0,0.05);
-    color: var(--text-primary);
 }
 
 /* Top Section (Search & New Chat) */
@@ -60,7 +37,6 @@
     align-items: center;
     margin-bottom: 20px;
     transition: background 0.2s, box-shadow 0.2s;
-    margin-right: 40px; /* Space for close button */
 }
 
 [data-theme="dark"] .search-container {

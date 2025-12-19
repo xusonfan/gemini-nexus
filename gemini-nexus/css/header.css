@@ -8,10 +8,7 @@
     justify-content: space-between;
     align-items: flex-start;
     padding: 16px 20px;
-    height: auto; 
-    background: transparent;
     z-index: 10;
-    box-sizing: border-box;
     pointer-events: none; /* Let clicks pass through empty space */
 }
 

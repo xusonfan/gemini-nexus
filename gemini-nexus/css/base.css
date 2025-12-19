@@ -16,6 +16,10 @@
     --border-color: #e1e3e1;
     --border-focus: #d3e3fd;
     
+    /* User Message Bubble */
+    --bg-user-msg: #f0f4f9;
+    --text-user-msg: #1f1f1f;
+
     /* Interactive Elements */
     --btn-hover: #e0e4e9;
     --btn-active-bg: #c2e7ff;
@@ -68,6 +72,10 @@
     --border-color: #444746;
     --border-focus: #5e5e5e;
     
+    /* User Message Bubble */
+    --bg-user-msg: #2d2e2f;
+    --text-user-msg: #e3e3e3;
+
     --btn-hover: #333537;
     --btn-active-bg: #004a77;
     --btn-active-text: #c2e7ff;

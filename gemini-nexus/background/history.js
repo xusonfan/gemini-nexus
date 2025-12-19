@@ -1,5 +1,5 @@
 // background/history.js
-import { generateUUID } from '../utils.js';
+import { generateUUID } from '../lib/utils.js';
 
 /**
  * Saves a completed interaction to the chat history in local storage.

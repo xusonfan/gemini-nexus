@@ -1,3 +1,4 @@
+
 // background/msg_session.js
 import { saveToHistory } from './history.js';
 
@@ -23,7 +24,7 @@ export class SessionMessageHandler {
                     if (request.includePageContext) {
                          const pageContent = await this._getActiveTabContent();
                          if (pageContent) {
-                             request.text = `Context from current webpage:\n\`\`\`html\n${pageContent}\n\`\`\`\n\nUser Question: ${request.text}`;
+                             request.text = `Webpage Context:\n\`\`\`text\n${pageContent}\n\`\`\`\n\nQuestion: ${request.text}`;
                          }
                     }
 
@@ -81,11 +82,43 @@ export class SessionMessageHandler {
     async _getActiveTabContent() {
         try {
             const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-            if (!tab) return null;
+            if (!tab || !tab.id) return null;
 
-            // Send message to content script
-            const response = await chrome.tabs.sendMessage(tab.id, { action: "GET_PAGE_CONTENT" });
-            return response ? response.content : null;
+            // Check for restricted URLs where content scripts/injection don't run
+            if (tab.url && (
+                tab.url.startsWith('chrome://') || 
+                tab.url.startsWith('edge://') || 
+                tab.url.startsWith('chrome-extension://') || 
+                tab.url.startsWith('about:') ||
+                tab.url.startsWith('view-source:') ||
+                tab.url.startsWith('https://chrome.google.com/webstore') ||
+                tab.url.startsWith('https://chromewebstore.google.com')
+            )) {
+                return null;
+            }
+
+            // Strategy 1: Try sending message to existing content script (Preferred)
+            try {
+                const response = await chrome.tabs.sendMessage(tab.id, { action: "GET_PAGE_CONTENT" });
+                return response ? response.content : null;
+            } catch (e) {
+                // Strategy 2: Fallback to Scripting Injection (Robustness for unloaded scripts)
+                // Useful if the tab was open before extension install or script context invalidated
+                console.log("Content script unavailable, attempting fallback injection...");
+                try {
+                    const results = await chrome.scripting.executeScript({
+                        target: { tabId: tab.id },
+                        func: () => {
+                            // Extract text content directly
+                            return document.body ? document.body.innerText : "";
+                        }
+                    });
+                    return results?.[0]?.result || null;
+                } catch (injErr) {
+                    console.error("Fallback injection failed:", injErr);
+                    return null;
+                }
+            }
         } catch (e) {
             console.error("Failed to get page context:", e);
             return null;

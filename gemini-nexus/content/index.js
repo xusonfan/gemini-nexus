@@ -1,15 +1,11 @@
 
-// content.js v1.2.0 -> content/index.js
-console.log("%c Gemini Nexus v1.2.0 Ready ", "background: #333; color: #00ff00; font-size: 16px");
+// content.js v2.0.0 -> content/index.js
+console.log("%c Gemini Nexus v2.0.0 Ready ", "background: #333; color: #00ff00; font-size: 16px");
 
 // Initialize Helpers
 // (Classes are loaded into window scope by previous content scripts in manifest)
 const selectionOverlay = new window.GeminiNexusOverlay();
-const responseObserver = new window.GeminiNexusObserver();
 const floatingToolbar = new window.GeminiFloatingToolbar(); // Initialize Toolbar
-
-// Start observing immediately
-responseObserver.start();
 
 // Listen for messages
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -45,18 +41,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true;
     }
 
-    // Get Full Page Content (Cleaned HTML)
+    // Get Full Page Content (Cleaned Text)
     if (request.action === "GET_PAGE_CONTENT") {
         try {
-            // Clone to avoid modifying active page
-            const clone = document.documentElement.cloneNode(true);
-            
-            // Remove Scripts, Styles, and other non-content elements
-            const elementsToRemove = clone.querySelectorAll('script, style, noscript, iframe, svg, meta, link');
-            elementsToRemove.forEach(el => el.remove());
-            
-            // Return outerHTML
-            sendResponse({ content: clone.outerHTML });
+            // Optimization: Return innerText instead of HTML
+            // 1. Reduces token usage significantly
+            // 2. Reduces message passing overhead
+            // 3. Focuses on content rather than markup
+            let text = document.body.innerText || "";
+            // Basic cleanup: merge multiple newlines
+            text = text.replace(/\n{3,}/g, '\n\n');
+            sendResponse({ content: text });
         } catch(e) {
             sendResponse({ content: "", error: e.message });
         }
