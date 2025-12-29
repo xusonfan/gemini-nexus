@@ -47,6 +47,14 @@ export class ToolExecutor {
                     throw new Error(`Unknown tool '${toolName}'. (External MCP tools are disabled)`);
                 }
 
+                if (request && request.mcpToolMode === 'selected') {
+                    const enabled = Array.isArray(request.mcpEnabledTools) ? request.mcpEnabledTools : [];
+                    const enabledSet = new Set(enabled);
+                    if (!enabledSet.has(toolName)) {
+                        throw new Error(`External MCP tool '${toolName}' is disabled (not in selected tools).`);
+                    }
+                }
+
                 source = "mcp_remote";
                 const remote = await this.mcpManager.callTool(request, toolName, toolCommand.args || {});
                 output = remote.text;

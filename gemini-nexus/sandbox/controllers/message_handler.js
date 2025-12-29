@@ -23,6 +23,13 @@ export class MessageHandler {
             return;
         }
 
+        if (request.action === "MCP_TOOLS_RESULT") {
+            if (this.ui && this.ui.settings && typeof this.ui.settings.updateMcpToolsResult === 'function') {
+                this.ui.settings.updateMcpToolsResult(request);
+            }
+            return;
+        }
+
         // 0. Stream Update
         if (request.action === "GEMINI_STREAM_UPDATE") {
             this.handleStreamUpdate(request);

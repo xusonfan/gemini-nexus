@@ -92,6 +92,28 @@ export const ConnectionSettingsTemplate = `
                 <button id="mcp-test-connection" class="tool-btn" style="padding: 6px 10px;" type="button" data-i18n="mcpTestConnection">Test</button>
             </div>
             <div id="mcp-test-status" style="font-size: 12px; opacity: 0.85;"></div>
+
+            <div style="margin-top: 6px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.06); display: flex; flex-direction: column; gap: 10px;">
+                <div>
+                    <label data-i18n="mcpToolMode" style="font-weight: 500; display: block; margin-bottom: 6px;">Expose Tools</label>
+                    <select id="mcp-tool-mode" class="shortcut-input" style="width: 100%; text-align: left; padding: 6px 12px;">
+                        <option value="all" data-i18n="mcpToolModeAll">All tools (default)</option>
+                        <option value="selected" data-i18n="mcpToolModeSelected">Selected tools only</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button id="mcp-refresh-tools" class="tool-btn" style="padding: 6px 10px;" type="button" data-i18n="mcpRefreshTools">Refresh Tools</button>
+                    <button id="mcp-enable-all-tools" class="tool-btn" style="padding: 6px 10px;" type="button" data-i18n="mcpEnableAllTools">Enable All</button>
+                    <button id="mcp-disable-all-tools" class="tool-btn" style="padding: 6px 10px;" type="button" data-i18n="mcpDisableAllTools">Disable All</button>
+                </div>
+
+                <input type="text" id="mcp-tool-search" class="shortcut-input" style="width: 100%; text-align: left; box-sizing: border-box;" data-i18n-placeholder="mcpToolSearchPlaceholder" placeholder="Search tools...">
+
+                <div id="mcp-tools-summary" style="font-size: 12px; opacity: 0.85;"></div>
+
+                <div id="mcp-tool-list" style="max-height: 220px; overflow: auto; padding: 8px; background: rgba(255,255,255,0.55); border-radius: 8px; border: 1px solid rgba(0,0,0,0.06);"></div>
+            </div>
         </div>
     </div>
 </div>`;

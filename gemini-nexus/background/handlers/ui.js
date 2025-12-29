@@ -212,6 +212,49 @@ export class UIMessageHandler {
             })();
             return true;
         }
+
+        if (request.action === "MCP_LIST_TOOLS") {
+            (async () => {
+                try {
+                    if (!this.mcpManager) throw new Error("MCP manager not available");
+                    const url = (request.url || "").trim();
+                    const transport = (request.transport || "sse").toLowerCase();
+                    if (!url) throw new Error("Server URL is empty");
+
+                    const tools = await this.mcpManager.listTools({
+                        enableMcpTools: true,
+                        mcpTransport: transport,
+                        mcpServerUrl: url
+                    });
+
+                    // Return only lightweight fields for UI
+                    const safeTools = Array.isArray(tools) ? tools.map(t => ({
+                        name: t.name,
+                        description: t.description || ""
+                    })) : [];
+
+                    sendResponse({
+                        action: "MCP_TOOLS_RESULT",
+                        ok: true,
+                        serverId: request.serverId || null,
+                        transport,
+                        url,
+                        tools: safeTools
+                    });
+                } catch (e) {
+                    sendResponse({
+                        action: "MCP_TOOLS_RESULT",
+                        ok: false,
+                        serverId: request.serverId || null,
+                        transport: request.transport || "sse",
+                        url: request.url || "",
+                        error: e.message || String(e),
+                        tools: []
+                    });
+                }
+            })();
+            return true;
+        }
         
         // --- TAB MANAGEMENT ---
         

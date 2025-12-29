@@ -528,6 +528,14 @@ export class McpRemoteManager {
     const tools = await this.listTools(config);
     if (!tools.length) return '';
 
+    const mode = config && config.mcpToolMode === 'selected' ? 'selected' : 'all';
+    const enabled = Array.isArray(config?.mcpEnabledTools) ? config.mcpEnabledTools : [];
+    const enabledSet = mode === 'selected' ? new Set(enabled) : null;
+
+    const filteredTools = mode === 'selected'
+      ? tools.filter(t => t && typeof t.name === 'string' && enabledSet.has(t.name))
+      : tools;
+
     const lines = [];
     lines.push('[System: External MCP Tools Enabled]');
     lines.push('You may call external tools using the same JSON tool-call format:');
@@ -535,9 +543,19 @@ export class McpRemoteManager {
     lines.push('{ "tool": "tool_name", "args": { /* ... */ } }');
     lines.push('```');
     lines.push('');
-    lines.push('External Tools:');
+    if (mode === 'selected') {
+      lines.push(`External Tools (selected):`);
+    } else {
+      lines.push('External Tools:');
+    }
 
-    for (const tool of tools) {
+    if (mode === 'selected' && filteredTools.length === 0) {
+      lines.push('- (none enabled)');
+      lines.push('');
+      return lines.join('\n');
+    }
+
+    for (const tool of filteredTools) {
       if (!tool || typeof tool.name !== 'string') continue;
       const desc = typeof tool.description === 'string' ? tool.description.trim() : '';
       const schema = summarizeInputSchema(tool.inputSchema);

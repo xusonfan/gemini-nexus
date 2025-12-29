@@ -7,6 +7,7 @@ export class ConnectionSection {
         this.elements = {};
         this.mcpServers = [];
         this.mcpActiveServerId = null;
+        this.mcpToolsCache = new Map(); // serverId -> { key, tools }
         this.queryElements();
         this.bindEvents();
     }
@@ -21,7 +22,9 @@ export class ConnectionSection {
             name: 'Local Proxy',
             transport: 'sse',
             url: 'http://127.0.0.1:3006/sse',
-            enabled: true
+            enabled: true,
+            toolMode: 'all', // 'all' | 'selected'
+            enabledTools: [] // only used when toolMode === 'selected'
         };
     }
 
@@ -54,6 +57,13 @@ export class ConnectionSection {
             mcpServerEnabled: get('mcp-server-enabled'),
             mcpTestConnection: get('mcp-test-connection'),
             mcpTestStatus: get('mcp-test-status'),
+            mcpToolMode: get('mcp-tool-mode'),
+            mcpRefreshTools: get('mcp-refresh-tools'),
+            mcpEnableAllTools: get('mcp-enable-all-tools'),
+            mcpDisableAllTools: get('mcp-disable-all-tools'),
+            mcpToolSearch: get('mcp-tool-search'),
+            mcpToolsSummary: get('mcp-tools-summary'),
+            mcpToolList: get('mcp-tool-list'),
         };
     }
 
@@ -80,7 +90,12 @@ export class ConnectionSection {
             mcpTransport,
             mcpServerUrl,
             mcpServerEnabled,
-            mcpTestConnection
+            mcpTestConnection,
+            mcpToolMode,
+            mcpRefreshTools,
+            mcpEnableAllTools,
+            mcpDisableAllTools,
+            mcpToolSearch
         } = this.elements;
 
         if (mcpServerSelect) {
@@ -135,6 +150,59 @@ export class ConnectionSection {
         if (mcpServerUrl) mcpServerUrl.addEventListener('input', onEdit);
         if (mcpTransport) mcpTransport.addEventListener('change', onEdit);
         if (mcpServerEnabled) mcpServerEnabled.addEventListener('change', onEdit);
+
+        if (mcpToolMode) {
+            mcpToolMode.addEventListener('change', () => {
+                this._saveCurrentServerEdits();
+                this._renderToolsUI();
+            });
+        }
+
+        if (mcpToolSearch) {
+            mcpToolSearch.addEventListener('input', () => {
+                this._renderToolsUI();
+            });
+        }
+
+        if (mcpRefreshTools) {
+            mcpRefreshTools.addEventListener('click', () => {
+                this._saveCurrentServerEdits();
+                const server = this._getActiveServer();
+                if (!server) return;
+
+                this.setMcpTestStatus('Fetching tools...');
+                sendToBackground({
+                    action: 'MCP_LIST_TOOLS',
+                    serverId: server.id,
+                    transport: server.transport || 'sse',
+                    url: server.url || ''
+                });
+            });
+        }
+
+        if (mcpEnableAllTools) {
+            mcpEnableAllTools.addEventListener('click', () => {
+                const server = this._getActiveServer();
+                if (!server) return;
+                const cached = this._getCachedTools(server);
+                if (!cached || cached.length === 0) return;
+                server.toolMode = 'selected';
+                server.enabledTools = cached.map(t => t.name).filter(Boolean);
+                this._loadActiveServerIntoForm();
+                this._renderToolsUI();
+            });
+        }
+
+        if (mcpDisableAllTools) {
+            mcpDisableAllTools.addEventListener('click', () => {
+                const server = this._getActiveServer();
+                if (!server) return;
+                server.toolMode = 'selected';
+                server.enabledTools = [];
+                this._loadActiveServerIntoForm();
+                this._renderToolsUI();
+            });
+        }
 
         if (mcpTestConnection) {
             mcpTestConnection.addEventListener('click', () => {
@@ -191,7 +259,9 @@ export class ConnectionSection {
                 name: s.name || '',
                 transport: s.transport || 'sse',
                 url: s.url || '',
-                enabled: s.enabled !== false
+                enabled: s.enabled !== false,
+                toolMode: s.toolMode === 'selected' ? 'selected' : 'all',
+                enabledTools: Array.isArray(s.enabledTools) ? s.enabledTools : []
             }));
             this.mcpActiveServerId = activeId && this.mcpServers.some(s => s.id === activeId) ? activeId : this.mcpServers[0].id;
         } else {
@@ -279,16 +349,26 @@ export class ConnectionSection {
             mcpServerName,
             mcpTransport,
             mcpServerUrl,
-            mcpServerEnabled
+            mcpServerEnabled,
+            mcpToolMode
         } = this.elements;
 
         const server = this._getActiveServer();
         if (!server) return;
 
+        const prevKey = this._serverKey(server);
+
         if (mcpServerName) server.name = mcpServerName.value || '';
         if (mcpTransport) server.transport = mcpTransport.value || 'sse';
         if (mcpServerUrl) server.url = (mcpServerUrl.value || '').trim();
         if (mcpServerEnabled) server.enabled = mcpServerEnabled.checked === true;
+        if (mcpToolMode) server.toolMode = mcpToolMode.value === 'selected' ? 'selected' : 'all';
+
+        // If transport/url changed, invalidate cached tool list for this server.
+        const nextKey = this._serverKey(server);
+        if (prevKey !== nextKey) {
+            this.mcpToolsCache.delete(server.id);
+        }
     }
 
     _loadActiveServerIntoForm() {
@@ -297,7 +377,8 @@ export class ConnectionSection {
             mcpServerName,
             mcpTransport,
             mcpServerUrl,
-            mcpServerEnabled
+            mcpServerEnabled,
+            mcpToolMode
         } = this.elements;
 
         const server = this._getActiveServer();
@@ -308,6 +389,9 @@ export class ConnectionSection {
         if (mcpTransport) mcpTransport.value = server.transport || 'sse';
         if (mcpServerUrl) mcpServerUrl.value = server.url || '';
         if (mcpServerEnabled) mcpServerEnabled.checked = server.enabled !== false;
+        if (mcpToolMode) mcpToolMode.value = server.toolMode === 'selected' ? 'selected' : 'all';
+
+        this._renderToolsUI();
     }
 
     _renderMcpServerOptions() {
@@ -336,5 +420,136 @@ export class ConnectionSection {
         if (!mcpTestStatus) return;
         mcpTestStatus.textContent = text || '';
         mcpTestStatus.style.color = isError ? '#b00020' : '';
+    }
+
+    _serverKey(server) {
+        const transport = (server.transport || 'sse').toLowerCase();
+        const url = (server.url || '').trim();
+        return `${transport}:${url}`;
+    }
+
+    _getCachedTools(server) {
+        const entry = this.mcpToolsCache.get(server.id);
+        if (!entry) return null;
+        if (entry.key !== this._serverKey(server)) return null;
+        return Array.isArray(entry.tools) ? entry.tools : null;
+    }
+
+    setMcpToolsList(serverId, transport, url, tools) {
+        const id = serverId || (this._getActiveServer() ? this._getActiveServer().id : null);
+        if (!id) return;
+
+        this.mcpToolsCache.set(id, {
+            key: `${(transport || 'sse').toLowerCase()}:${(url || '').trim()}`,
+            tools: Array.isArray(tools) ? tools : []
+        });
+
+        this.setMcpTestStatus('');
+        this._renderToolsUI();
+    }
+
+    _renderToolsUI() {
+        const { mcpToolsSummary, mcpToolList, mcpToolSearch } = this.elements;
+        const server = this._getActiveServer();
+        if (!server || !mcpToolList || !mcpToolsSummary) return;
+
+        const cached = this._getCachedTools(server) || [];
+        const toolMode = server.toolMode === 'selected' ? 'selected' : 'all';
+
+        // Summary
+        const enabledSet = new Set(Array.isArray(server.enabledTools) ? server.enabledTools : []);
+        const total = cached.length;
+        const enabledCount = toolMode === 'all' ? total : enabledSet.size;
+        const modeLabel = toolMode === 'all' ? 'all' : 'selected';
+
+        if (!server.url || !server.url.trim()) {
+            mcpToolsSummary.textContent = 'Set Server URL to manage tools.';
+        } else if (total === 0) {
+            mcpToolsSummary.textContent = toolMode === 'all'
+                ? 'All tools will be exposed. Click "Refresh Tools" to preview the tool list.'
+                : 'No tool list loaded. Click "Refresh Tools" to load tools, then select which to expose.';
+        } else {
+            mcpToolsSummary.textContent = toolMode === 'all'
+                ? `Mode: ${modeLabel}. Tools exposed: ${enabledCount}/${total}.`
+                : `Mode: ${modeLabel}. Tools exposed: ${enabledCount}/${total}.`;
+        }
+
+        // Tool list
+        mcpToolList.innerHTML = '';
+
+        if (toolMode === 'all') {
+            const div = document.createElement('div');
+            div.style.opacity = '0.85';
+            div.style.fontSize = '12px';
+            div.textContent = 'Switch to "Selected tools only" to choose which tools the model can use.';
+            mcpToolList.appendChild(div);
+            return;
+        }
+
+        if (cached.length === 0) {
+            const div = document.createElement('div');
+            div.style.opacity = '0.85';
+            div.style.fontSize = '12px';
+            div.textContent = 'No tools loaded yet.';
+            mcpToolList.appendChild(div);
+            return;
+        }
+
+        const search = mcpToolSearch ? (mcpToolSearch.value || '').trim().toLowerCase() : '';
+        const filtered = search
+            ? cached.filter(t => (t.name || '').toLowerCase().includes(search) || (t.description || '').toLowerCase().includes(search))
+            : cached;
+
+        filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+        const list = document.createElement('div');
+        list.style.display = 'flex';
+        list.style.flexDirection = 'column';
+        list.style.gap = '6px';
+
+        for (const tool of filtered) {
+            const toolName = tool.name || '';
+            if (!toolName) continue;
+
+            const row = document.createElement('label');
+            row.style.display = 'flex';
+            row.style.alignItems = 'flex-start';
+            row.style.gap = '8px';
+            row.style.cursor = 'pointer';
+
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = enabledSet.has(toolName);
+            cb.addEventListener('change', () => {
+                if (cb.checked) enabledSet.add(toolName);
+                else enabledSet.delete(toolName);
+                server.enabledTools = Array.from(enabledSet);
+                this._renderToolsUI();
+            });
+
+            const text = document.createElement('div');
+            text.style.display = 'flex';
+            text.style.flexDirection = 'column';
+            text.style.gap = '2px';
+
+            const nameEl = document.createElement('div');
+            nameEl.style.fontSize = '12px';
+            nameEl.style.fontWeight = '500';
+            nameEl.textContent = toolName;
+
+            const descEl = document.createElement('div');
+            descEl.style.fontSize = '11px';
+            descEl.style.opacity = '0.85';
+            descEl.textContent = tool.description || '';
+
+            text.appendChild(nameEl);
+            if (tool.description) text.appendChild(descEl);
+
+            row.appendChild(cb);
+            row.appendChild(text);
+            list.appendChild(row);
+        }
+
+        mcpToolList.appendChild(list);
     }
 }

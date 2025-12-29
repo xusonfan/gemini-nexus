@@ -35,7 +35,9 @@ export class SettingsController {
                 name: "Local Proxy",
                 transport: "sse",
                 url: "http://127.0.0.1:3006/sse",
-                enabled: true
+                enabled: true,
+                toolMode: "all",
+                enabledTools: []
             }],
             mcpActiveServerId: null
         };
@@ -234,6 +236,23 @@ export class SettingsController {
 
         const err = result && result.error ? result.error : 'Connection failed';
         this.view.connection.setMcpTestStatus(`Failed: ${err}`, true);
+    }
+
+    updateMcpToolsResult(result) {
+        if (!this.view || !this.view.connection || typeof this.view.connection.setMcpToolsList !== 'function') return;
+
+        if (!result || result.ok !== true) {
+            const err = result && result.error ? result.error : 'Failed to fetch tools';
+            this.view.connection.setMcpTestStatus(`Failed: ${err}`, true);
+            return;
+        }
+
+        this.view.connection.setMcpToolsList(
+            result.serverId || null,
+            result.transport || 'sse',
+            result.url || '',
+            Array.isArray(result.tools) ? result.tools : []
+        );
     }
     
     updateSidebarBehavior(behavior) {

@@ -77,7 +77,9 @@ export class PromptController {
                 name: '',
                 transport: conn.mcpTransport || 'sse',
                 url: conn.mcpServerUrl || '',
-                enabled: true
+                enabled: true,
+                toolMode: 'all',
+                enabledTools: []
             };
         }
 
@@ -95,6 +97,8 @@ export class PromptController {
             mcpTransport: activeMcpServer ? (activeMcpServer.transport || "sse") : "sse",
             mcpServerUrl: activeMcpServer ? (activeMcpServer.url || "") : "",
             mcpServerId: activeMcpServer ? activeMcpServer.id : null,
+            mcpToolMode: activeMcpServer && activeMcpServer.toolMode ? activeMcpServer.toolMode : 'all',
+            mcpEnabledTools: activeMcpServer && Array.isArray(activeMcpServer.enabledTools) ? activeMcpServer.enabledTools : [],
             sessionId: currentId // Important: Pass session ID so background can save history independently
         });
     }
