@@ -31,7 +31,9 @@ export class StateManager {
             'geminiOpenaiModel',
             'geminiMcpEnabled',
             'geminiMcpTransport',
-            'geminiMcpServerUrl'
+            'geminiMcpServerUrl',
+            'geminiMcpServers',
+            'geminiMcpActiveServerId'
         ], (result) => {
             this.data = result;
             this.trySendInitData();
@@ -80,7 +82,9 @@ export class StateManager {
                 // MCP
                 mcpEnabled: this.data.geminiMcpEnabled === true,
                 mcpTransport: this.data.geminiMcpTransport || "sse",
-                mcpServerUrl: this.data.geminiMcpServerUrl || "http://localhost:3006/sse"
+                mcpServerUrl: this.data.geminiMcpServerUrl || "http://127.0.0.1:3006/sse",
+                mcpServers: Array.isArray(this.data.geminiMcpServers) ? this.data.geminiMcpServers : null,
+                mcpActiveServerId: this.data.geminiMcpActiveServerId || null
             } 
         });
 

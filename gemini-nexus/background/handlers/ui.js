@@ -3,9 +3,10 @@
 import { getActiveTabContent } from './session/utils.js';
 
 export class UIMessageHandler {
-    constructor(imageHandler, controlManager) {
+    constructor(imageHandler, controlManager, mcpManager) {
         this.imageHandler = imageHandler;
         this.controlManager = controlManager;
+        this.mcpManager = mcpManager;
     }
 
     handle(request, sender, sendResponse) {
@@ -171,6 +172,43 @@ export class UIMessageHandler {
                 const content = await getActiveTabContent();
                 const length = content ? content.length : 0;
                 sendResponse({ action: "PAGE_CONTEXT_RESULT", length: length });
+            })();
+            return true;
+        }
+
+        // --- MCP (External Tools) ---
+        if (request.action === "MCP_TEST_CONNECTION") {
+            (async () => {
+                try {
+                    if (!this.mcpManager) throw new Error("MCP manager not available");
+                    const url = (request.url || "").trim();
+                    const transport = (request.transport || "sse").toLowerCase();
+                    if (!url) throw new Error("Server URL is empty");
+
+                    const tools = await this.mcpManager.listTools({
+                        enableMcpTools: true,
+                        mcpTransport: transport,
+                        mcpServerUrl: url
+                    });
+
+                    sendResponse({
+                        action: "MCP_TEST_RESULT",
+                        ok: true,
+                        serverId: request.serverId || null,
+                        transport,
+                        url,
+                        toolsCount: Array.isArray(tools) ? tools.length : 0
+                    });
+                } catch (e) {
+                    sendResponse({
+                        action: "MCP_TEST_RESULT",
+                        ok: false,
+                        serverId: request.serverId || null,
+                        transport: request.transport || "sse",
+                        url: request.url || "",
+                        error: e.message || String(e)
+                    });
+                }
             })();
             return true;
         }

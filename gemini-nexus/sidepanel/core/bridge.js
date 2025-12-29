@@ -37,7 +37,7 @@ export class MessageBridge {
             chrome.runtime.sendMessage(payload)
                 .then(response => {
                     // If request demands a reply (e.g., GET_LOGS, CHECK_PAGE_CONTEXT), send it back
-                    if (response && (payload.action === 'GET_LOGS' || payload.action === 'CHECK_PAGE_CONTEXT')) {
+                    if (response && (payload.action === 'GET_LOGS' || payload.action === 'CHECK_PAGE_CONTEXT' || payload.action === 'MCP_TEST_CONNECTION')) {
                         this.frame.postMessage({
                             action: 'BACKGROUND_MESSAGE',
                             payload: response
@@ -100,7 +100,9 @@ export class MessageBridge {
                 'geminiOpenaiModel',
                 'geminiMcpEnabled',
                 'geminiMcpTransport',
-                'geminiMcpServerUrl'
+                'geminiMcpServerUrl',
+                'geminiMcpServers',
+                'geminiMcpActiveServerId'
             ], (res) => {
                 this.frame.postMessage({ 
                     action: 'RESTORE_CONNECTION_SETTINGS', 
@@ -115,7 +117,9 @@ export class MessageBridge {
                         // MCP
                         mcpEnabled: res.geminiMcpEnabled === true,
                         mcpTransport: res.geminiMcpTransport || "sse",
-                        mcpServerUrl: res.geminiMcpServerUrl || "http://localhost:3006/sse"
+                        mcpServerUrl: res.geminiMcpServerUrl || "http://127.0.0.1:3006/sse",
+                        mcpServers: Array.isArray(res.geminiMcpServers) ? res.geminiMcpServers : null,
+                        mcpActiveServerId: res.geminiMcpActiveServerId || null
                     } 
                 });
             });
@@ -146,6 +150,8 @@ export class MessageBridge {
             this.state.save('geminiMcpEnabled', payload.mcpEnabled === true);
             this.state.save('geminiMcpTransport', payload.mcpTransport || "sse");
             this.state.save('geminiMcpServerUrl', payload.mcpServerUrl || "");
+            this.state.save('geminiMcpServers', Array.isArray(payload.mcpServers) ? payload.mcpServers : []);
+            this.state.save('geminiMcpActiveServerId', payload.mcpActiveServerId || null);
         }
     }
 

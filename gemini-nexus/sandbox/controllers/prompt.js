@@ -67,7 +67,22 @@ export class PromptController {
         this.ui.setLoading(true);
 
         const conn = (this.ui && this.ui.settings && this.ui.settings.connectionData) ? this.ui.settings.connectionData : {};
-        const enableMcpTools = conn.mcpEnabled === true && !!(conn.mcpServerUrl && conn.mcpServerUrl.trim());
+        let activeMcpServer = null;
+        if (conn && Array.isArray(conn.mcpServers) && conn.mcpServers.length > 0) {
+            const activeId = conn.mcpActiveServerId;
+            activeMcpServer = conn.mcpServers.find(s => s && s.id === activeId) || conn.mcpServers[0];
+        } else if (conn && (conn.mcpServerUrl || conn.mcpTransport)) {
+            activeMcpServer = {
+                id: null,
+                name: '',
+                transport: conn.mcpTransport || 'sse',
+                url: conn.mcpServerUrl || '',
+                enabled: true
+            };
+        }
+
+        const enableMcpTools = conn.mcpEnabled === true &&
+            !!(activeMcpServer && activeMcpServer.enabled !== false && activeMcpServer.url && activeMcpServer.url.trim());
 
         sendToBackground({ 
             action: "SEND_PROMPT", 
@@ -77,8 +92,9 @@ export class PromptController {
             includePageContext: this.app.pageContextActive,
             enableBrowserControl: this.app.browserControlActive, // Pass browser control state
             enableMcpTools: enableMcpTools,
-            mcpTransport: conn.mcpTransport || "sse",
-            mcpServerUrl: conn.mcpServerUrl || "",
+            mcpTransport: activeMcpServer ? (activeMcpServer.transport || "sse") : "sse",
+            mcpServerUrl: activeMcpServer ? (activeMcpServer.url || "") : "",
+            mcpServerId: activeMcpServer ? activeMcpServer.id : null,
             sessionId: currentId // Important: Pass session ID so background can save history independently
         });
     }

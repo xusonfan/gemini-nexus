@@ -61,6 +61,19 @@ export const ConnectionSettingsTemplate = `
 
         <div id="mcp-fields" style="display: none; flex-direction: column; gap: 12px; margin-top: 12px;">
             <div>
+                <label data-i18n="mcpActiveServer" style="font-weight: 500; display: block; margin-bottom: 6px;">Active Server</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <select id="mcp-server-select" class="shortcut-input" style="flex: 1; text-align: left; padding: 6px 12px;"></select>
+                    <button id="mcp-add-server" class="tool-btn" style="padding: 6px 10px;" type="button" data-i18n="mcpAddServer">Add</button>
+                    <button id="mcp-remove-server" class="tool-btn" style="padding: 6px 10px;" type="button" data-i18n="mcpRemoveServer">Remove</button>
+                </div>
+            </div>
+
+            <div>
+                <label data-i18n="mcpServerName" style="font-weight: 500; display: block; margin-bottom: 2px;">Name</label>
+                <input type="text" id="mcp-server-name" class="shortcut-input" style="width: 100%; text-align: left; box-sizing: border-box;" placeholder="Local Proxy">
+            </div>
+            <div>
                 <label data-i18n="mcpTransport" style="font-weight: 500; display: block; margin-bottom: 2px;">Transport</label>
                 <select id="mcp-transport" class="shortcut-input" style="width: 100%; text-align: left; padding: 6px 12px;">
                     <option value="sse">SSE (http://.../sse)</option>
@@ -69,8 +82,16 @@ export const ConnectionSettingsTemplate = `
             </div>
             <div>
                 <label data-i18n="mcpServerUrl" style="font-weight: 500; display: block; margin-bottom: 2px;">Server URL</label>
-                <input type="text" id="mcp-server-url" class="shortcut-input" style="width: 100%; text-align: left; box-sizing: border-box;" placeholder="http://localhost:3006/sse">
+                <input type="text" id="mcp-server-url" class="shortcut-input" style="width: 100%; text-align: left; box-sizing: border-box;" placeholder="http://127.0.0.1:3006/sse">
             </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <label style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="mcp-server-enabled" />
+                    <span data-i18n="enabled">Enabled</span>
+                </label>
+                <button id="mcp-test-connection" class="tool-btn" style="padding: 6px 10px;" type="button" data-i18n="mcpTestConnection">Test</button>
+            </div>
+            <div id="mcp-test-status" style="font-size: 12px; opacity: 0.85;"></div>
         </div>
     </div>
 </div>`;

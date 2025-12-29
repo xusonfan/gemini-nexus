@@ -29,7 +29,15 @@ export class SettingsController {
             // MCP (External Tools)
             mcpEnabled: false,
             mcpTransport: "sse",
-            mcpServerUrl: "http://localhost:3006/sse"
+            mcpServerUrl: "http://127.0.0.1:3006/sse",
+            mcpServers: [{
+                id: `srv_${Date.now()}`,
+                name: "Local Proxy",
+                transport: "sse",
+                url: "http://127.0.0.1:3006/sse",
+                enabled: true
+            }],
+            mcpActiveServerId: null
         };
 
         // Initialize View
@@ -119,7 +127,9 @@ export class SettingsController {
             // MCP
             mcpEnabled: data.connection.mcpEnabled === true,
             mcpTransport: data.connection.mcpTransport || "sse",
-            mcpServerUrl: data.connection.mcpServerUrl || ""
+            mcpServerUrl: data.connection.mcpServerUrl || "",
+            mcpServers: Array.isArray(data.connection.mcpServers) ? data.connection.mcpServers : [],
+            mcpActiveServerId: data.connection.mcpActiveServerId || null
         };
         
         saveConnectionSettingsToStorage(this.connectionData);
@@ -211,6 +221,19 @@ export class SettingsController {
         }
         
         this.view.setConnectionSettings(this.connectionData);
+    }
+
+    updateMcpTestResult(result) {
+        if (!this.view || !this.view.connection || typeof this.view.connection.setMcpTestStatus !== 'function') return;
+
+        if (result && result.ok === true) {
+            const count = typeof result.toolsCount === 'number' ? result.toolsCount : 0;
+            this.view.connection.setMcpTestStatus(`Connected. Tools: ${count}`, false);
+            return;
+        }
+
+        const err = result && result.error ? result.error : 'Connection failed';
+        this.view.connection.setMcpTestStatus(`Failed: ${err}`, true);
     }
     
     updateSidebarBehavior(behavior) {
