@@ -10,7 +10,9 @@ export class PromptBuilder {
     }
 
     async build(request) {
-        let systemPreamble = "";
+        let systemPreamble = `Current Time: ${new Date().toLocaleString()}
+
+`;
 
         if (request.includePageContext) {
             // If we have a locked tab in ControlManager, use it for context
