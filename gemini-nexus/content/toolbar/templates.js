@@ -63,6 +63,7 @@
                         <option value="gemini-3-flash-thinking">Thinking</option>
                         <option value="gemini-3-pro">3 Pro</option>
                     </select>
+                    <button class="icon-btn" id="btn-header-pin" title="${t.pin}">${ICONS.PIN}</button>
                     <button class="icon-btn" id="btn-header-close" title="${t.close}">${ICONS.CLOSE}</button>
                 </div>
             </div>

@@ -19,6 +19,11 @@
 
         togglePin() {
             this.isPinned = !this.isPinned;
+            const btn = this.elements.buttons.headerPin;
+            if (btn) {
+                btn.innerHTML = this.isPinned ? ICONS.PIN_FILLED : ICONS.PIN;
+                btn.title = this.isPinned ? (isZh ? "取消固定" : "Unpin") : (isZh ? "固定" : "Pin");
+            }
             return this.isPinned;
         }
 

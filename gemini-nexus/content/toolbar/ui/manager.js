@@ -117,6 +117,10 @@
             this.fireCallback('onModelChange', model);
         }
 
+        handlePinClick() {
+            this.view.togglePin();
+        }
+
         saveWindowDimensions(w, h) {
             chrome.storage.local.set({ 'gemini_nexus_window_size': { w, h } });
         }
@@ -294,6 +298,14 @@
         isWindowVisible() {
             if (!this.view) return false;
             return this.view.isWindowVisible();
+        }
+
+        get isPinned() {
+            return this.view ? this.view.isPinned : false;
+        }
+
+        get isDocked() {
+            return this.view ? this.view.isDocked : false;
         }
 
         isHost(target) {

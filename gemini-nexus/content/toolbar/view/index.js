@@ -52,6 +52,7 @@
                     translate: get('btn-translate'),
                     explain: get('btn-explain'),
                     summarize: get('btn-summarize'),
+                    headerPin: get('btn-header-pin'),
                     headerClose: get('btn-header-close'),
                     stop: get('btn-stop-gen'),
                     continue: get('btn-continue-chat'),

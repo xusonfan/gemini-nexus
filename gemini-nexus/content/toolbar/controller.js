@@ -195,6 +195,11 @@
                 return;
             }
 
+            // If window is visible, hide it on outside click
+            if (this.ui.isWindowVisible()) {
+                this.ui.hideAskWindow();
+            }
+
             this.hide();
         }
 
@@ -230,6 +235,10 @@
         handleModelChange(model) {
             // Update Global Preference
             chrome.storage.local.set({ 'geminiModel': model });
+        }
+
+        handlePinClick() {
+            this.ui.handlePinClick();
         }
 
         handleAction(actionType, data) {

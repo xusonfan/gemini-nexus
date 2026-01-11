@@ -25,6 +25,8 @@
         replace: isZh ? "替换" : "Replace",
         replaceTooltip: isZh ? "替换选中文本" : "Replace selected text",
         copyResult: isZh ? "复制结果" : "Copy Result",
+        pin: isZh ? "固定" : "Pin",
+        unpin: isZh ? "取消固定" : "Unpin",
         stopGenerating: isZh ? "停止生成" : "Stop generating",
         
         // AI Tools Menu

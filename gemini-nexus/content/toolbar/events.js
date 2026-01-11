@@ -81,6 +81,10 @@
             }
 
             // --- Window Actions ---
+            this._add(buttons.headerPin, 'click', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                this.controller.handlePinClick();
+            });
             this._add(buttons.headerClose, 'click', (e) => this.controller.actions.cancelAsk(e));
             this._add(buttons.stop, 'click', (e) => this.controller.actions.stopAsk(e));
 
