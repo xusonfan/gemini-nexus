@@ -31,6 +31,7 @@
                 
                 // New Window Elements
                 askWindow: get('ask-window'),
+                windowScrollContainer: get('window-scroll-container'),
                 askHeader: get('ask-header'),
                 windowTitle: get('window-title'),
                 contextPreview: get('context-preview'),

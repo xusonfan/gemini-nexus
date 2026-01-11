@@ -4,14 +4,12 @@
         /* --- Window Body --- */
 
         .window-body {
-            flex: 1;
+            flex-shrink: 0;
             display: flex;
             flex-direction: column;
             padding: 8px 16px 16px 16px;
-            overflow: hidden; /* Crucial for internal scroll */
             background: #fff;
             position: relative;
-            min-height: 0;
         }
 
         /* Input Styles */

@@ -21,6 +21,7 @@
             display: flex;
             flex-direction: column;
             z-index: 1000000;
+            overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             opacity: 0;
             pointer-events: none;
@@ -28,8 +29,20 @@
             
             /* Native Resize Capability */
             resize: both;
-            overflow: hidden; /* Required for resize to work */
         }
+
+        .window-scroll-container {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overscroll-behavior: contain;
+        }
+
+        .window-scroll-container::-webkit-scrollbar { width: 6px; }
+        .window-scroll-container::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 3px; }
+        .window-scroll-container::-webkit-scrollbar-thumb:hover { background: #d0d0d0; }
 
         .ask-window.visible {
             opacity: 1;

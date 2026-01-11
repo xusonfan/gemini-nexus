@@ -4,19 +4,13 @@
     window.GeminiStyles.Markdown = `
         /* Result Area */
         .result-area {
-            flex: 1;
-            overflow-y: auto;
+            flex-shrink: 0;
             position: relative;
             font-size: 14px;
             line-height: 1.6;
             color: #1f1f1f;
-            padding-right: 4px; /* Space for scrollbar */
             /* No bottom padding needed with separate footer */
         }
-        
-        .result-area::-webkit-scrollbar { width: 6px; }
-        .result-area::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 3px; }
-        .result-area::-webkit-scrollbar-thumb:hover { background: #d0d0d0; }
 
         /* --- Markdown Styles --- */
 

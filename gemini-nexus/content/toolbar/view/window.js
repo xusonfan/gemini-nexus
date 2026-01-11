@@ -110,9 +110,10 @@
                 if (this.elements.windowFooter) this.elements.windowFooter.classList.add('hidden');
             }
 
-            if (resultArea) {
+            const scrollContainer = this.elements.windowScrollContainer;
+            if (scrollContainer) {
                 // Always keep scroll at top to allow reading from the beginning
-                resultArea.scrollTop = 0;
+                scrollContainer.scrollTop = 0;
             }
         }
 

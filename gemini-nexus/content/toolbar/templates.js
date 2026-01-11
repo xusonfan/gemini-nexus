@@ -68,15 +68,17 @@
                 </div>
             </div>
             
-            <div class="window-body">
-                <div class="input-container">
-                    <input type="text" id="ask-input" placeholder="${t.askPlaceholder}" autocomplete="off">
-                </div>
-                
-                <div class="context-preview hidden" id="context-preview"></div>
-                
-                <div class="result-area" id="result-area">
-                    <div class="markdown-body" id="result-text"></div>
+            <div class="window-scroll-container" id="window-scroll-container">
+                <div class="window-body">
+                    <div class="input-container">
+                        <input type="text" id="ask-input" placeholder="${t.askPlaceholder}" autocomplete="off">
+                    </div>
+                    
+                    <div class="context-preview hidden" id="context-preview"></div>
+                    
+                    <div class="result-area" id="result-area">
+                        <div class="markdown-body" id="result-text"></div>
+                    </div>
                 </div>
             </div>
 
