@@ -15,6 +15,7 @@ export function setupContextMenus(imageHandler) {
             main: isZh ? "Gemini Nexus" : "Gemini Nexus",
             ask: isZh ? "快速提问" : "Quick Ask",
             pageChat: isZh ? "与当前网页对话" : "Chat with Page",
+            summarizePage: isZh ? "总结网页" : "Summarize Page",
             ocr: isZh ? "OCR (文字提取)" : "OCR (Extract Text)",
             screenshotTranslate: isZh ? "截图翻译" : "Screenshot Translate",
             snip: isZh ? "区域截图 (Snip)" : "Snip (Capture Area)"
@@ -37,6 +38,13 @@ export function setupContextMenus(imageHandler) {
             id: "menu-page-chat",
             parentId: "gemini-nexus-parent",
             title: titles.pageChat,
+            contexts: ["all"]
+        });
+
+        chrome.contextMenus.create({
+            id: "menu-summarize-page",
+            parentId: "gemini-nexus-parent",
+            title: titles.summarizePage,
             contexts: ["all"]
         });
 
@@ -76,9 +84,14 @@ export function setupContextMenus(imageHandler) {
             }).catch(() => {});
         } else if (menuId === "menu-page-chat") {
             // 直接通知内容脚本打开对话窗口并启用网页上下文
-            chrome.tabs.sendMessage(tab.id, { 
-                action: "CONTEXT_MENU_ACTION", 
-                mode: "page_chat" 
+            chrome.tabs.sendMessage(tab.id, {
+                action: "CONTEXT_MENU_ACTION",
+                mode: "page_chat"
+            }).catch(() => {});
+        } else if (menuId === "menu-summarize-page") {
+            chrome.tabs.sendMessage(tab.id, {
+                action: "CONTEXT_MENU_ACTION",
+                mode: "summarize_page"
             }).catch(() => {});
         } else if (menuId === "menu-ocr" || menuId === "menu-snip" || menuId === "menu-screenshot-translate") {
             let mode = "snip";

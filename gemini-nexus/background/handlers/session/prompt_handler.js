@@ -1,6 +1,6 @@
 
 // background/handlers/session/prompt_handler.js
-import { appendAiMessage, appendUserMessage } from '../../managers/history_manager.js';
+import { appendAiMessage, appendUserMessage, saveToHistory } from '../../managers/history_manager.js';
 import { PromptBuilder } from './prompt/builder.js';
 import { ToolExecutor } from './prompt/tool_executor.js';
 
@@ -20,17 +20,24 @@ export class PromptHandler {
         this.isCancelled = true;
     }
 
-    handle(request, sendResponse) {
+    handle(request, sender, sendResponse) {
         this.isCancelled = false;
 
         (async () => {
             const onUpdate = (partialText, partialThoughts) => {
-                // Catch errors if receiver (UI) is closed/unavailable
-                chrome.runtime.sendMessage({
+                const msg = {
                     action: "GEMINI_STREAM_UPDATE",
                     text: partialText,
                     thoughts: partialThoughts
-                }).catch(() => {}); 
+                };
+
+                // 1. 发送到全局 runtime (用于侧边栏等)
+                chrome.runtime.sendMessage(msg).catch(() => {});
+                
+                // 2. 发送到当前标签页 (用于网页工具栏 UI)
+                if (sender.tab && sender.tab.id) {
+                    chrome.tabs.sendMessage(sender.tab.id, msg).catch(() => {});
+                }
             };
 
             try {
@@ -72,6 +79,29 @@ export class PromptHandler {
                 
                 let keepLooping = true;
 
+                // --- HISTORY AUTO-SAVE (EPHEMERAL REQUESTS) ---
+                // If no sessionId is provided, this is a new "Quick Ask" style request.
+                // We create a session now so it can be resumed in the sidebar.
+                let ephemeralSessionId = request.sessionId;
+                if (!ephemeralSessionId) {
+                    try {
+                        const mockResult = { text: "...", status: "pending" };
+                        const newSession = await saveToHistory(currentPromptText, mockResult, currentFiles);
+                        if (newSession) {
+                            ephemeralSessionId = newSession.id;
+                            // Clean up the initial mock message - we'll append the real ones in the loop
+                            const { geminiSessions = [] } = await chrome.storage.local.get(['geminiSessions']);
+                            const sIdx = geminiSessions.findIndex(s => s.id === ephemeralSessionId);
+                            if (sIdx !== -1) {
+                                geminiSessions[sIdx].messages = [];
+                                await chrome.storage.local.set({ geminiSessions });
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Failed to create ephemeral session:", e);
+                    }
+                }
+
                 // --- AUTOMATED FEEDBACK LOOP ---
                 while (keepLooping && loopCount < MAX_LOOPS) {
                     if (this.isCancelled) break;
@@ -88,17 +118,38 @@ export class PromptHandler {
 
                     if (!result || result.status !== 'success') {
                         // If error, notify UI and break loop
-                        if (result) chrome.runtime.sendMessage(result).catch(() => {});
+                        if (result) {
+                            chrome.runtime.sendMessage(result).catch(() => {});
+                            if (sender.tab && sender.tab.id) {
+                                chrome.tabs.sendMessage(sender.tab.id, result).catch(() => {});
+                            }
+                        }
                         break;
                     }
 
-                    // 3. Save AI Response to History
-                    if (request.sessionId) {
-                        await appendAiMessage(request.sessionId, result);
+                    // 3. Save to History
+                    const activeSessionId = request.sessionId || ephemeralSessionId;
+                    if (activeSessionId) {
+                        // If it's the first turn and we just created an ephemeral session,
+                        // we need to save the user message first.
+                        if (loopCount === 0) {
+                            let historyImages = currentFiles ? currentFiles.map(f => f.base64) : null;
+                            await appendUserMessage(activeSessionId, currentPromptText, historyImages);
+                        }
+                        await appendAiMessage(activeSessionId, result);
                     }
                     
                     // Notify UI of the result (replaces streaming bubble)
-                    chrome.runtime.sendMessage(result).catch(() => {});
+                    const doneMsg = {
+                        ...result,
+                        action: "GEMINI_STREAM_DONE",
+                        result: result,
+                        sessionId: activeSessionId
+                    };
+                    chrome.runtime.sendMessage(doneMsg).catch(() => {});
+                    if (sender.tab && sender.tab.id) {
+                        chrome.tabs.sendMessage(sender.tab.id, doneMsg).catch(() => {});
+                    }
 
                     // 4. Process Tool Execution (if any)
                     let toolResult = null;
@@ -156,11 +207,11 @@ export class PromptHandler {
                         
                         // Save "User" message (Tool Output) to history to keep context in sync
                         // NOTE: We do NOT save the massive auto-snapshot text to the user history to keep the UI clean.
-                        if (request.sessionId) {
+                        if (activeSessionId) {
                             const userMsg = `🛠️ **Tool Output:**\n\`\`\`\n${toolResult.output}\n\`\`\`\n\n*(Proceeding to step ${loopCount + 1})*`;
                             
                             let historyImages = toolResult.files ? toolResult.files.map(f => f.base64) : null;
-                            await appendUserMessage(request.sessionId, userMsg, historyImages);
+                            await appendUserMessage(activeSessionId, userMsg, historyImages);
                         }
                         
                         // Update UI status

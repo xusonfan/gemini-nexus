@@ -20,6 +20,11 @@ export const ShortcutsSettingsTemplate = `
     </div>
 
     <div class="shortcut-row">
+        <label data-i18n="shortcutSummarizePage">Summarize Page</label>
+        <input type="text" id="shortcut-summarize-page" class="shortcut-input" readonly value="Alt+G">
+    </div>
+
+    <div class="shortcut-row">
         <label data-i18n="shortcutFocusInput">Focus Input</label>
         <input type="text" class="shortcut-input" readonly value="Ctrl+P">
     </div>

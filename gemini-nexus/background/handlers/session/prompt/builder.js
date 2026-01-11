@@ -16,7 +16,13 @@ export class PromptBuilder {
 
         if (request.includePageContext) {
             // If we have a locked tab in ControlManager, use it for context
-            const targetTabId = this.controlManager ? this.controlManager.getTargetTabId() : null;
+            let targetTabId = this.controlManager ? this.controlManager.getTargetTabId() : null;
+            
+            // 如果没有锁定的标签页，尝试从 request 中获取（可能由 sender 提供）
+            if (!targetTabId && request.tabId) {
+                targetTabId = request.tabId;
+            }
+
             const pageContent = await getActiveTabContent(targetTabId);
             
             if (pageContent) {

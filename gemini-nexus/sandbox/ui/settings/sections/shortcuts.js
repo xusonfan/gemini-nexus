@@ -13,7 +13,8 @@ export class ShortcutsSection {
         this.elements = {
             inputQuickAsk: get('shortcut-quick-ask'),
             inputOpenPanel: get('shortcut-open-panel'),
-            inputBrowserControl: get('shortcut-browser-control')
+            inputBrowserControl: get('shortcut-browser-control'),
+            inputSummarizePage: get('shortcut-summarize-page')
         };
     }
 
@@ -21,6 +22,7 @@ export class ShortcutsSection {
         this.setupShortcutInput(this.elements.inputQuickAsk);
         this.setupShortcutInput(this.elements.inputOpenPanel);
         this.setupShortcutInput(this.elements.inputBrowserControl);
+        this.setupShortcutInput(this.elements.inputSummarizePage);
     }
 
     setupShortcutInput(inputEl) {
@@ -47,14 +49,16 @@ export class ShortcutsSection {
         if (this.elements.inputQuickAsk) this.elements.inputQuickAsk.value = shortcuts.quickAsk;
         if (this.elements.inputOpenPanel) this.elements.inputOpenPanel.value = shortcuts.openPanel;
         if (this.elements.inputBrowserControl) this.elements.inputBrowserControl.value = shortcuts.browserControl || "Ctrl+B";
+        if (this.elements.inputSummarizePage) this.elements.inputSummarizePage.value = shortcuts.summarizePage || "Alt+G";
     }
 
     getData() {
-        const { inputQuickAsk, inputOpenPanel, inputBrowserControl } = this.elements;
+        const { inputQuickAsk, inputOpenPanel, inputBrowserControl, inputSummarizePage } = this.elements;
         return {
             quickAsk: inputQuickAsk ? inputQuickAsk.value : null,
             openPanel: inputOpenPanel ? inputOpenPanel.value : null,
-            browserControl: inputBrowserControl ? inputBrowserControl.value : "Ctrl+B"
+            browserControl: inputBrowserControl ? inputBrowserControl.value : "Ctrl+B",
+            summarizePage: inputSummarizePage ? inputSummarizePage.value : "Alt+G"
         };
     }
 }

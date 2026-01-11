@@ -28,6 +28,7 @@
             this.domBuilder = new DOMBuilder();
             this.callbacks = {};
             this.isBuilt = false;
+            this.t = window.GeminiToolbarStrings || {};
             
             // Sub-Managers
             this.grammarManager = null;

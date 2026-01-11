@@ -117,6 +117,8 @@
                 this.showGlobalInput(false);
             } else if (mode === 'page_chat') {
                 this.showGlobalInput(true); // 带网页上下文打开
+            } else if (mode === 'summarize_page') {
+                this.handleSummarizePage();
             } else {
                 // 需要截图的操作模式：ocr, snip, screenshot_translate
                 chrome.runtime.sendMessage({ action: "INITIATE_CAPTURE" });
@@ -288,6 +290,40 @@
             if (withPageContext) {
                 this.currentSelection = "__PAGE_CONTEXT_FORCE__";
             }
+        }
+
+        async handleSummarizePage() {
+            const viewportW = window.innerWidth;
+            const viewportH = window.innerHeight;
+            const width = 400;
+            const height = 100;
+
+            const left = (viewportW - width) / 2;
+            const top = (viewportH / 2) - 200;
+
+            const rect = {
+                left: left, top: top, right: left + width, bottom: top + height,
+                width: width, height: height
+            };
+
+            const model = this.ui.getSelectedModel();
+            
+            this.ui.hide();
+            await this.ui.showAskWindow(rect, null, this.ui.t.titles.summarizePage);
+            this.ui.showLoading(this.ui.t.loading.summarizePage);
+            this.ui.setInputValue(this.ui.t.inputs.summarizePage);
+
+            const msg = {
+                action: "QUICK_ASK",
+                text: this.ui.t.prompts.summarizePage,
+                model: model,
+                includePageContext: true
+            };
+
+            this.actions.lastRequest = msg;
+            chrome.runtime.sendMessage(msg);
+            
+            this.visible = true;
         }
     }
 

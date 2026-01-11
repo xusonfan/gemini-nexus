@@ -5,7 +5,8 @@
     const DEFAULT_SHORTCUTS = {
         quickAsk: "Ctrl+G",
         openPanel: "Alt+S",
-        browserControl: "Ctrl+B"
+        browserControl: "Ctrl+B",
+        summarizePage: "Alt+G"
     };
 
     class ShortcutManager {
@@ -60,6 +61,15 @@
                 e.stopPropagation();
                 // Toggle side panel / browser control
                 chrome.runtime.sendMessage({ action: "TOGGLE_SIDE_PANEL_CONTROL" });
+                return;
+            }
+
+            if (this.match(e, this.appShortcuts.summarizePage)) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (this.toolbarController) {
+                    this.toolbarController.handleSummarizePage();
+                }
                 return;
             }
         }

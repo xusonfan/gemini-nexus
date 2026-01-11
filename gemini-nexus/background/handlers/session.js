@@ -20,6 +20,14 @@ export class SessionMessageHandler {
 
         // --- QUICK ASK (CONTENT SCRIPT) ---
         if (request.action === "QUICK_ASK") {
+            // 如果请求包含网页上下文，使用 PromptHandler 以利用其上下文注入逻辑
+            if (request.includePageContext) {
+                // 注入发送者的 tabId 以便 PromptBuilder 能够找到正确的页面
+                if (sender.tab && sender.tab.id) {
+                    request.tabId = sender.tab.id;
+                }
+                return this.promptHandler.handle(request, sender, sendResponse);
+            }
             this.quickAskHandler.handleQuickAsk(request, sender).finally(() => {
                 sendResponse({ status: "completed" });
             });

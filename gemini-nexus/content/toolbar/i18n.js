@@ -12,6 +12,7 @@
         translate: isZh ? "翻译" : "Translate",
         explain: isZh ? "解释" : "Explain",
         summarize: isZh ? "总结" : "Summarize",
+        summarizePage: isZh ? "总结网页" : "Summarize Page",
         askImage: isZh ? "询问这张图片" : "Ask AI about this image",
         close: isZh ? "关闭" : "Close",
         askPlaceholder: isZh ? "询问 Gemini..." : "Ask Gemini...",
@@ -94,11 +95,15 @@
                 `用通俗易懂的语言简要解释以下内容：\n\n"${text}"` : 
                 `Briefly explain the following text in simple language:\n\n"${text}"`,
             
-            summarize: (text) => isZh ? 
-                `请尽量简洁地总结以下内容：\n\n"${text}"` : 
+            summarize: (text) => isZh ?
+                `请尽量简洁地总结以下内容：\n\n"${text}"` :
                 `Concise summary of the following text:\n\n"${text}"`,
             
-            grammar: (text) => isZh ? 
+            summarizePage: isZh ?
+                "请对当前网页的主要内容进行全面而简洁的总结。提取核心观点、关键信息和结论，并以清晰的结构（如要点列表）呈现。" :
+                "Please provide a comprehensive yet concise summary of the main content of this webpage. Extract core ideas, key information, and conclusions, presenting them in a clear structure (e.g., bullet points).",
+
+            grammar: (text) => isZh ?
                 `请修正以下文本的语法和拼写错误，保持原意不变。仅输出修正后的文本，不要添加任何解释：\n\n"${text}"` : 
                 `Correct the grammar and spelling of the following text. Output ONLY the corrected text without any explanation:\n\n"${text}"`
         },
@@ -116,6 +121,7 @@
             snip: isZh ? "正在分析截图..." : "Analyzing snip...",
             explain: isZh ? '正在解释...' : 'Explaining...',
             summarize: isZh ? '正在总结...' : 'Summarizing...',
+            summarizePage: isZh ? '正在总结网页...' : 'Summarizing page...',
             grammar: isZh ? '正在修正...' : 'Fixing grammar...',
             regenerate: isZh ? "正在重新生成..." : "Regenerating..."
         },
@@ -134,6 +140,7 @@
             explain: isZh ? '解释选中内容' : 'Explain selected text',
             textTranslate: isZh ? '翻译选中内容' : 'Translate selected text',
             summarize: isZh ? '总结选中内容' : 'Summarize selected text',
+            summarizePage: isZh ? '总结网页内容' : 'Summarize page content',
             grammar: isZh ? '修正语法' : 'Fixing grammar'
         },
         
@@ -150,6 +157,7 @@
             explain: isZh ? '解释' : 'Explain',
             textTranslate: isZh ? '翻译' : 'Translate',
             summarize: isZh ? '总结' : 'Summarize',
+            summarizePage: isZh ? '总结网页' : 'Summarize Page',
             grammar: isZh ? '语法修正' : 'Fix Grammar'
         }
     };
