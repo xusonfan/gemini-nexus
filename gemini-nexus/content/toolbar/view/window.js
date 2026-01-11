@@ -96,14 +96,6 @@
             if (title) this.elements.windowTitle.textContent = title;
             
             const resultArea = this.elements.resultArea;
-            let shouldScrollBottom = false;
-            
-            // Only auto-scroll to bottom during streaming
-            if (resultArea && isStreaming) {
-                const threshold = 50;
-                const distanceToBottom = resultArea.scrollHeight - resultArea.scrollTop - resultArea.clientHeight;
-                shouldScrollBottom = distanceToBottom <= threshold;
-            }
             
             // Content is now always HTML rendered via Bridge (using marked/katex/highlight.js)
             this.elements.resultText.innerHTML = htmlContent;
@@ -119,14 +111,8 @@
             }
 
             if (resultArea) {
-                if (isStreaming) {
-                    if (shouldScrollBottom) {
-                        resultArea.scrollTop = resultArea.scrollHeight;
-                    }
-                } else {
-                    // Finished: Scroll to top
-                    resultArea.scrollTop = 0;
-                }
+                // Always keep scroll at top to allow reading from the beginning
+                resultArea.scrollTop = 0;
             }
         }
 
