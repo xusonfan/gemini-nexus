@@ -123,11 +123,21 @@
             if (isStreaming) {
                 if (this.elements.footerStop) this.elements.footerStop.classList.remove('hidden');
                 if (this.elements.footerActions) this.elements.footerActions.classList.add('hidden');
+                
+                // Add loading class to input container/button if needed
+                if (this.elements.buttons.ask) {
+                    this.elements.buttons.ask.classList.add('loading');
+                }
             } else {
                 if (this.elements.footerStop) this.elements.footerStop.classList.add('hidden');
                 if (this.elements.footerActions) this.elements.footerActions.classList.remove('hidden');
                 // Reset Copy Icon
                 if (this.elements.buttons.copy) this.elements.buttons.copy.innerHTML = ICONS.COPY;
+
+                // Remove loading class
+                if (this.elements.buttons.ask) {
+                    this.elements.buttons.ask.classList.remove('loading');
+                }
             }
         }
 

@@ -37,7 +37,7 @@ export class MessageHandler {
         }
 
         // 1. AI Reply
-        if (request.action === "GEMINI_REPLY") {
+        if (request.action === "GEMINI_REPLY" || request.action === "GEMINI_STREAM_DONE") {
             this.handleGeminiReply(request);
             return;
         }

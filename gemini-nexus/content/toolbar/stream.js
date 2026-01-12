@@ -37,8 +37,10 @@
                         this.ui.showResult(result.text, null, false, result.images);
                     } else if (result && result.status === 'error') {
                         this.ui.showError(result.text);
+                    } else {
+                        // If result is null (cancelled) or other status, ensure loading stops
+                        this.ui.stopLoading();
                     }
-                    // If result is null (cancelled), do nothing or handle accordingly
                 }
             }
         }

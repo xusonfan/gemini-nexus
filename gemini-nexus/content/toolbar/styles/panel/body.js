@@ -36,6 +36,12 @@
             box-shadow: 0 0 0 2px rgba(11, 87, 208, 0.1);
         }
 
+        /* Loading animation for the small logo in input container if we decide to add one,
+           or to any button that gets the .loading class */
+        .btn.loading svg, .btn.loading img {
+            animation: spin 1s linear infinite;
+        }
+
         .context-preview {
             font-size: 12px;
             color: #444746;
