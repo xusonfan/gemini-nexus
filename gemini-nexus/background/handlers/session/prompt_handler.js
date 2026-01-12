@@ -20,6 +20,49 @@ export class PromptHandler {
         this.isCancelled = true;
     }
 
+    async generateAiTitle(sessionId, userText, aiText) {
+        try {
+            const isZh = chrome.i18n.getUILanguage().startsWith('zh');
+            const prompt = isZh
+                ? `请根据以下对话内容，总结一个简短的标题（不超过10个字）。直接输出标题，不要有任何解释或标点符号。\n\n用户: ${userText}\nAI: ${aiText}`
+                : `Generate a very short title (max 6 words) for this conversation. Output ONLY the title text.\n\nUser: ${userText}\nAI: ${aiText}`;
+
+            const { geminiSummaryModel } = await chrome.storage.local.get(['geminiSummaryModel']);
+            const summaryModel = geminiSummaryModel || "";
+
+            if (!summaryModel) {
+                console.info("[Gemini Nexus] AI Title generation skipped: No summary model configured.");
+                return;
+            }
+
+            const result = await this.sessionManager.handleSendPrompt({
+                text: prompt,
+                model: summaryModel,
+                systemInstruction: "You are a helpful assistant that summarizes conversation titles."
+            }, () => {});
+
+            if (result && result.status === 'success' && result.text) {
+                let title = result.text.trim().replace(/["'“”‘’]/g, '');
+                if (title.length > 40) title = title.substring(0, 40) + "...";
+
+                const { geminiSessions = [] } = await chrome.storage.local.get(['geminiSessions']);
+                const sIdx = geminiSessions.findIndex(s => s.id === sessionId);
+                if (sIdx !== -1) {
+                    geminiSessions[sIdx].title = title;
+                    await chrome.storage.local.set({ geminiSessions });
+                    
+                    // Notify UI
+                    chrome.runtime.sendMessage({
+                        action: "SESSIONS_UPDATED",
+                        sessions: geminiSessions
+                    }).catch(() => {});
+                }
+            }
+        } catch (e) {
+            console.error("Error generating AI title:", e);
+        }
+    }
+
     handle(request, sender, sendResponse) {
         this.isCancelled = false;
 
@@ -135,6 +178,9 @@ export class PromptHandler {
                         if (loopCount === 0) {
                             let historyImages = currentFiles ? currentFiles.map(f => f.base64) : null;
                             await appendUserMessage(activeSessionId, currentPromptText, historyImages);
+                            
+                            // AI Title Generation (Async, don't block the main flow)
+                            this.generateAiTitle(activeSessionId, currentPromptText, result.text).catch(e => console.error("AI Title generation failed:", e));
                         }
                         await appendAiMessage(activeSessionId, result);
                     }

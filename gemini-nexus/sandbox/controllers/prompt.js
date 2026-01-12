@@ -28,7 +28,7 @@ export class PromptController {
         const currentId = this.sessionManager.currentSessionId;
         const session = this.sessionManager.getCurrentSession();
 
-        // Update Title if needed
+        // Update Title if needed (Initial placeholder, will be replaced by AI summary)
         if (session.messages.length === 0) {
             const titleUpdate = this.sessionManager.updateTitle(currentId, text || t('imageSent'));
             if(titleUpdate) this.app.sessionFlow.refreshHistoryUI();

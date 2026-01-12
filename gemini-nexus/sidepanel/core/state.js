@@ -22,6 +22,7 @@ export class StateManager {
             'geminiTextSelectionEnabled',
             'geminiImageToolsEnabled',
             'geminiAccountIndices',
+            'geminiSummaryModel',
             'geminiApiKey',
             'geminiUseOfficialApi',
             'geminiThinkingLevel',
@@ -98,6 +99,7 @@ export class StateManager {
         this.frame.postMessage({ action: 'RESTORE_TEXT_SELECTION', payload: this.data.geminiTextSelectionEnabled !== false });
         this.frame.postMessage({ action: 'RESTORE_IMAGE_TOOLS', payload: this.data.geminiImageToolsEnabled !== false });
         this.frame.postMessage({ action: 'RESTORE_ACCOUNT_INDICES', payload: this.data.geminiAccountIndices || "0" });
+        this.frame.postMessage({ action: 'RESTORE_SUMMARY_MODEL', payload: this.data.geminiSummaryModel || "" });
 
         // 2. Pending Actions (Session Switch)
         if (this.data.pendingSessionId) {

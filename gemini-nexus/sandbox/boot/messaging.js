@@ -91,6 +91,10 @@ export class AppMessageBridge {
             this.ui.settings.updateAccountIndices(payload);
             return;
         }
+        if (action === 'RESTORE_SUMMARY_MODEL') {
+            this.ui.settings.updateSummaryModel(payload);
+            return;
+        }
         
         // Note: RESTORE_CONNECTION_SETTINGS is handled by AppController to update Model List
         

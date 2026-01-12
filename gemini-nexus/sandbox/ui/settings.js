@@ -1,6 +1,6 @@
 
 // sandbox/ui/settings.js
-import { saveShortcutsToStorage, saveThemeToStorage, requestThemeFromStorage, saveOpacityToStorage, requestOpacityFromStorage, saveLanguageToStorage, requestLanguageFromStorage, saveTextSelectionToStorage, requestTextSelectionFromStorage, saveSidebarBehaviorToStorage, saveImageToolsToStorage, requestImageToolsFromStorage, saveAccountIndicesToStorage, requestAccountIndicesFromStorage, saveConnectionSettingsToStorage, requestConnectionSettingsFromStorage, sendToBackground } from '../../lib/messaging.js';
+import { saveShortcutsToStorage, saveThemeToStorage, requestThemeFromStorage, saveOpacityToStorage, requestOpacityFromStorage, saveLanguageToStorage, requestLanguageFromStorage, saveTextSelectionToStorage, requestTextSelectionFromStorage, saveSidebarBehaviorToStorage, saveImageToolsToStorage, requestImageToolsFromStorage, saveAccountIndicesToStorage, requestAccountIndicesFromStorage, saveSummaryModelToStorage, requestSummaryModelFromStorage, saveConnectionSettingsToStorage, requestConnectionSettingsFromStorage, sendToBackground } from '../../lib/messaging.js';
 import { setLanguagePreference, getLanguagePreference } from '../core/i18n.js';
 import { SettingsView } from './settings/view.js';
 import { DEFAULT_SHORTCUTS } from '../../lib/constants.js';
@@ -16,6 +16,7 @@ export class SettingsController {
         this.textSelectionEnabled = true;
         this.imageToolsEnabled = true;
         this.accountIndices = "0";
+        this.summaryModel = "";
         
         // Connection State
         this.connectionData = {
@@ -26,6 +27,7 @@ export class SettingsController {
             openaiBaseUrl: "",
             openaiApiKey: "",
             openaiModel: "",
+            summaryModel: "",
             // MCP (External Tools)
             mcpEnabled: false,
             mcpTransport: "sse",
@@ -90,12 +92,13 @@ export class SettingsController {
         requestOpacityFromStorage();
         this.view.setToggles(this.textSelectionEnabled, this.imageToolsEnabled);
         this.view.setAccountIndices(this.accountIndices);
-        this.view.setConnectionSettings(this.connectionData);
+        this.view.setConnectionSettings({ ...this.connectionData, summaryModel: this.summaryModel });
         
         // Refresh from storage
         requestTextSelectionFromStorage();
         requestImageToolsFromStorage();
         requestAccountIndicesFromStorage();
+        requestSummaryModelFromStorage();
         requestConnectionSettingsFromStorage();
         
         this.fetchGithubData();
@@ -119,6 +122,10 @@ export class SettingsController {
         this.accountIndices = val;
         const cleaned = val.replace(/[^0-9,]/g, '');
         saveAccountIndicesToStorage(cleaned);
+
+        // Summary Model
+        this.summaryModel = data.connection.summaryModel || "";
+        saveSummaryModelToStorage(this.summaryModel);
         
         // Connection
         this.connectionData = {
@@ -128,6 +135,7 @@ export class SettingsController {
             openaiBaseUrl: data.connection.openaiBaseUrl,
             openaiApiKey: data.connection.openaiApiKey,
             openaiModel: data.connection.openaiModel,
+            summaryModel: data.connection.summaryModel,
             // MCP
             mcpEnabled: data.connection.mcpEnabled === true,
             mcpTransport: data.connection.mcpTransport || "sse",
@@ -226,6 +234,7 @@ export class SettingsController {
     
     updateConnectionSettings(settings) {
         this.connectionData = { ...this.connectionData, ...settings };
+        if (this.summaryModel) this.connectionData.summaryModel = this.summaryModel;
         
         // Legacy compat: If provider missing but useOfficialApi is true, set to official
         if (!this.connectionData.provider) {
@@ -273,6 +282,11 @@ export class SettingsController {
     updateAccountIndices(indicesString) {
         this.accountIndices = indicesString || "0";
         this.view.setAccountIndices(this.accountIndices);
+    }
+
+    updateSummaryModel(model) {
+        this.summaryModel = model || "";
+        this.view.setConnectionSettings({ ...this.connectionData, summaryModel: this.summaryModel });
     }
 
     async fetchGithubData() {

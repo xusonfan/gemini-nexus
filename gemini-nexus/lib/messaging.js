@@ -95,6 +95,17 @@ export function saveAccountIndicesToStorage(indices) {
     }, '*');
 }
 
+export function requestSummaryModelFromStorage() {
+    window.parent.postMessage({ action: 'GET_SUMMARY_MODEL' }, '*');
+}
+
+export function saveSummaryModelToStorage(model) {
+    window.parent.postMessage({
+        action: 'SAVE_SUMMARY_MODEL',
+        payload: model
+    }, '*');
+}
+
 export function requestConnectionSettingsFromStorage() {
     window.parent.postMessage({ action: 'GET_CONNECTION_SETTINGS' }, '*');
 }

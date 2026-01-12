@@ -55,6 +55,42 @@ export function setupMessageListener(sessionManager, imageHandler, controlManage
             return true;
         }
 
+        if (request.action === 'GET_ACCOUNT_INDICES') {
+            chrome.storage.local.get(['geminiAccountIndices'], (res) => {
+                const payload = res.geminiAccountIndices || "0";
+                if (sender.tab) {
+                    chrome.tabs.sendMessage(sender.tab.id, { action: 'RESTORE_ACCOUNT_INDICES', payload });
+                } else {
+                    chrome.runtime.sendMessage({ action: 'RESTORE_ACCOUNT_INDICES', payload });
+                }
+                sendResponse({ payload });
+            });
+            return true;
+        }
+
+        if (request.action === 'SAVE_ACCOUNT_INDICES') {
+            chrome.storage.local.set({ geminiAccountIndices: request.payload });
+            return false;
+        }
+
+        if (request.action === 'GET_SUMMARY_MODEL') {
+            chrome.storage.local.get(['geminiSummaryModel'], (res) => {
+                const payload = res.geminiSummaryModel || "";
+                if (sender.tab) {
+                    chrome.tabs.sendMessage(sender.tab.id, { action: 'RESTORE_SUMMARY_MODEL', payload });
+                } else {
+                    chrome.runtime.sendMessage({ action: 'RESTORE_SUMMARY_MODEL', payload });
+                }
+                sendResponse({ payload });
+            });
+            return true;
+        }
+
+        if (request.action === 'SAVE_SUMMARY_MODEL') {
+            chrome.storage.local.set({ geminiSummaryModel: request.payload });
+            return false;
+        }
+
         // Delegate to Session Handler (Prompt, Context, Quick Ask, Browser Control)
         if (sessionHandler.handle(request, sender, sendResponse)) {
             return true;

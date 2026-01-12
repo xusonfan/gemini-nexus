@@ -52,6 +52,7 @@ export class ConnectionSection {
             openaiBaseUrl: get('openai-base-url'),
             openaiApiKey: get('openai-api-key'),
             openaiModel: get('openai-model'),
+            summaryModelInput: get('summary-model-input'),
 
             // MCP Fields
             mcpEnabled: get('mcp-enabled'),
@@ -252,9 +253,9 @@ export class ConnectionSection {
     }
 
     setData(data) {
-        const { 
-            providerSelect, apiKeyInput, thinkingLevelSelect, 
-            openaiBaseUrl, openaiApiKey, openaiModel,
+        const {
+            providerSelect, apiKeyInput, thinkingLevelSelect,
+            openaiBaseUrl, openaiApiKey, openaiModel, summaryModelInput,
             mcpEnabled
         } = this.elements;
 
@@ -272,6 +273,7 @@ export class ConnectionSection {
         if (openaiBaseUrl) openaiBaseUrl.value = data.openaiBaseUrl || "";
         if (openaiApiKey) openaiApiKey.value = data.openaiApiKey || "";
         if (openaiModel) openaiModel.value = data.openaiModel || "";
+        if (summaryModelInput) summaryModelInput.value = data.summaryModel || "";
 
         // MCP
         if (mcpEnabled) {
@@ -312,9 +314,9 @@ export class ConnectionSection {
     }
 
     getData() {
-        const { 
-            providerSelect, apiKeyInput, thinkingLevelSelect, 
-            openaiBaseUrl, openaiApiKey, openaiModel,
+        const {
+            providerSelect, apiKeyInput, thinkingLevelSelect,
+            openaiBaseUrl, openaiApiKey, openaiModel, summaryModelInput,
             mcpEnabled
         } = this.elements;
 
@@ -331,6 +333,7 @@ export class ConnectionSection {
             openaiBaseUrl: openaiBaseUrl ? openaiBaseUrl.value.trim() : "",
             openaiApiKey: openaiApiKey ? openaiApiKey.value.trim() : "",
             openaiModel: openaiModel ? openaiModel.value.trim() : "",
+            summaryModel: summaryModelInput ? summaryModelInput.value.trim() : "",
 
             // MCP
             mcpEnabled: mcpEnabled ? mcpEnabled.checked === true : false,
