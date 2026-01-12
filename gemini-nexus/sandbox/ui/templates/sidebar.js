@@ -9,7 +9,22 @@ export const SidebarTemplate = `
             </div>
         </div>
         
-        <div class="history-list-label" data-i18n="recentLabel">Recent</div>
+        <div class="history-list-label">
+            <span data-i18n="recentLabel">Recent</span>
+            <button id="batch-manage-btn" class="batch-btn-link" data-i18n="batchManage">Batch Manage</button>
+        </div>
+        
+        <div id="batch-actions" class="batch-actions-bar" style="display: none;">
+            <div class="batch-actions-left">
+                <input type="checkbox" id="batch-select-all">
+                <label for="batch-select-all" data-i18n="selectAll">Select All</label>
+            </div>
+            <div class="batch-actions-right">
+                <button id="batch-delete-btn" class="batch-delete-btn" disabled data-i18n="deleteSelected">Delete Selected (0)</button>
+                <button id="batch-cancel-btn" class="batch-cancel-btn" data-i18n="cancelBatch">Cancel</button>
+            </div>
+        </div>
+
         <div id="history-list" class="history-list"></div>
 
         <div class="sidebar-footer">

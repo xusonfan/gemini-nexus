@@ -122,6 +122,82 @@ body.layout-wide .sidebar-overlay {
     color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.batch-btn-link {
+    background: none;
+    border: none;
+    color: var(--link-color, #0b57d0);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    text-transform: none;
+}
+
+.batch-btn-link:hover {
+    background: var(--btn-hover);
+}
+
+/* Batch Actions Bar */
+.batch-actions-bar {
+    padding: 8px 16px;
+    margin: 0 12px 8px 12px;
+    background: var(--bg-input);
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+}
+
+.batch-actions-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+}
+
+.batch-actions-left input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.batch-actions-right {
+    display: flex;
+    gap: 8px;
+}
+
+.batch-delete-btn {
+    background: #f8d7da;
+    color: #721c24;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.batch-delete-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.batch-cancel-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+[data-theme="dark"] .batch-delete-btn {
+    background: #442726;
+    color: #f8d7da;
 }
 
 /* History List */
@@ -197,6 +273,13 @@ body.layout-wide .sidebar-overlay {
 }
 
 .history-item:hover .history-delete { opacity: 1; }
+.history-item.batch-mode .history-delete { display: none; }
+
+.history-item-checkbox {
+    margin-right: 12px;
+    cursor: pointer;
+}
+
 .history-delete:hover { background: #ffb4ab; color: #690005; }
 [data-theme="dark"] .history-delete:hover { background: #5c1e1a; color: #ffb4ab; }
 

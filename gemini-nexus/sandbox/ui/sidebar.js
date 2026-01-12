@@ -21,6 +21,17 @@ export class SidebarController {
         this.itemCallbacks = null;
         this.fuse = null;
 
+        // Batch Management State
+        this.isBatchMode = false;
+        this.selectedSessionIds = new Set();
+
+        // Batch Elements
+        this.batchManageBtn = document.getElementById('batch-manage-btn');
+        this.batchActionsBar = document.getElementById('batch-actions');
+        this.batchSelectAll = document.getElementById('batch-select-all');
+        this.batchDeleteBtn = document.getElementById('batch-delete-btn');
+        this.batchCancelBtn = document.getElementById('batch-cancel-btn');
+
         this.initListeners();
     }
 
@@ -42,6 +53,83 @@ export class SidebarController {
         if (this.searchInput) {
             this.searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
         }
+
+        // Batch Listeners
+        if (this.batchManageBtn) {
+            this.batchManageBtn.addEventListener('click', () => this.enterBatchMode());
+        }
+        if (this.batchCancelBtn) {
+            this.batchCancelBtn.addEventListener('click', () => this.exitBatchMode());
+        }
+        if (this.batchSelectAll) {
+            this.batchSelectAll.addEventListener('change', (e) => this.toggleSelectAll(e.target.checked));
+        }
+        if (this.batchDeleteBtn) {
+            this.batchDeleteBtn.addEventListener('click', () => this.handleBatchDelete());
+        }
+    }
+
+    enterBatchMode() {
+        this.isBatchMode = true;
+        this.selectedSessionIds.clear();
+        this.updateBatchUI();
+        this._renderDOM(this._getFilteredSessions());
+    }
+
+    exitBatchMode() {
+        this.isBatchMode = false;
+        this.selectedSessionIds.clear();
+        this.updateBatchUI();
+        this._renderDOM(this._getFilteredSessions());
+    }
+
+    toggleSelectAll(checked) {
+        if (checked) {
+            const filtered = this._getFilteredSessions();
+            filtered.forEach(s => this.selectedSessionIds.add(s.id));
+        } else {
+            this.selectedSessionIds.clear();
+        }
+        this.updateBatchUI();
+        this._renderDOM(this._getFilteredSessions());
+    }
+
+    handleBatchDelete() {
+        if (this.selectedSessionIds.size === 0) return;
+        const count = this.selectedSessionIds.size;
+        if (confirm(t('deleteChatConfirm') + ` (${count})`)) {
+            const idsToDelete = Array.from(this.selectedSessionIds);
+            if (this.itemCallbacks && this.itemCallbacks.onBatchDelete) {
+                this.itemCallbacks.onBatchDelete(idsToDelete);
+            }
+            this.exitBatchMode();
+        }
+    }
+
+    updateBatchUI() {
+        if (this.batchActionsBar) {
+            this.batchActionsBar.style.display = this.isBatchMode ? 'flex' : 'none';
+        }
+        if (this.batchManageBtn) {
+            this.batchManageBtn.style.display = this.isBatchMode ? 'none' : 'block';
+        }
+        if (this.batchDeleteBtn) {
+            this.batchDeleteBtn.disabled = this.selectedSessionIds.size === 0;
+            this.batchDeleteBtn.textContent = t('deleteSelected').replace('{count}', this.selectedSessionIds.size);
+        }
+        if (this.batchSelectAll) {
+            const filtered = this._getFilteredSessions();
+            this.batchSelectAll.checked = filtered.length > 0 && filtered.every(s => this.selectedSessionIds.has(s.id));
+        }
+    }
+
+    _getFilteredSessions() {
+        const query = this.searchInput ? this.searchInput.value : '';
+        if (query.trim() && this.fuse) {
+            const results = this.fuse.search(query);
+            return results.map(r => r.item);
+        }
+        return this.allSessions;
     }
 
     toggle() {
@@ -126,15 +214,41 @@ export class SidebarController {
 
         sessions.forEach(s => {
             const item = document.createElement('div');
-            item.className = `history-item ${s.id === this.currentSessionId ? 'active' : ''}`;
-            item.onclick = () => {
-                this.itemCallbacks.onSwitch(s.id);
-                // On mobile or small screens, maybe auto-close sidebar?
-                // Keeping current behavior: explicit close required or select closes
-                if (window.innerWidth < 600) {
-                    this.close();
-                }
-            };
+            item.className = `history-item ${s.id === this.currentSessionId ? 'active' : ''} ${this.isBatchMode ? 'batch-mode' : ''}`;
+            
+            if (this.isBatchMode) {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'history-item-checkbox';
+                checkbox.checked = this.selectedSessionIds.has(s.id);
+                checkbox.onclick = (e) => e.stopPropagation();
+                checkbox.onchange = (e) => {
+                    if (e.target.checked) {
+                        this.selectedSessionIds.add(s.id);
+                    } else {
+                        this.selectedSessionIds.delete(s.id);
+                    }
+                    this.updateBatchUI();
+                };
+                item.appendChild(checkbox);
+
+                item.onclick = () => {
+                    if (this.selectedSessionIds.has(s.id)) {
+                        this.selectedSessionIds.delete(s.id);
+                    } else {
+                        this.selectedSessionIds.add(s.id);
+                    }
+                    this.updateBatchUI();
+                    this._renderDOM(sessions);
+                };
+            } else {
+                item.onclick = () => {
+                    this.itemCallbacks.onSwitch(s.id);
+                    if (window.innerWidth < 600) {
+                        this.close();
+                    }
+                };
+            }
             
             const titleSpan = document.createElement('span');
             titleSpan.className = 'history-title';

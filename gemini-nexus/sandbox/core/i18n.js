@@ -131,6 +131,10 @@ export const translations = {
         "noTabsFound": "No open tabs found.",
         "lockTab": "Lock Tab",
         "unlockTab": "Unlock Tab (Auto-follow Active)",
+        "batchManage": "Batch Manage",
+        "selectAll": "Select All",
+        "deleteSelected": "Delete Selected ({count})",
+        "cancelBatch": "Cancel",
     },
     zh: {
         "mcpTools": "外部 MCP 工具",
@@ -261,6 +265,10 @@ export const translations = {
         "noTabsFound": "未找到打开的标签页。",
         "lockTab": "锁定标签页",
         "unlockTab": "解锁 (自动跟随活动标签页)",
+        "batchManage": "批量管理",
+        "selectAll": "全选",
+        "deleteSelected": "删除选中 ({count})",
+        "cancelBatch": "取消",
     }
 };
 

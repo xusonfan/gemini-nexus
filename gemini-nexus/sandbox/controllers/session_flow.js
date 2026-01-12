@@ -60,13 +60,35 @@ export class SessionFlowController {
             this.sessionManager.currentSessionId,
             {
                 onSwitch: (id) => this.switchToSession(id),
-                onDelete: (id) => this.handleDeleteSession(id)
+                onDelete: (id) => this.handleDeleteSession(id),
+                onBatchDelete: (ids) => this.handleBatchDelete(ids)
             }
         );
     }
 
     handleDeleteSession(sessionId) {
         const switchNeeded = this.sessionManager.deleteSession(sessionId);
+        saveSessionsToStorage(this.sessionManager.sessions);
+        
+        if (switchNeeded) {
+            if (this.sessionManager.sessions.length > 0) {
+                this.switchToSession(this.sessionManager.currentSessionId);
+            } else {
+                this.handleNewChat();
+            }
+        } else {
+            this.refreshHistoryUI();
+        }
+    }
+
+    handleBatchDelete(sessionIds) {
+        let switchNeeded = false;
+        sessionIds.forEach(id => {
+            if (this.sessionManager.deleteSession(id)) {
+                switchNeeded = true;
+            }
+        });
+        
         saveSessionsToStorage(this.sessionManager.sessions);
         
         if (switchNeeded) {
