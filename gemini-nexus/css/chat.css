@@ -77,7 +77,8 @@ body.layout-wide .msg.ai {
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.msg.user:hover .copy-btn {
+.msg.user:hover .copy-btn,
+.msg.user:last-child .copy-btn {
     opacity: 1;
 }
 
@@ -129,7 +130,8 @@ body.layout-wide .msg.ai {
     flex-shrink: 0; /* Prevent shrinking */
 }
 
-.msg.ai:hover .ai-copy-btn {
+.msg.ai:hover .ai-copy-btn,
+.msg.ai:last-child .ai-copy-btn {
     opacity: 1;
 }
 
