@@ -15,11 +15,15 @@ export class PromptController {
 
     async send() {
         if (this.app.isGenerating) return;
+        this.app.isGenerating = true;
 
         const text = this.ui.inputFn.value.trim();
         const files = this.imageManager.getFiles();
 
-        if (!text && files.length === 0) return;
+        if (!text && files.length === 0) {
+            this.app.isGenerating = false;
+            return;
+        }
 
         if (!this.sessionManager.currentSessionId) {
             this.sessionManager.createSession();
@@ -69,7 +73,6 @@ export class PromptController {
         this.ui.resetInput();
         this.imageManager.clearFile();
         
-        this.app.isGenerating = true;
         this.ui.setLoading(true);
 
         const conn = (this.ui && this.ui.settings && this.ui.settings.connectionData) ? this.ui.settings.connectionData : {};

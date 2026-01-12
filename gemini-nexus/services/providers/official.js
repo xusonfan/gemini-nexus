@@ -74,7 +74,16 @@ export async function sendOfficialMessage(prompt, systemInstruction, history, ap
 
     // Add History
     if (history && Array.isArray(history)) {
-        history.forEach(msg => {
+        // Filter out the last message if it's identical to the current prompt to avoid duplication
+        // (Sandbox saves the message before sending the request)
+        const filteredHistory = history.filter((msg, idx) => {
+            if (idx === history.length - 1 && msg.role === 'user' && msg.text === prompt) {
+                return false;
+            }
+            return true;
+        });
+
+        filteredHistory.forEach(msg => {
             const role = msg.role === 'ai' ? 'model' : 'user';
             const parts = formatPart(msg);
             if (parts.length > 0) {

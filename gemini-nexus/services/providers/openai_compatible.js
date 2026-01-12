@@ -49,12 +49,18 @@ export async function sendOpenAIMessage(prompt, systemInstruction, history, conf
 
     // History
     if (history && Array.isArray(history)) {
-        history.forEach(msg => {
+        // Filter out the last message if it's identical to the current prompt to avoid duplication
+        const filteredHistory = history.filter((msg, idx) => {
+            if (idx === history.length - 1 && msg.role === 'user' && msg.text === prompt) {
+                return false;
+            }
+            return true;
+        });
+
+        filteredHistory.forEach(msg => {
             const role = msg.role === 'ai' ? 'assistant' : 'user';
             
             // Map image attachment from history
-            // Gemini history stores images as array of base64 strings in msg.image
-            // Only user messages usually have images
             const images = (msg.role === 'user' && msg.image) ? msg.image : [];
             
             messages.push({

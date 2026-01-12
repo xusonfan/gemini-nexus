@@ -236,13 +236,18 @@ ${aiText}`;
                     if (activeSessionId) {
                         // If it's the first turn and we just created an ephemeral session,
                         // we need to save the user message first.
-                        if (loopCount === 0) {
+                        // NOTE: If request.sessionId is provided, Sandbox already saved the user message.
+                        if (loopCount === 0 && !request.sessionId) {
                             let historyImages = currentFiles ? currentFiles.map(f => f.base64) : null;
                             await appendUserMessage(activeSessionId, currentPromptText, historyImages);
                             
                             // AI Title Generation (Async, don't block the main flow)
                             this.generateAiTitle(activeSessionId, currentPromptText, result.text).catch(e => console.error("AI Title generation failed:", e));
+                        } else if (loopCount === 0 && request.sessionId) {
+                            // Even if already saved, we trigger title generation for the first real exchange
+                            this.generateAiTitle(activeSessionId, currentPromptText, result.text).catch(e => console.error("AI Title generation failed:", e));
                         }
+
                         await appendAiMessage(activeSessionId, result);
                     }
                     
