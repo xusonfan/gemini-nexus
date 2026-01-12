@@ -51,6 +51,7 @@
             this.ui.setCallbacks({
                 onAction: this.handleAction,
                 onModelChange: (model) => this.handleModelChange(model),
+                onOpacityChange: (opacity) => this.handleOpacityChange(opacity),
                 onImageBtnHover: (isHovering) => {
                     if (isHovering) {
                         this.imageDetector.cancelHide();
@@ -62,6 +63,7 @@
 
             // Sync Settings (Model & Provider) with Global State
             this.syncSettings();
+            this.syncOpacity();
             
             // Listen for global setting changes to keep toolbar in sync
             chrome.storage.onChanged.addListener((changes, area) => {
@@ -94,6 +96,24 @@
             
             // Update UI options and selection
             this.ui.updateModelList(settings, result.geminiModel);
+        }
+
+        async syncOpacity() {
+            const result = await chrome.storage.local.get('gemini_nexus_opacity');
+            const opacity = result.gemini_nexus_opacity !== undefined ? result.gemini_nexus_opacity : 1.0;
+            this.setOpacity(opacity);
+        }
+        
+        setOpacity(opacity) {
+            if (this.ui) {
+                this.ui.setOpacity(opacity);
+            }
+        }
+
+        handleOpacityChange(opacity) {
+            this.setOpacity(opacity);
+            // Save to storage
+            chrome.storage.local.set({ 'gemini_nexus_opacity': opacity });
         }
         
         setSelectionEnabled(enabled) {

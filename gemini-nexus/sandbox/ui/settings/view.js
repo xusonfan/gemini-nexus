@@ -22,6 +22,7 @@ export class SettingsView {
         
         this.appearance = new AppearanceSection({
             onThemeChange: (val) => this.fire('onThemeChange', val),
+            onOpacityChange: (val) => this.fire('onOpacityChange', val),
             onLanguageChange: (val) => this.fire('onLanguageChange', val)
         });
         
@@ -113,6 +114,10 @@ export class SettingsView {
     // Delegation to Appearance
     setThemeValue(theme) {
         this.appearance.setTheme(theme);
+    }
+
+    setOpacityValue(opacity) {
+        this.appearance.setOpacity(opacity);
     }
 
     setLanguageValue(lang) {

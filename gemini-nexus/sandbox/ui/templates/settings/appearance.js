@@ -11,6 +11,13 @@ export const AppearanceSettingsTemplate = `
         </select>
     </div>
     <div class="shortcut-row">
+        <label data-i18n="opacity">Opacity</label>
+        <div style="flex: 1; display: flex; align-items: center; gap: 10px; padding: 0 10px;">
+            <input type="range" id="opacity-slider" min="10" max="100" step="5" value="100" style="flex: 1; cursor: pointer;">
+            <span id="opacity-value" style="min-width: 35px; font-size: 12px; color: #666;">100%</span>
+        </div>
+    </div>
+    <div class="shortcut-row">
         <label data-i18n="language">Language</label>
         <select id="language-select" class="shortcut-input" style="width: auto; padding: 6px 12px; text-align: left;">
             <option value="system" data-i18n="system">System Default</option>

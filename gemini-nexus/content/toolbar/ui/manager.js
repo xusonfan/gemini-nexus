@@ -118,8 +118,9 @@
         }
 
         handlePinClick() {
-            this.view.togglePin();
+            if (this.view) this.view.togglePin();
         }
+
 
         saveWindowDimensions(w, h) {
             chrome.storage.local.set({ 'gemini_nexus_window_size': { w, h } });
@@ -209,6 +210,12 @@
 
         setInputValue(text) {
             this.view.setInputValue(text);
+        }
+
+        setOpacity(opacity) {
+            if (this.view) {
+                this.view.setOpacity(opacity);
+            }
         }
 
         // --- Model Selection ---

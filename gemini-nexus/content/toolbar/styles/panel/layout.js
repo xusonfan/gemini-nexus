@@ -45,7 +45,7 @@
         .window-scroll-container::-webkit-scrollbar-thumb:hover { background: #d0d0d0; }
 
         .ask-window.visible {
-            opacity: 1;
+            opacity: var(--ask-window-opacity, 1);
             pointer-events: auto;
         }
 

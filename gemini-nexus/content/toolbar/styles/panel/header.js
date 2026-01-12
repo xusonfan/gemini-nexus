@@ -88,5 +88,39 @@
             background: #f0f1f1;
             color: #1f1f1f;
         }
+
+        /* Opacity Control */
+        .opacity-control-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .opacity-panel {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #ffffff;
+            border: 1px solid #e1e3e1;
+            border-radius: 8px;
+            padding: 8px 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000002;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            width: 120px;
+        }
+
+        .opacity-panel.hidden {
+            display: none;
+        }
+
+        #header-opacity-slider {
+            width: 100%;
+            cursor: pointer;
+            height: 4px;
+            accent-color: #0b57d0;
+        }
     `;
 })();

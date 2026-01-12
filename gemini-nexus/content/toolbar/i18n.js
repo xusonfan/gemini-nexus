@@ -28,6 +28,7 @@
         pin: isZh ? "固定" : "Pin",
         unpin: isZh ? "取消固定" : "Unpin",
         stopGenerating: isZh ? "停止生成" : "Stop generating",
+        opacity: isZh ? "透明度" : "Opacity",
         
         // AI Tools Menu
         aiTools: isZh ? "AI 工具" : "AI Tools",

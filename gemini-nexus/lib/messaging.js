@@ -33,6 +33,17 @@ export function saveThemeToStorage(theme) {
     }, '*');
 }
 
+export function requestOpacityFromStorage() {
+    window.parent.postMessage({ action: 'GET_OPACITY' }, '*');
+}
+
+export function saveOpacityToStorage(opacity) {
+    window.parent.postMessage({
+        action: 'SAVE_OPACITY',
+        payload: opacity
+    }, '*');
+}
+
 export function requestLanguageFromStorage() {
     window.parent.postMessage({ action: 'GET_LANGUAGE' }, '*');
 }

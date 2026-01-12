@@ -111,6 +111,12 @@
         dockWindow(side, top) { this.windowView.dockWindow(side, top); }
         undockWindow() { this.windowView.undockWindow(); }
 
+        setOpacity(opacity) {
+            if (this.elements.askWindow) {
+                this.elements.askWindow.style.setProperty('--ask-window-opacity', opacity);
+            }
+        }
+
         // --- Model Selection ---
         
         getSelectedModel() {

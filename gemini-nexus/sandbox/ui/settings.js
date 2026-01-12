@@ -1,6 +1,6 @@
 
 // sandbox/ui/settings.js
-import { saveShortcutsToStorage, saveThemeToStorage, requestThemeFromStorage, saveLanguageToStorage, requestLanguageFromStorage, saveTextSelectionToStorage, requestTextSelectionFromStorage, saveSidebarBehaviorToStorage, saveImageToolsToStorage, requestImageToolsFromStorage, saveAccountIndicesToStorage, requestAccountIndicesFromStorage, saveConnectionSettingsToStorage, requestConnectionSettingsFromStorage, sendToBackground } from '../../lib/messaging.js';
+import { saveShortcutsToStorage, saveThemeToStorage, requestThemeFromStorage, saveOpacityToStorage, requestOpacityFromStorage, saveLanguageToStorage, requestLanguageFromStorage, saveTextSelectionToStorage, requestTextSelectionFromStorage, saveSidebarBehaviorToStorage, saveImageToolsToStorage, requestImageToolsFromStorage, saveAccountIndicesToStorage, requestAccountIndicesFromStorage, saveConnectionSettingsToStorage, requestConnectionSettingsFromStorage, sendToBackground } from '../../lib/messaging.js';
 import { setLanguagePreference, getLanguagePreference } from '../core/i18n.js';
 import { SettingsView } from './settings/view.js';
 import { DEFAULT_SHORTCUTS } from '../../lib/constants.js';
@@ -49,6 +49,7 @@ export class SettingsController {
             onReset: () => this.resetSettings(),
             
             onThemeChange: (theme) => this.setTheme(theme),
+            onOpacityChange: (opacity) => this.setOpacity(opacity),
             onLanguageChange: (lang) => this.setLanguage(lang),
             
             onTextSelectionChange: (val) => { this.textSelectionEnabled = (val === 'on' || val === true); saveTextSelectionToStorage(this.textSelectionEnabled); },
@@ -86,6 +87,7 @@ export class SettingsController {
         // Sync state to view
         this.view.setShortcuts(this.shortcuts);
         this.view.setLanguageValue(getLanguagePreference());
+        requestOpacityFromStorage();
         this.view.setToggles(this.textSelectionEnabled, this.imageToolsEnabled);
         this.view.setAccountIndices(this.accountIndices);
         this.view.setConnectionSettings(this.connectionData);
@@ -182,6 +184,15 @@ export class SettingsController {
     
     updateTheme(theme) {
         this.view.setThemeValue(theme);
+    }
+
+    setOpacity(opacity) {
+        saveOpacityToStorage(opacity);
+        // Apply locally if needed, but usually it's for the content script
+    }
+
+    updateOpacity(opacity) {
+        this.view.setOpacityValue(opacity);
     }
     
     setLanguage(newLang) {

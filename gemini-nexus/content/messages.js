@@ -80,6 +80,15 @@
                 return true;
             }
 
+            // Restore Opacity
+            if (request.action === "RESTORE_OPACITY") {
+                if (this.toolbarController) {
+                    this.toolbarController.setOpacity(request.payload);
+                }
+                sendResponse({status: "ok"});
+                return true;
+            }
+
             // Get Active Selection
             if (request.action === "GET_SELECTION") {
                 sendResponse({ selection: window.getSelection().toString() });

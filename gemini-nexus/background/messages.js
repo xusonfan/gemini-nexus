@@ -17,7 +17,33 @@ export function setupMessageListener(sessionManager, imageHandler, controlManage
     const uiHandler = new UIMessageHandler(imageHandler, controlManager, mcpManager);
 
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-        
+        if (request.action === 'GET_OPACITY') {
+            chrome.storage.local.get('gemini_nexus_opacity', (res) => {
+                const opacity = res.gemini_nexus_opacity !== undefined ? res.gemini_nexus_opacity : 1.0;
+                if (sender.tab) {
+                    chrome.tabs.sendMessage(sender.tab.id, { action: 'RESTORE_OPACITY', payload: opacity });
+                } else {
+                    // From Sandbox
+                    const views = chrome.extension.getViews({ type: 'tab' }); // This is not ideal for sidepanel
+                    // Better: broadcast to all or handle via specific port if available
+                    // But usually sandbox communicates via window.parent.postMessage which is handled in content/index.js or sidepanel/index.js
+                }
+                sendResponse({ opacity });
+            });
+            return true;
+        }
+
+        if (request.action === 'SAVE_OPACITY') {
+            chrome.storage.local.set({ 'gemini_nexus_opacity': request.payload });
+            // Broadcast to all tabs to apply opacity
+            chrome.tabs.query({}, (tabs) => {
+                tabs.forEach(tab => {
+                    chrome.tabs.sendMessage(tab.id, { action: 'RESTORE_OPACITY', payload: request.payload }).catch(() => {});
+                });
+            });
+            return false;
+        }
+
         // --- LOGGING SYSTEM ---
         if (request.action === 'LOG_ENTRY') {
             logManager.add(request.entry);

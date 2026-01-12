@@ -55,6 +55,10 @@ export class AppMessageBridge {
             this.ui.updateTheme(payload);
             return;
         }
+        if (action === 'RESTORE_OPACITY') {
+            this.ui.settings.updateOpacity(payload);
+            return;
+        }
         if (action === 'RESTORE_LANGUAGE') {
             this.ui.updateLanguage(payload);
             return;

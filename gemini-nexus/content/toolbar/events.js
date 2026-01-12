@@ -131,7 +131,9 @@
 
             // Prevent event bubbling to page
             if (elements.askWindow) {
-                this._add(elements.askWindow, 'mousedown', (e) => e.stopPropagation());
+                this._add(elements.askWindow, 'mousedown', (e) => {
+                    e.stopPropagation();
+                });
             }
             
             // Code Copy Delegation inside Result Area

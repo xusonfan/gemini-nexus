@@ -67,6 +67,13 @@ export class MessageBridge {
             this.frame.postMessage({ action: 'RESTORE_LANGUAGE', payload: this.state.getCached('geminiLanguage') });
             return;
         }
+        if (action === 'GET_OPACITY') {
+            chrome.storage.local.get(['gemini_nexus_opacity'], (res) => {
+                const val = res.gemini_nexus_opacity !== undefined ? res.gemini_nexus_opacity : 1.0;
+                this.frame.postMessage({ action: 'RESTORE_OPACITY', payload: val });
+            });
+            return;
+        }
         if (action === 'GET_TEXT_SELECTION') {
             // Some keys might not be in initial bulk fetch if added later, but usually are.
             // Fallback to async storage if needed, but state.data usually has it.
@@ -132,6 +139,7 @@ export class MessageBridge {
         if (action === 'SAVE_MODEL') this.state.save('geminiModel', payload);
         if (action === 'SAVE_THEME') this.state.save('geminiTheme', payload);
         if (action === 'SAVE_LANGUAGE') this.state.save('geminiLanguage', payload);
+        if (action === 'SAVE_OPACITY') this.state.save('gemini_nexus_opacity', payload);
         if (action === 'SAVE_TEXT_SELECTION') this.state.save('geminiTextSelectionEnabled', payload);
         if (action === 'SAVE_IMAGE_TOOLS') this.state.save('geminiImageToolsEnabled', payload);
         if (action === 'SAVE_SIDEBAR_BEHAVIOR') this.state.save('geminiSidebarBehavior', payload);
