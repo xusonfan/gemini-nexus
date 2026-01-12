@@ -1,4 +1,3 @@
-
 // sandbox/render/message.js
 import { renderContent } from './content.js';
 import { copyToClipboard } from './clipboard.js';
@@ -108,30 +107,86 @@ export function appendMessage(container, text, role, attachment = null, thoughts
             }
         }
 
-        // --- Add Copy Button ---
-        const copyBtn = document.createElement('button');
-        copyBtn.className = 'copy-btn';
-        copyBtn.title = 'Copy content';
-        
-        const copyIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
-        const checkIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        // --- Footer Container (Copy + Follow-ups) ---
+        if (role === 'ai') {
+            const footerDiv = document.createElement('div');
+            footerDiv.className = 'msg-footer';
+            footerDiv.style.display = 'flex';
+            footerDiv.style.alignItems = 'flex-start';
+            footerDiv.style.gap = '8px';
+            footerDiv.style.marginTop = '8px'; // Adjusted for balanced spacing
+            footerDiv.style.minHeight = '32px';
 
-        copyBtn.innerHTML = copyIcon;
+            // --- Add Copy Button ---
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-btn ai-copy-btn';
+            copyBtn.title = 'Copy content';
+            copyBtn.style.marginTop = '4px';
+            
+            const copyIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+            const checkIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
 
-        copyBtn.addEventListener('click', async () => {
-            try {
-                // Use currentText closure to get latest streaming text
-                await copyToClipboard(currentText);
-                copyBtn.innerHTML = checkIcon;
-                setTimeout(() => {
-                    copyBtn.innerHTML = copyIcon;
-                }, 2000);
-            } catch (err) {
-                console.error('Failed to copy text: ', err);
-            }
-        });
+            copyBtn.innerHTML = copyIcon;
 
-        div.appendChild(copyBtn);
+            copyBtn.addEventListener('click', async () => {
+                try {
+                    await copyToClipboard(currentText);
+                    copyBtn.innerHTML = checkIcon;
+                    setTimeout(() => {
+                        copyBtn.innerHTML = copyIcon;
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                }
+            });
+
+            footerDiv.appendChild(copyBtn);
+
+            // --- Follow-up Questions Container ---
+            const followUpContainer = document.createElement('div');
+            followUpContainer.className = 'follow-up-container';
+            followUpContainer.style.display = 'flex';
+            followUpContainer.style.flexWrap = 'nowrap';
+            followUpContainer.style.gap = '8px';
+            followUpContainer.style.overflowX = 'auto';
+            followUpContainer.style.scrollbarWidth = 'none';
+            followUpContainer.style.msOverflowStyle = 'none';
+            followUpContainer.style.paddingBottom = '4px';
+            
+            followUpContainer.addEventListener('wheel', (e) => {
+                if (e.deltaY !== 0) {
+                    e.preventDefault();
+                    followUpContainer.scrollLeft += e.deltaY;
+                }
+            });
+
+            footerDiv.appendChild(followUpContainer);
+            div.appendChild(footerDiv);
+        } else {
+            // For user messages, keep simple copy button without footer container
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-btn';
+            copyBtn.title = 'Copy content';
+            
+            const copyIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+            const checkIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+            copyBtn.innerHTML = copyIcon;
+
+            copyBtn.addEventListener('click', async () => {
+                try {
+                    await copyToClipboard(currentText);
+                    copyBtn.innerHTML = checkIcon;
+                    setTimeout(() => {
+                        copyBtn.innerHTML = copyIcon;
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                }
+            });
+
+            div.appendChild(copyBtn);
+        }
     }
 
     container.appendChild(div);
@@ -170,6 +225,46 @@ export function appendMessage(container, text, role, attachment = null, thoughts
             // If the user is at the start of the message, we want them to stay there
             // as the content expands downwards.
         },
+        // Function to add follow-up questions
+        addFollowUps: (questions) => {
+            const followUpContainer = div.querySelector('.follow-up-container');
+            if (!followUpContainer) return;
+
+            followUpContainer.innerHTML = '';
+            questions.forEach(q => {
+                const btn = document.createElement('button');
+                btn.className = 'follow-up-btn';
+                btn.textContent = q;
+                Object.assign(btn.style, {
+                    padding: '6px 14px',
+                    borderRadius: '18px',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-sidebar)',
+                    color: 'var(--text-secondary)',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                    whiteSpace: 'nowrap'
+                });
+
+                btn.addEventListener('mouseenter', () => {
+                    btn.style.background = 'var(--btn-hover)';
+                    btn.style.color = 'var(--text-primary)';
+                });
+                btn.addEventListener('mouseleave', () => {
+                    btn.style.background = 'var(--bg-sidebar)';
+                    btn.style.color = 'var(--text-secondary)';
+                });
+
+                btn.addEventListener('click', () => {
+                    document.dispatchEvent(new CustomEvent('gemini-send-followup', { detail: q }));
+                });
+
+                followUpContainer.appendChild(btn);
+            });
+        },
         // Function to update images if they arrive late (though mostly synchronous in final reply)
         addImages: (images) => {
             if (Array.isArray(images) && images.length > 0 && !div.querySelector('.generated-images-grid')) {
@@ -180,9 +275,13 @@ export function appendMessage(container, text, role, attachment = null, thoughts
                 const firstImage = images[0];
                 grid.appendChild(createGeneratedImage(firstImage));
 
-                // Insert before copy button
-                div.insertBefore(grid, div.querySelector('.copy-btn'));
-                // Do not force scroll here either
+                // Insert before footer
+                const footer = div.querySelector('.msg-footer');
+                if (footer) {
+                    div.insertBefore(grid, footer);
+                } else {
+                    div.appendChild(grid);
+                }
             }
         }
     };

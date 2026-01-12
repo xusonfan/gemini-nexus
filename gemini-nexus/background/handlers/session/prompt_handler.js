@@ -20,8 +20,69 @@ export class PromptHandler {
         this.isCancelled = true;
     }
 
+    async generateFollowUpQuestions(sessionId, aiText, sender) {
+        try {
+            const isZh = chrome.i18n.getUILanguage().startsWith('zh');
+            const prompt = isZh
+                ? `根据以下 AI 的回答，生成 3 个简短的后续追问问题，让用户可以继续深入探讨。要求：
+1. 必须是疑问句。
+2. 每个问题不超过 20 个字。
+3. 直接输出问题列表，每行一个，不要包含数字编号或任何多余文字。
+
+AI 回答内容：
+${aiText}`
+                : `Based on the following AI response, generate 3 short follow-up questions for the user to continue the conversation.
+Requirements:
+1. Must be questions.
+2. Max 15 words per question.
+3. Output ONLY the questions, one per line, no numbers or extra text.
+
+AI Response:
+${aiText}`;
+
+            const { geminiSummaryModel } = await chrome.storage.local.get(['geminiSummaryModel']);
+            const summaryModel = geminiSummaryModel || "";
+
+            if (!summaryModel) return;
+
+            const result = await this.sessionManager.handleSendPrompt({
+                text: prompt,
+                model: summaryModel,
+                systemInstruction: "You are a helpful assistant that generates relevant follow-up questions."
+            }, () => {}, true); // Pass isInternal = true
+
+            if (result && result.status === 'success' && result.text) {
+                const questions = result.text.split('\n')
+                    .map(q => q.trim().replace(/^\d+\.\s*/, ''))
+                    .filter(q => q.length > 0 && q.endsWith('?') || q.endsWith('？'))
+                    .slice(0, 3);
+
+                if (questions.length > 0) {
+                    const msg = {
+                        action: "FOLLOW_UP_QUESTIONS",
+                        sessionId,
+                        questions
+                    };
+                    chrome.runtime.sendMessage(msg).catch(() => {});
+                    if (sender.tab && sender.tab.id) {
+                        chrome.tabs.sendMessage(sender.tab.id, msg).catch(() => {});
+                    }
+                }
+            }
+        } catch (e) {
+            console.error("Error generating follow-up questions:", e);
+        }
+    }
+
     async generateAiTitle(sessionId, userText, aiText) {
         try {
+            // Check if it's the first round (only 1 message: the current user message)
+            const { geminiSessions = [] } = await chrome.storage.local.get(['geminiSessions']);
+            const session = geminiSessions.find(s => s.id === sessionId);
+            if (session && session.messages && session.messages.length > 1) {
+                return;
+            }
+
             const isZh = chrome.i18n.getUILanguage().startsWith('zh');
             const prompt = isZh
                 ? `请根据以下对话内容，总结一个简短的标题（不超过10个字）。直接输出标题，不要有任何解释或标点符号。\n\n用户: ${userText}\nAI: ${aiText}`
@@ -39,7 +100,7 @@ export class PromptHandler {
                 text: prompt,
                 model: summaryModel,
                 systemInstruction: "You are a helpful assistant that summarizes conversation titles."
-            }, () => {});
+            }, () => {}, true); // Pass isInternal = true
 
             if (result && result.status === 'success' && result.text) {
                 let title = result.text.trim().replace(/["'“”‘’]/g, '');
@@ -128,7 +189,7 @@ export class PromptHandler {
                 let ephemeralSessionId = request.sessionId;
                 if (!ephemeralSessionId) {
                     try {
-                        const mockResult = { text: "...", status: "pending" };
+                        const mockResult = { text: "...", status: "pending" }; // Restore "..." for initial state
                         const newSession = await saveToHistory(currentPromptText, mockResult, currentFiles);
                         if (newSession) {
                             ephemeralSessionId = newSession.id;
@@ -274,6 +335,12 @@ export class PromptHandler {
                     } else {
                         // No tool execution, final answer reached
                         keepLooping = false;
+
+                        // Generate Follow-up questions after the final response
+                        if (result && result.status === 'success') {
+                            const activeSessionId = request.sessionId || ephemeralSessionId;
+                            this.generateFollowUpQuestions(activeSessionId, result.text, sender).catch(e => console.error("Follow-up generation failed:", e));
+                        }
                     }
                 }
 

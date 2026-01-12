@@ -4,6 +4,15 @@ import { sendToBackground } from '../../lib/messaging.js';
 import { t } from '../core/i18n.js';
 
 export function bindAppEvents(app, ui, setResizeRef) {
+    // --- Follow-up Questions ---
+    document.addEventListener('gemini-send-followup', (e) => {
+        const question = e.detail;
+        if (ui.inputFn) {
+            ui.inputFn.value = question;
+            app.handleSendMessage();
+        }
+    });
+
     // New Chat Buttons
     document.getElementById('new-chat-header-btn').addEventListener('click', () => app.handleNewChat());
     

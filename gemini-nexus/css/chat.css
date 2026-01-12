@@ -115,8 +115,23 @@ body.layout-wide .msg.ai {
     border-radius: 8px;
 }
 
-.msg.ai:hover .copy-btn { opacity: 1; }
-.msg.ai .copy-btn:hover { color: var(--primary); background: var(--btn-hover); }
+.msg.ai:hover .ai-copy-btn { opacity: 1; }
+.msg.ai .ai-copy-btn:hover { color: var(--primary); background: var(--btn-hover); }
+
+/* Ensure footer remains aligned even when copy button is hidden */
+.follow-up-container::-webkit-scrollbar { display: none; }
+
+.msg.ai .ai-copy-btn {
+    opacity: 0;
+    float: none; /* Reset float since we use flex now */
+    margin: 0;
+    transition: opacity 0.2s;
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+.msg.ai:hover .ai-copy-btn {
+    opacity: 1;
+}
 
 /* --- Thinking Process Styles --- */
 .thoughts-container {
@@ -314,8 +329,8 @@ body.layout-wide .msg.ai {
 }
 
 /* Lists */
-.msg.ai ul, .msg.ai ol { margin: 8px 0 16px 0; padding-left: 24px; }
-.msg.ai li { margin-bottom: 6px; }
+.msg.ai ul, .msg.ai ol { margin: 8px 0 8px 0; padding-left: 24px; }
+.msg.ai li { margin-bottom: 4px; }
 
 /* Quotes */
 .msg.ai blockquote { 

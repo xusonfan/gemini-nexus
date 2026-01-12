@@ -82,6 +82,66 @@ export class MessageHandler {
             this.app.setPageContext(request.enable);
             return;
         }
+
+        // 7. Follow-up Questions
+        if (request.action === "FOLLOW_UP_QUESTIONS") {
+            this.handleFollowUpQuestions(request);
+            return;
+        }
+    }
+
+    handleFollowUpQuestions(request) {
+        // Find the last AI message bubble in the current session
+        const session = this.sessionManager.getCurrentSession();
+        if (!session || session.id !== request.sessionId) return;
+
+        // We need a way to find the last message's controller.
+        // Since we don't store controllers, we'll look for the last .msg.ai in historyDiv
+        const aiMsgs = this.ui.historyDiv.querySelectorAll('.msg.ai');
+        if (aiMsgs.length === 0) return;
+
+        const lastAiMsg = aiMsgs[aiMsgs.length - 1];
+        
+        // We can't easily get the 'controller' returned by appendMessage here,
+        // but we can manually find the container we added.
+        const followUpContainer = lastAiMsg.querySelector('.follow-up-container');
+        if (followUpContainer) {
+            // Re-use the logic from addFollowUps but manually since we don't have the closure
+            followUpContainer.innerHTML = '';
+            request.questions.forEach(q => {
+                const btn = document.createElement('button');
+                btn.className = 'follow-up-btn';
+                btn.textContent = q;
+                // Styles are already defined in message.js diff, but let's ensure they are applied
+                Object.assign(btn.style, {
+                    padding: '6px 14px',
+                    borderRadius: '18px',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-sidebar)',
+                    color: 'var(--text-secondary)',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                    whiteSpace: 'nowrap'
+                });
+
+                btn.addEventListener('mouseenter', () => {
+                    btn.style.background = 'var(--btn-hover)';
+                    btn.style.color = 'var(--text-primary)';
+                });
+                btn.addEventListener('mouseleave', () => {
+                    btn.style.background = 'var(--bg-sidebar)';
+                    btn.style.color = 'var(--text-secondary)';
+                });
+                btn.addEventListener('click', () => {
+                    document.dispatchEvent(new CustomEvent('gemini-send-followup', { detail: q }));
+                });
+
+                followUpContainer.appendChild(btn);
+            });
+        }
     }
 
     handleStreamUpdate(request) {
@@ -90,6 +150,25 @@ export class MessageHandler {
 
         // If we don't have a bubble yet, create one
         if (!this.streamingBubble) {
+            // Check if there's a pending "..." bubble from history restore/ephemeral save
+            const aiMsgs = this.ui.historyDiv.querySelectorAll('.msg.ai');
+            let existingBubble = null;
+            if (aiMsgs.length > 0) {
+                const last = aiMsgs[aiMsgs.length - 1];
+                if (last.innerText.trim() === '...') {
+                    existingBubble = last;
+                }
+            }
+
+            if (existingBubble) {
+                // We need to "take over" this bubble.
+                // Since appendMessage returns a controller, we'll just clear it and use it.
+                existingBubble.innerHTML = '';
+                // Re-run appendMessage logic but targeting this div is complex,
+                // so we'll just remove it and create a fresh one to get the controller.
+                existingBubble.remove();
+            }
+            
             this.streamingBubble = appendMessage(this.ui.historyDiv, "", 'ai', null, "");
         }
         

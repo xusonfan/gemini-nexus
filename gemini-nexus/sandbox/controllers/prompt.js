@@ -46,6 +46,12 @@ export class PromptController {
         
         this.sessionManager.addMessage(currentId, 'user', text, displayAttachments.length > 0 ? displayAttachments : null);
         
+        // Hide previous follow-up questions
+        const followUpContainers = this.ui.historyDiv.querySelectorAll('.follow-up-container');
+        followUpContainers.forEach(container => {
+            container.style.display = 'none';
+        });
+
         saveSessionsToStorage(this.sessionManager.sessions);
         this.app.sessionFlow.refreshHistoryUI();
 

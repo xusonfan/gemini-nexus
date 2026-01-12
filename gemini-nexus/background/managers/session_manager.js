@@ -15,12 +15,15 @@ export class GeminiSessionManager {
         await this.auth.ensureInitialized();
     }
 
-    async handleSendPrompt(request, onUpdate) {
-        // Cancel previous if exists
-        this.cancelCurrentRequest();
-        
-        this.abortController = new AbortController();
-        const signal = this.abortController.signal;
+    async handleSendPrompt(request, onUpdate, isInternal = false) {
+        // Cancel previous main request if exists, but don't cancel if this is an internal utility task
+        // and don't let internal tasks cancel the main one.
+        let signal = null;
+        if (!isInternal) {
+            this.cancelCurrentRequest();
+            this.abortController = new AbortController();
+            signal = this.abortController.signal;
+        }
 
         try {
             const settings = await getConnectionSettings();
