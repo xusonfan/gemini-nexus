@@ -1,11 +1,11 @@
 
 <div align="center">
   <a href="https://github.com/yeahhe365/gemini-nexus">
-    <img src="https://github.com/user-attachments/assets/5c5c1f06-7fb2-43b7-b467-f08680d76e70" width="160" height="160" alt="Gemini Nexus Logo">
+    <img src="https://github.com/user-attachments/assets/5c5c1f06-7fb2-43b7-b467-f08680d76e70" width="160" height="160" alt="Gemini Nova Logo">
   </a>
 
-  # Gemini Nexus
-  ### 🚀 赋予浏览器原生 AI 灵魂：深度集成 Google Gemini 的全能助手
+  # Gemini Nova
+  ### 🚀 赋予浏览器原生 AI 灵魂：深度集成 Google Gemini 的全能进化助手
 
   <p>
     <img src="https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white" alt="Gemini">
@@ -24,7 +24,9 @@
 
 ## 🌟 项目简介
 
-**Gemini Nexus** 是一款深度集成 Google Gemini 能力的 Chrome 扩展程序。它不仅仅是一个侧边栏插件，而是通过注入式的**悬浮工具栏**、强大的**图像 AI 处理**以及前沿的**浏览器控制协议 (MCP)**，将 AI 的触角伸向网页浏览的每一个交互细节。
+**Gemini Nova** 是一款深度集成 Google Gemini 能力的 Chrome 扩展程序。它不仅仅是一个侧边栏插件，而是通过注入式的**悬浮工具栏**、强大的**图像 AI 处理**以及前沿的**浏览器控制协议 (MCP)**，将 AI 的触角伸向网页浏览的每一个交互细节。
+
+> 💡 **二次开发说明**：本项目（Gemini Nova）基于开源项目 [yeahhe365/gemini-nexus](https://github.com/yeahhe365/gemini-nexus) 进行深度二次开发与功能增强，在原有基础上优化了交互逻辑并引入了多项智能化新特性。
 
 ---
 
@@ -52,15 +54,14 @@
 | **脚本执行** | `evaluate_script` | 在网页 Context 中运行自定义 JavaScript |
 
 ---
-以下是为您翻译的中文内容：
 
 ## 外部 MCP 工具（远程服务器）
 
-Gemini Nexus 可以选择连接到外部 MCP 服务器（通过 **SSE**、**可流式传输的 HTTP** 或 **WebSocket**），并在现有的工具循环（Tool Loop）中执行其工具。
+Gemini Nova 可以选择连接到外部 MCP 服务器（通过 **SSE**、**可流式传输的 HTTP** 或 **WebSocket**），并在现有的工具循环（Tool Loop）中执行其工具。
 
 ### 推荐方案：使用本地代理（支持 stdio 服务器）
 
-由于 Chrome 扩展程序无法直接运行基于 stdio 的 MCP 服务器，推荐的设置方案是运行一个本地代理（例如 [MCP SuperAssistant](https://github.com/srbhptl39/MCP-SuperAssistant) Proxy）。在代理中配置您的 MCP 服务器（包括 stdio 服务器），然后将 Gemini Nexus 连接到该代理端点。
+由于 Chrome 扩展程序无法直接运行基于 stdio 的 MCP 服务器，推荐的设置方案是运行一个本地代理（例如 [MCP SuperAssistant](https://github.com/srbhptl39/MCP-SuperAssistant) Proxy）。在代理中配置您的 MCP 服务器（包括 stdio 服务器），然后将 Gemini Nova 连接到该代理端点。
 
 常见的代理端点如下：
 
@@ -92,30 +93,18 @@ Gemini Nexus 可以选择连接到外部 MCP 服务器（通过 **SSE**、**可�
 
 ## ✨ 核心功能亮点
 
-*   **💬 智能侧边栏**：基于 `sidePanel` API，提供毫秒级唤起的对话空间，支持全文搜索历史记录。
-*   **🪄 划词工具栏**：注入 Content Script，选中文字即刻进行**翻译、总结、重写**，支持一键回填表单。
+*   **💬 智能侧边栏**：基于 `sidePanel` API，提供毫秒级唤起的对话空间，支持全文搜索历史记录与**批量管理**。
+*   **🪄 划词工具栏**：注入 Content Script，选中文字即刻进行**翻译、总结、重写**，支持窗口**固定**、**透明度调节**及一键回填表单。
+*   **🧠 智能交互增强**：
+    *   **自动追问**：AI 根据上下文自动生成后续追问建议。
+    *   **智能总结**：支持**网页一键总结**，并可根据对话内容自动生成标题。
+    *   **流式动画**：内置流式传输加载动画，提供更平滑的响应体验。
 *   **🖼️ 图像 AI 处理**：
     *   **OCR & 截图翻译**：集成 Canvas 裁剪技术，框选图片区域即刻提取文字并翻译。
     *   **浮窗探测**：自动识别网页图片并生成悬浮 AI 分析按钮。
     *   **水印消除**：内置 `watermark_remover.js` 算法，显著提升生成图像的可视化质量。
 *   **🛡️ 安全渲染**：所有 Markdown、LaTeX 公式及代码块均在 `sandbox` 隔离环境中渲染，确保主页面安全。
 
----
-
-## ❤️ 赞助与支持
-
-如果您觉得 Gemini Nexus 提升了您的工作效率，欢迎请开发者喝杯咖啡，支持项目的持续维护！☕
-
-**赞赏通道（爱发电）：** [https://afdian.com/a/gemini-nexus](https://afdian.com/a/gemini-nexus)
-
-<div align="center">
-  <a href="https://afdian.com/a/gemini-nexus" target="_blank">
-    <img src="https://github.com/user-attachments/assets/b833ac9b-ca8d-4ff6-b83c-f3b2b0094aa8" width="200" alt="afdian-yeahhe">
-  </a>
-  <p><b>扫描上方二维码或 <a href="https://afdian.com/a/gemini-nexus" target="_blank">点击此处</a> 前往爱发电支持我</b></p>
-</div>
-
----
 
 ## 🚀 快速开始
 
@@ -129,6 +118,7 @@ Gemini Nexus 可以选择连接到外部 MCP 服务器（通过 **SSE**、**可�
 *   **架构协议**：Chrome MV3 + Browser Control Protocol
 *   **核心库**：Marked.js, KaTeX, Highlight.js
 
-## 📄 许可证
+## 📄 许可证与致谢
 
-本项目基于 **MIT License** 开源。
+*   本项目基于 **MIT License** 开源。
+*   **致谢**：感谢原项目 [gemini-nexus](https://github.com/yeahhe365/gemini-nexus) 提供的优秀基础架构。根据 MIT 协议要求，本项目完整保留了原作者的版权声明。
