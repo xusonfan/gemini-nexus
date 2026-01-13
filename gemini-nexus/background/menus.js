@@ -18,7 +18,8 @@ export function setupContextMenus(imageHandler) {
             summarizePage: isZh ? "总结网页" : "Summarize Page",
             ocr: isZh ? "OCR (文字提取)" : "OCR (Extract Text)",
             screenshotTranslate: isZh ? "截图翻译" : "Screenshot Translate",
-            snip: isZh ? "区域截图 (Snip)" : "Snip (Capture Area)"
+            snip: isZh ? "区域截图 (Snip)" : "Snip (Capture Area)",
+            openBridge: isZh ? "打开 Bridge 页面" : "Open Bridge Page"
         };
 
         chrome.contextMenus.create({
@@ -68,6 +69,12 @@ export function setupContextMenus(imageHandler) {
             title: titles.snip,
             contexts: ["all"]
         });
+
+        chrome.contextMenus.create({
+            id: "menu-open-bridge",
+            title: titles.openBridge,
+            contexts: ["action"]
+        });
     });
 
     // Handle Context Menu Clicks
@@ -99,10 +106,15 @@ export function setupContextMenus(imageHandler) {
             if (menuId === "menu-screenshot-translate") mode = "screenshot_translate";
             
             // 通知内容脚本准备截图
-            chrome.tabs.sendMessage(tab.id, { 
-                action: "CONTEXT_MENU_ACTION", 
-                mode: mode 
+            chrome.tabs.sendMessage(tab.id, {
+                action: "CONTEXT_MENU_ACTION",
+                mode: mode
             }).catch(() => {});
+        } else if (menuId === "menu-open-bridge") {
+            // 打开 Bridge 页面
+            chrome.tabs.create({
+                url: chrome.runtime.getURL("sidepanel/index.html")
+            });
         }
     });
 }
