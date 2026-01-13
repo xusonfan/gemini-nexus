@@ -350,3 +350,44 @@ body.layout-wide .msg.ai {
         padding-bottom: 120px;
     }
 }
+
+/* Scroll to Bottom Button */
+.scroll-bottom-btn {
+    position: fixed;
+    bottom: 140px; /* Above the input area */
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.scroll-bottom-btn.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.scroll-bottom-btn:hover {
+    background: var(--btn-hover);
+    color: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Adjust for wide layout */
+body.layout-wide .scroll-bottom-btn {
+    margin-left: 150px; /* Offset by half of sidebar width to stay centered in chat area */
+}

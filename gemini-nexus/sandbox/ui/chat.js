@@ -11,6 +11,7 @@ export class ChatController {
         this.inputFn = elements.inputFn;
         this.sendBtn = elements.sendBtn;
         this.pageContextBtn = document.getElementById('page-context-btn');
+        this.scrollBottomBtn = document.getElementById('scroll-bottom-btn');
 
         this.initListeners();
     }
@@ -22,8 +23,25 @@ export class ChatController {
                 const { scrollTop, scrollHeight, clientHeight } = this.historyDiv;
                 // If user scrolls up, disable auto-scroll.
                 // We use a small buffer (5px) to account for precision issues.
-                const isAtBottom = scrollHeight - scrollTop - clientHeight < 5;
+                const isAtBottom = scrollHeight - scrollTop - clientHeight < 50; // 增加缓冲区
                 this.isUserScrolling = !isAtBottom;
+
+                // 显示/隐藏滚动到底部按钮
+                if (this.scrollBottomBtn) {
+                    if (this.isUserScrolling && scrollTop > 100) {
+                        this.scrollBottomBtn.classList.add('visible');
+                    } else {
+                        this.scrollBottomBtn.classList.remove('visible');
+                    }
+                }
+            });
+        }
+
+        // 滚动到底部按钮点击事件
+        if (this.scrollBottomBtn) {
+            this.scrollBottomBtn.addEventListener('click', () => {
+                this.scrollToBottom(true);
+                this.scrollBottomBtn.classList.remove('visible');
             });
         }
 
@@ -77,7 +95,16 @@ export class ChatController {
             if (this.isUserScrolling && !force) return;
 
             setTimeout(() => {
-                // Scroll to the start of the last message to ensure visibility from the beginning
+                // If forced (e.g. clicking the scroll button), scroll to absolute bottom
+                if (force) {
+                    this.historyDiv.scrollTo({
+                        top: this.historyDiv.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                    return;
+                }
+
+                // Default behavior: Scroll to the start of the last message
                 const lastMsg = this.historyDiv.lastElementChild;
                 if (lastMsg) {
                     this.historyDiv.scrollTo({
