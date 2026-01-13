@@ -6,6 +6,7 @@ import { copyToClipboard } from '../render/clipboard.js';
 export class ChatController {
     constructor(elements) {
         this.historyDiv = elements.historyDiv;
+        this.isUserScrolling = false;
         this.statusDiv = elements.statusDiv;
         this.inputFn = elements.inputFn;
         this.sendBtn = elements.sendBtn;
@@ -15,6 +16,17 @@ export class ChatController {
     }
 
     initListeners() {
+        // Scroll Listener to detect manual scrolling
+        if (this.historyDiv) {
+            this.historyDiv.addEventListener('scroll', () => {
+                const { scrollTop, scrollHeight, clientHeight } = this.historyDiv;
+                // If user scrolls up, disable auto-scroll.
+                // We use a small buffer (5px) to account for precision issues.
+                const isAtBottom = scrollHeight - scrollTop - clientHeight < 5;
+                this.isUserScrolling = !isAtBottom;
+            });
+        }
+
         // Auto-resize Textarea
         if (this.inputFn) {
             this.inputFn.addEventListener('input', () => {
@@ -60,8 +72,10 @@ export class ChatController {
         if (this.historyDiv) this.historyDiv.innerHTML = '';
     }
 
-    scrollToBottom() {
+    scrollToBottom(force = false) {
         if (this.historyDiv) {
+            if (this.isUserScrolling && !force) return;
+
             setTimeout(() => {
                 // Scroll to the start of the last message to ensure visibility from the beginning
                 const lastMsg = this.historyDiv.lastElementChild;

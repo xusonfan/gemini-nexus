@@ -15,6 +15,23 @@
         constructor(elements) {
             this.elements = elements;
             this.isPinned = false;
+            this.isUserScrolling = false;
+            this.initScrollListener();
+        }
+
+        initScrollListener() {
+            const scrollContainer = this.elements.windowScrollContainer;
+            if (scrollContainer) {
+                scrollContainer.addEventListener('scroll', () => {
+                    // If user scrolls away from top, mark as user scrolling
+                    // We use a small threshold (5px)
+                    if (scrollContainer.scrollTop > 5) {
+                        this.isUserScrolling = true;
+                    } else {
+                        this.isUserScrolling = false;
+                    }
+                });
+            }
         }
 
         togglePin() {
@@ -63,6 +80,7 @@
             
             this.elements.askInput.value = '';
             this.elements.resultText.innerHTML = '';
+            this.isUserScrolling = false; // Reset on new show
             
             // Hide Footer initially
             if (this.elements.windowFooter) this.elements.windowFooter.classList.add('hidden');
@@ -112,8 +130,18 @@
 
             const scrollContainer = this.elements.windowScrollContainer;
             if (scrollContainer) {
-                // Always keep scroll at top to allow reading from the beginning
-                scrollContainer.scrollTop = 0;
+                if (isStreaming) {
+                    // If user hasn't scrolled down manually, keep it at top
+                    if (!this.isUserScrolling) {
+                        scrollContainer.scrollTop = 0;
+                    }
+                } else {
+                    // Final result: if user is still at top, keep it there.
+                    // If they scrolled, respect their position.
+                    if (!this.isUserScrolling) {
+                        scrollContainer.scrollTop = 0;
+                    }
+                }
             }
         }
 

@@ -181,6 +181,7 @@ export class MessageHandler {
         
         // Update content if text or thoughts exist
         this.streamingBubble.update(request.text, request.thoughts);
+        this.ui.scrollToBottom();
         
         // Ensure UI state reflects generation
         if (!this.app.isGenerating) {
