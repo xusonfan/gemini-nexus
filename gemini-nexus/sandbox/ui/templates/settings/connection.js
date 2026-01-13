@@ -40,14 +40,32 @@ export const ConnectionSettingsTemplate = `
                 <label data-i18n="apiKey" style="font-weight: 500; display: block; margin-bottom: 2px;">API Key</label>
                 <input type="password" id="openai-api-key" class="shortcut-input" style="width: 100%; text-align: left; box-sizing: border-box;" data-i18n-placeholder="apiKeyPlaceholder" placeholder="sk-...">
             </div>
-            <div>
-                <label style="font-weight: 500; display: block; margin-bottom: 2px;">Model IDs (Comma separated)</label>
-                <input type="text" id="openai-model" class="shortcut-input" style="width: 100%; text-align: left; box-sizing: border-box;" placeholder="e.g. gpt-4o, claude-3-5-sonnet">
+            
+            <div style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: rgba(0,0,0,0.03); border-radius: 8px; border: 1px solid rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <label style="font-weight: 600; font-size: 13px;" data-i18n="modelSelection">Model Selection</label>
+                    <button id="openai-refresh-models" class="tool-btn" style="padding: 4px 10px; font-size: 12px;" type="button" data-i18n="fetchModels">Fetch Models</button>
+                </div>
+                
+                <div id="openai-fetch-status" style="font-size: 11px; opacity: 0.8; min-height: 14px;"></div>
+
+                <div id="openai-model-selection-area" style="display: none; flex-direction: column; gap: 10px;">
+                    <div style="font-size: 11px; opacity: 0.8; line-height: 1.5; padding: 8px; background: rgba(0,0,0,0.02); border-radius: 6px; border-left: 3px solid var(--btn-primary);" data-i18n="modelSelectionGuide">
+                        • <b>Main Models</b> (Left checkbox): For daily chat, supports multi-selection and switching in input.<br>
+                        • <b>Summary Model</b> (Right button): For generating chat summaries and titles, faster models recommended.
+                    </div>
+
+                    <input type="text" id="openai-model-search" class="shortcut-input" style="width: 100%; text-align: left; box-sizing: border-box; font-size: 12px; padding: 6px 10px;" data-i18n-placeholder="searchModels" placeholder="Search models...">
+                    
+                    <div id="openai-model-list-container" style="max-height: 250px; overflow-y: auto; padding: 4px; background: rgba(255,255,255,0.3); border: 1px solid var(--border-color); border-radius: 6px; flex-direction: column; gap: 2px; display: flex;">
+                    </div>
+                </div>
+
+                <!-- Hidden inputs to maintain compatibility with existing save logic -->
+                <input type="hidden" id="openai-model">
+                <input type="hidden" id="summary-model-input">
             </div>
-            <div>
-                <label data-i18n="summaryModelId" style="font-weight: 500; display: block; margin-bottom: 2px;">Summary Model ID</label>
-                <input type="text" id="summary-model-input" class="shortcut-input" style="width: 100%; text-align: left; box-sizing: border-box;" data-i18n-placeholder="summaryModelIdPlaceholder" placeholder="e.g. gemini-1.5-flash">
-            </div>
+            <div id="openai-fetch-status" style="font-size: 11px; opacity: 0.8; margin-top: -4px;"></div>
         </div>
     </div>
 

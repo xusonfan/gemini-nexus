@@ -275,6 +275,18 @@ export class SettingsController {
         );
     }
     
+    updateOpenAIModelsResult(result) {
+        if (!this.view || !this.view.connection || typeof this.view.connection.setOpenAIModelsList !== 'function') return;
+
+        if (!result || result.ok !== true) {
+            const err = result && result.error ? result.error : 'Failed to fetch models';
+            this.view.connection.setOpenAIFetchStatus(`Failed: ${err}`, true);
+            return;
+        }
+
+        this.view.connection.setOpenAIModelsList(result.models || []);
+    }
+
     updateSidebarBehavior(behavior) {
         this.view.setSidebarBehavior(behavior);
     }

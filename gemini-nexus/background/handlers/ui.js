@@ -256,6 +256,59 @@ export class UIMessageHandler {
             return true;
         }
         
+        // --- OPENAI (External Models) ---
+        if (request.action === "OPENAI_LIST_MODELS") {
+            (async () => {
+                try {
+                    let baseUrl = (request.baseUrl || "").trim();
+                    const apiKey = (request.apiKey || "").trim();
+                    if (!baseUrl) throw new Error("Base URL is empty");
+
+                    // Normalize Base URL
+                    baseUrl = baseUrl.replace(/\/$/, "");
+                    const url = `${baseUrl}/models`;
+
+                    const headers = {
+                        'Accept': 'application/json'
+                    };
+                    if (apiKey) {
+                        headers['Authorization'] = `Bearer ${apiKey}`;
+                    }
+
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: headers
+                    });
+
+                    if (!response.ok) {
+                        let errorText = await response.text();
+                        try {
+                            const errJson = JSON.parse(errorText);
+                            if (errJson.error && errJson.error.message) errorText = errJson.error.message;
+                        } catch (e) {}
+                        throw new Error(`API Error (${response.status}): ${errorText}`);
+                    }
+
+                    const data = await response.json();
+                    const models = Array.isArray(data.data) ? data.data : [];
+
+                    sendResponse({
+                        action: "OPENAI_MODELS_RESULT",
+                        ok: true,
+                        models: models
+                    });
+                } catch (e) {
+                    sendResponse({
+                        action: "OPENAI_MODELS_RESULT",
+                        ok: false,
+                        error: e.message || String(e),
+                        models: []
+                    });
+                }
+            })();
+            return true;
+        }
+
         // --- TAB MANAGEMENT ---
         
         if (request.action === "GET_OPEN_TABS") {

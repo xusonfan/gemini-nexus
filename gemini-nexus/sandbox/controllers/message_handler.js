@@ -30,6 +30,13 @@ export class MessageHandler {
             return;
         }
 
+        if (request.action === "OPENAI_MODELS_RESULT") {
+            if (this.ui && this.ui.settings && typeof this.ui.settings.updateOpenAIModelsResult === 'function') {
+                this.ui.settings.updateOpenAIModelsResult(request);
+            }
+            return;
+        }
+
         // 0. Stream Update
         if (request.action === "GEMINI_STREAM_UPDATE") {
             this.handleStreamUpdate(request);

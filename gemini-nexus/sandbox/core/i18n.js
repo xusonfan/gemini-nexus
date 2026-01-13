@@ -52,6 +52,10 @@ export const translations = {
         "modelIdPlaceholder": "e.g. gpt-4o, claude-3-5-sonnet",
         "summaryModelId": "Summary Model ID",
         "summaryModelIdPlaceholder": "e.g. gemini-1.5-flash",
+        "modelSelection": "Model Selection",
+        "fetchModels": "Fetch Models",
+        "searchModels": "Search models...",
+        "modelSelectionGuide": "• Main Models (Left checkbox): For daily chat, supports multi-selection and switching in input.\n• Summary Model (Right button): For generating chat summaries and titles, faster models recommended.",
         "textSelection": "Text Selection Toolbar",
         "textSelectionDesc": "Show floating toolbar when selecting text.",
         "imageToolsToggle": "Show Image Tools Button",
@@ -186,6 +190,10 @@ export const translations = {
         "modelIdPlaceholder": "例如 gpt-4o, claude-3-5-sonnet",
         "summaryModelId": "轻量模型 ID",
         "summaryModelIdPlaceholder": "例如 gemini-2.5-flash-lite",
+        "modelSelection": "模型选择",
+        "fetchModels": "获取模型列表",
+        "searchModels": "搜索模型...",
+        "modelSelectionGuide": "• 主模型 (左侧勾选)：用于日常对话，支持多选并在聊天框切换。\n• 轻量模型 (右侧按钮)：用于生成对话摘要和标题，建议选较快的模型。",
         "textSelection": "划词工具栏",
         "textSelectionDesc": "选中网页文本时显示悬浮工具栏。",
         "imageToolsToggle": "显示图片工具按钮",
@@ -307,7 +315,13 @@ export function applyTranslations() {
     elements.forEach(el => {
         const key = el.getAttribute('data-i18n');
         const text = t(key);
-        if (text) el.textContent = text;
+        if (text) {
+            if (key === 'modelSelectionGuide') {
+                el.innerHTML = text.replace(/\n/g, '<br>');
+            } else {
+                el.textContent = text;
+            }
+        }
     });
     
     // 2. Placeholders

@@ -1,6 +1,7 @@
 
 // sandbox/ui/settings/sections/connection.js
 import { sendToBackground } from '../../../../lib/messaging.js';
+import { getLanguagePreference, resolveLanguage } from '../../../core/i18n.js';
 
 export class ConnectionSection {
     constructor() {
@@ -52,6 +53,11 @@ export class ConnectionSection {
             openaiBaseUrl: get('openai-base-url'),
             openaiApiKey: get('openai-api-key'),
             openaiModel: get('openai-model'),
+            openaiRefreshModels: get('openai-refresh-models'),
+            openaiFetchStatus: get('openai-fetch-status'),
+            openaiModelSearch: get('openai-model-search'),
+            openaiModelSelectionArea: get('openai-model-selection-area'),
+            openaiModelListContainer: get('openai-model-list-container'),
             summaryModelInput: get('summary-model-input'),
 
             // MCP Fields
@@ -249,6 +255,165 @@ export class ConnectionSection {
                     url: server.url || ''
                 });
             });
+        }
+
+        const { openaiRefreshModels } = this.elements;
+        if (openaiRefreshModels) {
+            openaiRefreshModels.addEventListener('click', () => {
+                const { openaiBaseUrl, openaiApiKey } = this.elements;
+                const baseUrl = (openaiBaseUrl ? openaiBaseUrl.value : '').trim();
+                const apiKey = (openaiApiKey ? openaiApiKey.value : '').trim();
+
+                if (!baseUrl) {
+                    this.setOpenAIFetchStatus('Please enter Base URL first', true);
+                    return;
+                }
+
+                this.setOpenAIFetchStatus('Fetching models...');
+                sendToBackground({
+                    action: 'OPENAI_LIST_MODELS',
+                    baseUrl,
+                    apiKey
+                });
+            });
+        }
+
+        const { openaiModelSearch } = this.elements;
+        if (openaiModelSearch) {
+            openaiModelSearch.addEventListener('input', () => {
+                this._renderOpenAIModels();
+            });
+        }
+    }
+
+    setOpenAIFetchStatus(text, isError = false) {
+        const { openaiFetchStatus } = this.elements;
+        if (!openaiFetchStatus) return;
+        
+        // If text is a key, it might be translated, but here we usually pass dynamic status
+        openaiFetchStatus.textContent = text || '';
+        openaiFetchStatus.style.color = isError ? '#b00020' : '';
+    }
+
+    setOpenAIModelsList(models) {
+        this.cachedOpenAIModels = Array.isArray(models) ? models : [];
+        this._renderOpenAIModels();
+    }
+
+    _renderOpenAIModels() {
+        let currentLang = 'en';
+        try {
+            currentLang = resolveLanguage(getLanguagePreference());
+        } catch (e) {}
+        
+        const {
+            openaiModel,
+            summaryModelInput,
+            openaiModelListContainer,
+            openaiModelSearch,
+            openaiModelSelectionArea
+        } = this.elements;
+        
+        if (!openaiModelListContainer || !this.cachedOpenAIModels) return;
+
+        const models = this.cachedOpenAIModels;
+        const modelIds = models.map(m => m.id).filter(Boolean).sort();
+        const search = (openaiModelSearch ? openaiModelSearch.value : '').toLowerCase().trim();
+        
+        if (modelIds.length > 0) {
+            this.setOpenAIFetchStatus(`Fetched ${modelIds.length} models.`);
+            if (openaiModelSelectionArea) openaiModelSelectionArea.style.display = 'flex';
+            
+            openaiModelListContainer.innerHTML = '';
+            
+            const currentModels = new Set(openaiModel.value.split(',').map(m => m.trim()).filter(Boolean));
+            const currentSummary = (summaryModelInput.value || '').trim();
+
+            const filteredIds = search
+                ? modelIds.filter(id => id.toLowerCase().includes(search))
+                : modelIds;
+
+            filteredIds.forEach(id => {
+                const item = document.createElement('div');
+                item.style.display = 'flex';
+                item.style.alignItems = 'center';
+                item.style.justifyContent = 'space-between';
+                item.style.gap = '8px';
+                item.style.padding = '4px 6px';
+                item.style.borderRadius = '4px';
+                item.style.transition = 'background 0.1s';
+
+                // Left: Checkbox + Name (for Model IDs)
+                const left = document.createElement('label');
+                left.style.display = 'flex';
+                left.style.alignItems = 'center';
+                left.style.gap = '8px';
+                left.style.flex = '1';
+                left.style.cursor = 'pointer';
+                left.style.fontSize = '12px';
+                left.style.overflow = 'hidden';
+
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.checked = currentModels.has(id);
+                cb.style.margin = '0';
+                
+                cb.addEventListener('change', () => {
+                    const modelsSet = new Set(openaiModel.value.split(',').map(m => m.trim()).filter(Boolean));
+                    if (cb.checked) {
+                        modelsSet.add(id);
+                    } else {
+                        modelsSet.delete(id);
+                    }
+                    openaiModel.value = Array.from(modelsSet).join(', ');
+                    openaiModel.dispatchEvent(new Event('input'));
+                });
+
+                const span = document.createElement('span');
+                span.textContent = id;
+                span.style.overflow = 'hidden';
+                span.style.textOverflow = 'ellipsis';
+                span.style.whiteSpace = 'nowrap';
+
+                left.appendChild(cb);
+                left.appendChild(span);
+
+                // Right: "Summary" Radio-like button
+                const setSummaryBtn = document.createElement('button');
+                setSummaryBtn.textContent = currentLang === 'zh' ? '轻量' : 'Summary';
+                setSummaryBtn.className = 'tool-btn';
+                setSummaryBtn.style.padding = '2px 6px';
+                setSummaryBtn.style.fontSize = '10px';
+                
+                const isSummary = currentSummary === id;
+                setSummaryBtn.style.opacity = isSummary ? '1' : '0.4';
+                if (isSummary) {
+                    setSummaryBtn.style.background = 'var(--btn-primary)';
+                    setSummaryBtn.style.color = '#fff';
+                }
+
+                setSummaryBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    summaryModelInput.value = id;
+                    summaryModelInput.dispatchEvent(new Event('input'));
+                    this._renderOpenAIModels(); // Rerender to update button states
+                });
+
+                item.appendChild(left);
+                item.appendChild(setSummaryBtn);
+                
+                item.addEventListener('mouseenter', () => item.style.background = 'rgba(255,255,255,0.1)');
+                item.addEventListener('mouseleave', () => item.style.background = 'transparent');
+
+                openaiModelListContainer.appendChild(item);
+            });
+
+            if (filteredIds.length === 0) {
+                openaiModelListContainer.innerHTML = `<div style="font-size: 11px; opacity: 0.6; padding: 10px; text-align: center;">${currentLang === 'zh' ? '未找到匹配模型' : 'No matches found'}</div>`;
+            }
+        } else {
+            this.setOpenAIFetchStatus('No models found', true);
+            if (openaiModelSelectionArea) openaiModelSelectionArea.style.display = 'none';
         }
     }
 
