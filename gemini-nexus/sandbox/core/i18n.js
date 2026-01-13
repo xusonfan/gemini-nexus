@@ -139,6 +139,9 @@ export const translations = {
         "selectAll": "Select All",
         "deleteSelected": "Delete Selected ({count})",
         "cancelBatch": "Cancel",
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "previousDays": "{count} days ago",
     },
     zh: {
         "mcpTools": "外部 MCP 工具",
@@ -277,6 +280,9 @@ export const translations = {
         "selectAll": "全选",
         "deleteSelected": "删除选中 ({count})",
         "cancelBatch": "取消",
+        "today": "今天",
+        "yesterday": "昨天",
+        "previousDays": "{count} 天前",
     }
 };
 

@@ -9,7 +9,7 @@ export const SidebarTemplate = `
             </div>
         </div>
         
-        <div class="history-list-label">
+        <div class="history-list-label" style="display: none;">
             <span data-i18n="recentLabel">Recent</span>
             <button id="batch-manage-btn" class="batch-btn-link" data-i18n="batchManage">Batch Manage</button>
         </div>

@@ -198,6 +198,38 @@ export class SidebarController {
         }
     }
 
+    _formatDate(timestamp) {
+        if (!timestamp) return "";
+        const date = new Date(timestamp);
+        const now = new Date();
+        
+        // Reset hours to compare dates only
+        const d1 = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const d2 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const diffDays = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) return t('today') || "Today";
+        if (diffDays === 1) return t('yesterday') || "Yesterday";
+        if (diffDays < 7) return t('previousDays').replace('{count}', diffDays) || `${diffDays} days ago`;
+        
+        return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined });
+    }
+
+    _getTimeString(timestamp) {
+        if (!timestamp) return "";
+        return new Date(timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+
+    _groupSessionsByDate(sessions) {
+        const groups = {};
+        sessions.forEach(s => {
+            const label = this._formatDate(s.timestamp);
+            if (!groups[label]) groups[label] = [];
+            groups[label].push(s);
+        });
+        return groups;
+    }
+
     _renderDOM(sessions) {
         this.listEl.innerHTML = '';
         
@@ -212,62 +244,95 @@ export class SidebarController {
             return;
         }
 
-        sessions.forEach(s => {
-            const item = document.createElement('div');
-            item.className = `history-item ${s.id === this.currentSessionId ? 'active' : ''} ${this.isBatchMode ? 'batch-mode' : ''}`;
-            
-            if (this.isBatchMode) {
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.className = 'history-item-checkbox';
-                checkbox.checked = this.selectedSessionIds.has(s.id);
-                checkbox.onclick = (e) => e.stopPropagation();
-                checkbox.onchange = (e) => {
-                    if (e.target.checked) {
-                        this.selectedSessionIds.add(s.id);
-                    } else {
-                        this.selectedSessionIds.delete(s.id);
-                    }
-                    this.updateBatchUI();
-                };
-                item.appendChild(checkbox);
+        const groups = this._groupSessionsByDate(sessions);
 
-                item.onclick = () => {
-                    if (this.selectedSessionIds.has(s.id)) {
-                        this.selectedSessionIds.delete(s.id);
-                    } else {
-                        this.selectedSessionIds.add(s.id);
-                    }
-                    this.updateBatchUI();
-                    this._renderDOM(sessions);
-                };
-            } else {
-                item.onclick = () => {
-                    this.itemCallbacks.onSwitch(s.id);
-                    if (window.innerWidth < 600) {
-                        this.close();
-                    }
-                };
+        Object.keys(groups).forEach((label, index) => {
+            const groupHeader = document.createElement('div');
+            groupHeader.className = 'history-group-header';
+            
+            const labelSpan = document.createElement('span');
+            labelSpan.textContent = label;
+            groupHeader.appendChild(labelSpan);
+
+            if (index === 0) {
+                const batchBtn = document.createElement('button');
+                batchBtn.className = 'batch-btn-link';
+                batchBtn.textContent = t('batchManage');
+                batchBtn.style.marginLeft = 'auto';
+                batchBtn.style.display = this.isBatchMode ? 'none' : 'block';
+                batchBtn.onclick = () => this.enterBatchMode();
+                groupHeader.appendChild(batchBtn);
             }
-            
-            const titleSpan = document.createElement('span');
-            titleSpan.className = 'history-title';
-            titleSpan.textContent = s.title;
-            
-            const delBtn = document.createElement('span');
-            delBtn.className = 'history-delete';
-            delBtn.textContent = '✕';
-            delBtn.title = t('delete');
-            delBtn.onclick = (e) => {
-                e.stopPropagation();
-                if(confirm(t('deleteChatConfirm'))) {
-                    this.itemCallbacks.onDelete(s.id);
-                }
-            };
 
-            item.appendChild(titleSpan);
-            item.appendChild(delBtn);
-            this.listEl.appendChild(item);
+            this.listEl.appendChild(groupHeader);
+
+            groups[label].forEach(s => {
+                const item = document.createElement('div');
+                item.className = `history-item ${s.id === this.currentSessionId ? 'active' : ''} ${this.isBatchMode ? 'batch-mode' : ''}`;
+                
+                if (this.isBatchMode) {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'history-item-checkbox';
+                    checkbox.checked = this.selectedSessionIds.has(s.id);
+                    checkbox.onclick = (e) => e.stopPropagation();
+                    checkbox.onchange = (e) => {
+                        if (e.target.checked) {
+                            this.selectedSessionIds.add(s.id);
+                        } else {
+                            this.selectedSessionIds.delete(s.id);
+                        }
+                        this.updateBatchUI();
+                    };
+                    item.appendChild(checkbox);
+
+                    item.onclick = () => {
+                        if (this.selectedSessionIds.has(s.id)) {
+                            this.selectedSessionIds.delete(s.id);
+                        } else {
+                            this.selectedSessionIds.add(s.id);
+                        }
+                        this.updateBatchUI();
+                        this._renderDOM(sessions);
+                    };
+                } else {
+                    item.onclick = () => {
+                        this.itemCallbacks.onSwitch(s.id);
+                        if (window.innerWidth < 600) {
+                            this.close();
+                        }
+                    };
+                }
+                
+                const contentWrapper = document.createElement('div');
+                contentWrapper.className = 'history-content-wrapper';
+
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'history-title';
+                titleSpan.textContent = s.title;
+                
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'history-time';
+                timeSpan.textContent = this._getTimeString(s.timestamp);
+
+                contentWrapper.appendChild(titleSpan);
+                contentWrapper.appendChild(timeSpan);
+
+                const delBtn = document.createElement('span');
+                delBtn.className = 'history-delete';
+                delBtn.textContent = '✕';
+                delBtn.title = t('delete');
+                delBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    if(confirm(t('deleteChatConfirm'))) {
+                        this.itemCallbacks.onDelete(s.id);
+                    }
+                };
+
+                item.appendChild(contentWrapper);
+                item.appendChild(delBtn);
+                this.listEl.appendChild(item);
+            });
         });
     }
 }

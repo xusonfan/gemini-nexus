@@ -206,6 +206,21 @@ body.layout-wide .sidebar-overlay {
     overflow-y: auto;
     padding: 0 12px;
     margin-bottom: 8px;
+    scroll-padding-top: 36px;
+}
+
+.history-group-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg-sidebar);
+    padding: 12px 12px 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 /* Scrollbar styling for sidebar */
@@ -218,9 +233,9 @@ body.layout-wide .sidebar-overlay {
 
 /* History Items */
 .history-item {
-    padding: 10px 16px;
+    padding: 8px 16px;
     margin-bottom: 2px;
-    border-radius: 20px; /* Pill shape */
+    border-radius: 12px;
     cursor: pointer;
     display: flex;
     justify-content: space-between;
@@ -249,12 +264,30 @@ body.layout-wide .sidebar-overlay {
     color: #c2e7ff;
 }
 
+.history-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex: 1;
+}
+
 .history-title {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 190px;
-    flex: 1;
+    max-width: 100%;
+    font-size: 14px;
+}
+
+.history-time {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+}
+
+.history-item.active .history-time {
+    color: inherit;
+    opacity: 0.8;
 }
 
 .history-delete {
