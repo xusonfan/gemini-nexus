@@ -188,11 +188,25 @@ ${aiText}`;
                 // We create a session now so it can be resumed in the sidebar.
                 let ephemeralSessionId = request.sessionId;
                 if (!ephemeralSessionId) {
+                    // 强制重置上下文，确保新会话不会携带旧会话的上下文
+                    // 特别是 Web Provider 下的 contextIds 必须清除
+                    await this.sessionManager.resetContext();
+                    
+                    // 强制清除 storage 中的上下文，防止 dispatcher 重新读取
+                    await chrome.storage.local.remove(['geminiContext']);
+
                     try {
                         const mockResult = { text: "...", status: "pending" }; // Restore "..." for initial state
                         const newSession = await saveToHistory(currentPromptText, mockResult, currentFiles);
                         if (newSession) {
                             ephemeralSessionId = newSession.id;
+                            
+                            // 立即通知 UI 切换到新会话，防止流式更新追加到旧会话
+                            chrome.runtime.sendMessage({
+                                action: "SWITCH_SESSION",
+                                sessionId: ephemeralSessionId
+                            }).catch(() => {});
+
                             // Clean up the initial mock message - we'll append the real ones in the loop
                             const { geminiSessions = [] } = await chrome.storage.local.get(['geminiSessions']);
                             const sIdx = geminiSessions.findIndex(s => s.id === ephemeralSessionId);

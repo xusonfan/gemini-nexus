@@ -342,6 +342,10 @@
             this.ui.showLoading(this.ui.t.loading.summarizePage);
             this.ui.setInputValue(this.ui.t.inputs.summarizePage);
 
+            // 重置会话状态，确保总结内容不会追加到旧对话
+            this.lastSessionId = null;
+            this.currentSelection = "";
+
             const msg = {
                 action: "QUICK_ASK",
                 text: this.ui.t.prompts.summarizePage,
