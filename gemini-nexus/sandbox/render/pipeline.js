@@ -9,9 +9,9 @@ import { MathHandler } from './math_utils.js';
  */
 export function transformMarkdown(text) {
     if (typeof marked === 'undefined') {
-        // Library loads asynchronously; app will rerender when ready.
-        // Return raw text in the meantime without polluting console.
-        return text;
+        // 库异步加载中；如果尚未加载，返回空字符串以避免原生 Markdown 闪烁
+        // 应用在 marked 加载完成后会触发重新渲染
+        return '';
     }
 
     const mathHandler = new MathHandler();

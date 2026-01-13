@@ -25,7 +25,7 @@ export function renderContent(contentDiv, text, role) {
             });
         }
     } else {
-        // User message OR fallback if marked not loaded yet
+        // 用户消息
         contentDiv.innerText = text;
     }
 }
