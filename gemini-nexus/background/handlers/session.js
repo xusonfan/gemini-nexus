@@ -15,7 +15,7 @@ export class SessionMessageHandler {
     handle(request, sender, sendResponse) {
         // --- PROMPT EXECUTION ---
         if (request.action === "SEND_PROMPT") {
-            return this.promptHandler.handle(request, sendResponse);
+            return this.promptHandler.handle(request, sender, sendResponse);
         }
 
         // --- QUICK ASK (CONTENT SCRIPT) ---
