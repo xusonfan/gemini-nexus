@@ -1,5 +1,6 @@
 
 // sandbox/ui/viewer.js
+import { copyToClipboard, copyImageToClipboard } from '../render/clipboard.js';
 
 export class ViewerController {
     constructor() {
@@ -27,6 +28,7 @@ export class ViewerController {
         this.btnZoomIn = document.getElementById('viewer-zoom-in');
         this.btnZoomOut = document.getElementById('viewer-zoom-out');
         this.btnReset = document.getElementById('viewer-reset');
+        this.btnCopy = document.getElementById('viewer-copy');
         this.btnDownload = document.getElementById('viewer-download');
         this.btnClose = document.getElementById('viewer-close');
         this.lblZoom = document.getElementById('viewer-zoom-level');
@@ -51,6 +53,7 @@ export class ViewerController {
         this.btnZoomOut.addEventListener('click', () => this.zoomOut());
         this.btnReset.addEventListener('click', () => this.resetTransform());
         this.btnClose.addEventListener('click', () => this.close());
+        this.btnCopy.addEventListener('click', () => this.copyContent());
         this.btnDownload.addEventListener('click', () => this.downloadImage());
 
         // --- Backdrop Click to Close ---
@@ -82,13 +85,14 @@ export class ViewerController {
             this.viewer.classList.add('visible');
             
             // Mermaid SVG specific adjustment:
-            // If it's a blob SVG, it might need higher initial scale or specific sizing
             if (src.startsWith('blob:')) {
                 this.fullImage.style.width = '90%';
                 this.fullImage.style.height = 'auto';
+                if (this.btnCopy) this.btnCopy.style.display = 'flex';
             } else {
                 this.fullImage.style.width = '';
                 this.fullImage.style.height = '';
+                if (this.btnCopy) this.btnCopy.style.display = 'none';
             }
 
             this.resetTransform();
@@ -168,6 +172,38 @@ export class ViewerController {
     endPan() {
         this.state.panning = false;
         this.container.style.cursor = 'grab';
+    }
+
+    async copyContent() {
+        if (!this.currentData) return;
+        
+        try {
+            // Try to copy as image first if it's a mermaid SVG
+            if (this.currentData.type === 'image/svg+xml') {
+                // We need to find the SVG element. Since it's rendered in fullImage (as src),
+                // we might need to parse the raw data back to an element or use the one from the DOM if available.
+                // However, the easiest way is to use the raw SVG data we already have.
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(this.currentData.data, 'image/svg+xml');
+                const svgElement = doc.documentElement;
+                
+                await copyImageToClipboard(svgElement);
+            } else if (this.currentData.rawCode) {
+                await copyToClipboard(this.currentData.rawCode);
+            }
+            
+            const originalHtml = this.btnCopy.innerHTML;
+            this.btnCopy.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+            setTimeout(() => {
+                this.btnCopy.innerHTML = originalHtml;
+            }, 2000);
+        } catch (err) {
+            console.error("Failed to copy content:", err);
+            // Fallback to code if image copy fails
+            if (this.currentData.rawCode) {
+                await copyToClipboard(this.currentData.rawCode);
+            }
+        }
     }
 
     downloadImage() {

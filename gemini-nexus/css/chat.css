@@ -1,11 +1,71 @@
 
 /* css/chat.css */
 
-.mermaid-wrapper {
-    margin: 1rem 0;
-    padding: 1rem;
-    background: var(--bg-secondary, #f8f9fa);
+.mermaid-container {
+    margin: 16px 0;
     border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary, #f8f9fa);
+    overflow: hidden;
+}
+
+[data-theme="dark"] .mermaid-container {
+    background: #1e1e1e;
+}
+
+.mermaid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-family: sans-serif;
+    user-select: none;
+}
+
+[data-theme="light"] .mermaid-header {
+    background: #e9eef6;
+    border-bottom: 1px solid #e1e3e1;
+}
+
+.mermaid-lang {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    font-weight: 600;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+.copy-mermaid-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.copy-mermaid-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .copy-mermaid-btn:hover {
+    background: rgba(0,0,0,0.05);
+}
+
+.copy-mermaid-btn.copied {
+    color: #4caf50;
+}
+
+.mermaid-wrapper {
+    padding: 1rem;
     overflow-x: auto;
     display: flex;
     justify-content: center;

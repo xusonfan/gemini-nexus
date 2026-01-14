@@ -1,5 +1,6 @@
 // sandbox/render/content.js
 import { transformMarkdown } from './pipeline.js';
+import { copyToClipboard, copyImageToClipboard } from './clipboard.js';
 
 // Helper: Render Markdown/Math/Text into an element
 export function renderContent(contentDiv, text, role) {
@@ -41,9 +42,48 @@ export function renderContent(contentDiv, text, role) {
                         nodes: unrenderedBlocks,
                         suppressErrors: true
                     }).then(() => {
+                        // Add copy handler
+                        const container = contentDiv.closest('.msg.ai') || contentDiv;
+                        const copyBtns = container.querySelectorAll('.copy-mermaid-btn');
+                        copyBtns.forEach(btn => {
+                            if (btn.onclick) return;
+                            btn.onclick = async (e) => {
+                                e.stopPropagation();
+                                
+                                // Find the SVG element
+                                const mermaidContainer = btn.closest('.mermaid-container');
+                                const svg = mermaidContainer ? mermaidContainer.querySelector('.mermaid svg') : null;
+                                
+                                try {
+                                    if (svg) {
+                                        await copyImageToClipboard(svg);
+                                    } else {
+                                        const code = decodeURIComponent(btn.getAttribute('data-code'));
+                                        await copyToClipboard(code);
+                                    }
+                                    
+                                    const originalHtml = btn.innerHTML;
+                                    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span>已复制图片</span>`;
+                                    btn.classList.add('copied');
+                                    setTimeout(() => {
+                                        btn.innerHTML = originalHtml;
+                                        btn.classList.remove('copied');
+                                    }, 2000);
+                                } catch (err) {
+                                    console.error("Failed to copy mermaid image:", err);
+                                    // Fallback to code copy if image copy fails
+                                    const code = decodeURIComponent(btn.getAttribute('data-code'));
+                                    await copyToClipboard(code);
+                                }
+                            };
+                        });
+
                         // Add click handler for zoom
                         mermaidBlocks.forEach(block => {
                             const wrapper = block.closest('.mermaid-wrapper');
+                            const container = block.closest('.mermaid-container');
+                            const rawCode = container ? decodeURIComponent(container.querySelector('.copy-mermaid-btn').getAttribute('data-code')) : '';
+                            
                             const target = wrapper || block;
                             target.style.cursor = 'zoom-in';
                             target.onclick = (e) => {
@@ -62,6 +102,7 @@ export function renderContent(contentDiv, text, role) {
                                         detail: {
                                             url: url,
                                             data: svgData,
+                                            rawCode: rawCode,
                                             type: 'image/svg+xml',
                                             filename: `mermaid-${Date.now()}.svg`
                                         }
@@ -113,8 +154,44 @@ export function initMermaidObserver() {
                     nodes: blocks,
                     suppressErrors: true
                 }).then(() => {
+                    // Add copy handler for observed blocks
+                    blocks.forEach(block => {
+                        const container = block.closest('.mermaid-container');
+                        if (container) {
+                            const btn = container.querySelector('.copy-mermaid-btn');
+                            if (btn && !btn.onclick) {
+                                btn.onclick = async (e) => {
+                                    e.stopPropagation();
+                                    const svg = container.querySelector('.mermaid svg');
+                                    try {
+                                        if (svg) {
+                                            await copyImageToClipboard(svg);
+                                        } else {
+                                            const code = decodeURIComponent(btn.getAttribute('data-code'));
+                                            await copyToClipboard(code);
+                                        }
+                                        const originalHtml = btn.innerHTML;
+                                        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span>已复制图片</span>`;
+                                        btn.classList.add('copied');
+                                        setTimeout(() => {
+                                            btn.innerHTML = originalHtml;
+                                            btn.classList.remove('copied');
+                                        }, 2000);
+                                    } catch (err) {
+                                        console.error("Failed to copy mermaid image:", err);
+                                        const code = decodeURIComponent(btn.getAttribute('data-code'));
+                                        await copyToClipboard(code);
+                                    }
+                                };
+                            }
+                        }
+                    });
+
                     blocks.forEach(block => {
                         const wrapper = block.closest('.mermaid-wrapper');
+                        const container = block.closest('.mermaid-container');
+                        const rawCode = container ? decodeURIComponent(container.querySelector('.copy-mermaid-btn').getAttribute('data-code')) : '';
+
                         const target = wrapper || block;
                         target.style.cursor = 'zoom-in';
                         target.onclick = (e) => {
@@ -129,6 +206,7 @@ export function initMermaidObserver() {
                                     detail: {
                                         url: url,
                                         data: svgData,
+                                        rawCode: rawCode,
                                         type: 'image/svg+xml',
                                         filename: `mermaid-${Date.now()}.svg`
                                     }

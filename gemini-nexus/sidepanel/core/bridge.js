@@ -61,6 +61,27 @@ export class MessageBridge {
             downloadBlob(payload.data, payload.type, payload.filename);
             return;
         }
+        if (action === 'COPY_TO_CLIPBOARD') {
+            const { text, type } = payload;
+            if (type === 'image/png') {
+                // For images, we need to fetch the blob and use ClipboardItem
+                // text is now a Data URL (base64)
+                fetch(text)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const item = new ClipboardItem({ [blob.type]: blob });
+                        navigator.clipboard.write([item]);
+                    })
+                    .catch(err => {
+                        console.error("Failed to copy image in bridge:", err);
+                        // Fallback to text if image fails
+                        navigator.clipboard.writeText("Failed to copy image");
+                    });
+            } else {
+                navigator.clipboard.writeText(text);
+            }
+            return;
+        }
 
         // 5. Data Getters (Immediate Response)
         if (action === 'GET_THEME') {
