@@ -85,10 +85,10 @@
     background: #1e1e1e;
 }
 
-#chat-history { 
-    flex: 1; 
-    overflow-y: auto; 
-    padding: 80px 20px 0 20px; 
+#chat-history {
+    flex: 1;
+    overflow-y: auto;
+    padding: 100px 20px 0 20px;
     padding-bottom: 140px; /* Space for input */
     display: flex; 
     flex-direction: column; 
@@ -430,7 +430,7 @@ body.layout-wide .msg.ai {
 /* Mobile Adjustments */
 @media (max-width: 600px) {
     #chat-history {
-        padding: 80px 16px 0 16px;
+        padding: 100px 16px 0 16px;
         padding-bottom: 120px;
     }
 }

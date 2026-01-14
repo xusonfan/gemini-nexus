@@ -107,8 +107,9 @@ export class ChatController {
                 // Default behavior: Scroll to the start of the last message
                 const lastMsg = this.historyDiv.lastElementChild;
                 if (lastMsg) {
+                    // Offset by more to account for floating header (padding-top is 100px)
                     this.historyDiv.scrollTo({
-                        top: lastMsg.offsetTop - 20,
+                        top: lastMsg.offsetTop - 80,
                         behavior: 'smooth'
                     });
                 } else {
