@@ -17,10 +17,14 @@ export function initRendererMode() {
             const { text, reqId, images } = e.data;
             
             try {
-                // Use shared pipeline
-                let html = transformMarkdown(text);
+                // Create a temporary container to use renderContent logic
+                const tempDiv = document.createElement('div');
+                const { renderContent } = await import('../render/content.js');
+                renderContent(tempDiv, text, 'ai');
                 
-                // Process KaTeX if available
+                let html = tempDiv.innerHTML;
+                
+                // Process KaTeX if available (Fallback for direct regex if needed, but renderContent handles it)
                 if (typeof katex !== 'undefined') {
                     html = html.replace(/\$\$([\s\S]+?)\$\$/g, (m, c) => {
                         try { return katex.renderToString(c, { displayMode: true, throwOnError: false }); } catch(err){ return m; }

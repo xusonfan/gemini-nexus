@@ -1,6 +1,30 @@
 
 /* css/chat.css */
 
+.mermaid-wrapper {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: var(--bg-secondary, #f8f9fa);
+    border-radius: 8px;
+    overflow-x: auto;
+    display: flex;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.mermaid-wrapper:hover {
+    background: var(--bg-tertiary, #f1f3f5);
+}
+
+.mermaid svg {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+[data-theme="dark"] .mermaid-wrapper {
+    background: #1e1e1e;
+}
+
 #chat-history { 
     flex: 1; 
     overflow-y: auto; 

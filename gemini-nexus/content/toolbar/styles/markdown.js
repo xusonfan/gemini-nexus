@@ -14,6 +14,27 @@
 
         /* --- Markdown Styles --- */
 
+        .mermaid-wrapper {
+            margin: 12px 0;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            overflow-x: auto;
+            display: flex;
+            justify-content: center;
+            transition: background 0.2s;
+            border: 1px solid #e1e3e1;
+        }
+
+        .mermaid-wrapper:hover {
+            background: #f1f3f5;
+        }
+
+        .mermaid svg {
+            max-width: 100% !important;
+            height: auto !important;
+        }
+
         .markdown-body p { margin: 0 0 12px 0; }
         .markdown-body p:last-child { margin-bottom: 0; }
         

@@ -72,10 +72,25 @@ export class ViewerController {
 
     // --- State Management ---
 
-    open(src) {
+    open(detail) {
         if (this.fullImage) {
+            const isObject = typeof detail === 'object' && detail !== null;
+            const src = isObject ? detail.url : detail;
+            
+            this.currentData = isObject ? detail : null;
             this.fullImage.src = src;
             this.viewer.classList.add('visible');
+            
+            // Mermaid SVG specific adjustment:
+            // If it's a blob SVG, it might need higher initial scale or specific sizing
+            if (src.startsWith('blob:')) {
+                this.fullImage.style.width = '90%';
+                this.fullImage.style.height = 'auto';
+            } else {
+                this.fullImage.style.width = '';
+                this.fullImage.style.height = '';
+            }
+
             this.resetTransform();
         }
     }
@@ -158,6 +173,19 @@ export class ViewerController {
     downloadImage() {
         const src = this.fullImage.src;
         if (!src) return;
+
+        // If we have raw data (e.g. Mermaid SVG), send that instead of the blob URL
+        if (this.currentData && this.currentData.data) {
+            window.parent.postMessage({
+                action: 'DOWNLOAD_DATA',
+                payload: {
+                    data: this.currentData.data,
+                    type: this.currentData.type || 'image/svg+xml',
+                    filename: this.currentData.filename || `mermaid-${Date.now()}.svg`
+                }
+            }, '*');
+            return;
+        }
 
         // Delegate to parent (Sidepanel) to bypass Sandbox restrictions
         window.parent.postMessage({

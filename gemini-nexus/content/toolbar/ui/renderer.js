@@ -36,6 +36,9 @@
 
             // Pass to view
             this.view.showResult(html, title, isStreaming);
+            
+            // Bind Mermaid click events in the view's context
+            this._bindMermaidEvents();
                  
             // Execute fetch tasks (images) if any
             if (tasks.length > 0) {
@@ -43,6 +46,43 @@
             }
         }
         
+        _bindMermaidEvents() {
+            const container = this.view.elements.resultText;
+            if (!container) return;
+
+            const mermaidWrappers = container.querySelectorAll('.mermaid-wrapper');
+            mermaidWrappers.forEach(wrapper => {
+                wrapper.style.cursor = 'zoom-in';
+                wrapper.onclick = (e) => {
+                    e.stopPropagation();
+                    const svg = wrapper.querySelector('svg');
+                    if (svg) {
+                        // Add XML namespace if missing
+                        if (!svg.getAttribute('xmlns')) {
+                            svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                        }
+                        const svgData = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' + new XMLSerializer().serializeToString(svg);
+                        const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+                        const url = URL.createObjectURL(blob);
+                        
+                        // In content script, we can't easily use the viewer, but we can try to download directly
+                        // or open in a new tab. window.open(blobUrl) often fails in content scripts.
+                        // Let's use a temporary link for download instead of just opening.
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `mermaid-${Date.now()}.svg`;
+                        a.style.display = 'none';
+                        document.body.appendChild(a);
+                        a.click();
+                        setTimeout(() => {
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                        }, 100);
+                    }
+                };
+            });
+        }
+
         _executeImageFetchTasks(tasks) {
             const container = this.view.elements.resultText;
             if(!container) return;

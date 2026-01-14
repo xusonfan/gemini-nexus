@@ -34,13 +34,21 @@ export async function loadLibs() {
         loadCSS('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css');
         loadCSS('https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css');
 
-        Promise.all([
+        await Promise.all([
             loadScript('https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js'),
             loadScript('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js'),
-            loadScript('https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.basic.min.js')
-        ]).then(() => {
+            loadScript('https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.basic.min.js'),
+            loadScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js')
+        ]).then(async () => {
+            if (typeof mermaid !== 'undefined') {
+                mermaid.initialize({
+                    startOnLoad: false,
+                    theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+                    securityLevel: 'loose',
+                });
+            }
              // Auto-render ext for Katex
-             return loadScript('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js');
+             await loadScript('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js');
         }).catch(e => console.warn("Optional libs load failed", e));
 
         console.log("Lazy dependencies loading...");

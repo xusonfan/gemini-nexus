@@ -1,6 +1,6 @@
 
 // sidepanel/core/bridge.js
-import { downloadFile, downloadText } from '../utils/download.js';
+import { downloadFile, downloadText, downloadBlob } from '../utils/download.js';
 
 export class MessageBridge {
     constructor(frameManager, stateManager) {
@@ -55,6 +55,10 @@ export class MessageBridge {
         }
         if (action === 'DOWNLOAD_LOGS') {
             downloadText(payload.text, payload.filename || 'gemini-nexus-logs.txt');
+            return;
+        }
+        if (action === 'DOWNLOAD_DATA') {
+            downloadBlob(payload.data, payload.type, payload.filename);
             return;
         }
 

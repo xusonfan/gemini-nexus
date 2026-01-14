@@ -27,6 +27,15 @@ export function configureMarkdown() {
         }
 
         const validLang = (lang && typeof hljs !== 'undefined' && hljs.getLanguage(lang)) ? lang : 'plaintext';
+        
+        // Special handling for Mermaid
+        if (lang === 'mermaid') {
+            return `
+<div class="mermaid-wrapper" title="点击在新标签页打开放大查看">
+    <div class="mermaid">${escapeHtml(code)}</div>
+</div>`;
+        }
+
         let highlighted;
         
         if (typeof hljs !== 'undefined' && validLang !== 'plaintext') {

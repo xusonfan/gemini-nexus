@@ -81,6 +81,8 @@ export function initAppMode() {
         
         // Trigger dependency load in parallel, and re-render if needed when done
         loadLibs().then(() => {
+            // Initialize dynamic observer for Mermaid
+            import('../render/content.js').then(m => m.initMermaidObserver());
             if (app) app.rerender();
         });
 
