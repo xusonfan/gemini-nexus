@@ -40,36 +40,59 @@
         }
 
         handleKeydown(e) {
+            // Open Side Panel
             if (this.match(e, this.appShortcuts.openPanel)) {
-                e.preventDefault(); 
-                e.stopPropagation();
+                e.preventDefault(); e.stopPropagation();
                 chrome.runtime.sendMessage({ action: "OPEN_SIDE_PANEL" });
                 return;
             }
 
+            // Quick Ask
             if (this.match(e, this.appShortcuts.quickAsk)) {
-                e.preventDefault();
-                e.stopPropagation();
-                if (this.toolbarController) {
-                    this.toolbarController.showGlobalInput();
-                }
+                e.preventDefault(); e.stopPropagation();
+                if (this.toolbarController) this.toolbarController.showGlobalInput();
                 return;
             }
 
+            // Browser Control
             if (this.match(e, this.appShortcuts.browserControl)) {
-                e.preventDefault();
-                e.stopPropagation();
-                // Toggle side panel / browser control
+                e.preventDefault(); e.stopPropagation();
                 chrome.runtime.sendMessage({ action: "TOGGLE_SIDE_PANEL_CONTROL" });
                 return;
             }
 
+            // Summarize Page
             if (this.match(e, this.appShortcuts.summarizePage)) {
-                e.preventDefault();
-                e.stopPropagation();
-                if (this.toolbarController) {
-                    this.toolbarController.handleSummarizePage();
-                }
+                e.preventDefault(); e.stopPropagation();
+                if (this.toolbarController) this.toolbarController.handleSummarizePage();
+                return;
+            }
+
+            // Page Chat
+            if (this.match(e, this.appShortcuts.pageChat)) {
+                e.preventDefault(); e.stopPropagation();
+                if (this.toolbarController) this.toolbarController.handlePageChat();
+                return;
+            }
+
+            // OCR
+            if (this.match(e, this.appShortcuts.ocr)) {
+                e.preventDefault(); e.stopPropagation();
+                if (this.toolbarController) this.toolbarController.handleOCR();
+                return;
+            }
+
+            // Translate
+            if (this.match(e, this.appShortcuts.screenshotTranslate)) {
+                e.preventDefault(); e.stopPropagation();
+                if (this.toolbarController) this.toolbarController.handleTranslate();
+                return;
+            }
+
+            // Snip
+            if (this.match(e, this.appShortcuts.snip)) {
+                e.preventDefault(); e.stopPropagation();
+                if (this.toolbarController) this.toolbarController.handleSnip();
                 return;
             }
         }

@@ -144,7 +144,7 @@
         }
 
         /**
-         * 处理来自右键菜单的动作指令
+         * 处理来自右键菜单或快捷键的动作指令
          */
         handleContextAction(mode) {
             this.currentMode = mode;
@@ -159,6 +159,22 @@
                 // 需要截图的操作模式：ocr, snip, screenshot_translate
                 chrome.runtime.sendMessage({ action: "INITIATE_CAPTURE" });
             }
+        }
+
+        handlePageChat() {
+            this.handleContextAction('page_chat');
+        }
+
+        handleOCR() {
+            this.handleContextAction('ocr');
+        }
+
+        handleTranslate() {
+            this.handleContextAction('screenshot_translate');
+        }
+
+        handleSnip() {
+            this.handleContextAction('snip');
         }
 
         /**

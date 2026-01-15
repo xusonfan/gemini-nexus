@@ -6,32 +6,82 @@ export const ShortcutsSettingsTemplate = `
     
     <div class="shortcut-row">
         <label data-i18n="quickAsk">Quick Ask (Floating)</label>
-        <input type="text" id="shortcut-quick-ask" class="shortcut-input" readonly value="Ctrl+G">
+        <div class="shortcut-input-wrapper">
+            <input type="text" id="shortcut-quick-ask" class="shortcut-input" readonly value="Ctrl+G" data-i18n-placeholder="shortcutClickToSet">
+            <button class="shortcut-clear" title="Clear">&times;</button>
+        </div>
     </div>
     
     <div class="shortcut-row">
         <label data-i18n="openSidePanel">Open Side Panel</label>
-        <input type="text" id="shortcut-open-panel" class="shortcut-input" readonly value="Alt+S">
+        <div class="shortcut-input-wrapper">
+            <input type="text" id="shortcut-open-panel" class="shortcut-input" readonly value="Alt+S" data-i18n-placeholder="shortcutClickToSet">
+            <button class="shortcut-clear" title="Clear">&times;</button>
+        </div>
     </div>
 
     <div class="shortcut-row">
         <label data-i18n="shortcutBrowserControl">Open Browser Control</label>
-        <input type="text" id="shortcut-browser-control" class="shortcut-input" readonly value="Ctrl+B">
+        <div class="shortcut-input-wrapper">
+            <input type="text" id="shortcut-browser-control" class="shortcut-input" readonly value="Ctrl+B" data-i18n-placeholder="shortcutClickToSet">
+            <button class="shortcut-clear" title="Clear">&times;</button>
+        </div>
     </div>
 
     <div class="shortcut-row">
         <label data-i18n="shortcutSummarizePage">Summarize Page</label>
-        <input type="text" id="shortcut-summarize-page" class="shortcut-input" readonly value="Alt+G">
+        <div class="shortcut-input-wrapper">
+            <input type="text" id="shortcut-summarize-page" class="shortcut-input" readonly value="Alt+G" data-i18n-placeholder="shortcutClickToSet">
+            <button class="shortcut-clear" title="Clear">&times;</button>
+        </div>
+    </div>
+
+    <div class="shortcut-row">
+        <label data-i18n="shortcutPageChat">Chat with Page</label>
+        <div class="shortcut-input-wrapper">
+            <input type="text" id="shortcut-page-chat" class="shortcut-input" readonly value="" data-i18n-placeholder="shortcutClickToSet">
+            <button class="shortcut-clear" title="Clear">&times;</button>
+        </div>
+    </div>
+
+    <div class="shortcut-row">
+        <label data-i18n="shortcutOCR">OCR (Extract Text)</label>
+        <div class="shortcut-input-wrapper">
+            <input type="text" id="shortcut-ocr" class="shortcut-input" readonly value="" data-i18n-placeholder="shortcutClickToSet">
+            <button class="shortcut-clear" title="Clear">&times;</button>
+        </div>
+    </div>
+
+    <div class="shortcut-row">
+        <label data-i18n="shortcutTranslate">Screenshot Translate</label>
+        <div class="shortcut-input-wrapper">
+            <input type="text" id="shortcut-translate" class="shortcut-input" readonly value="" data-i18n-placeholder="shortcutClickToSet">
+            <button class="shortcut-clear" title="Clear">&times;</button>
+        </div>
+    </div>
+
+    <div class="shortcut-row">
+        <label data-i18n="shortcutSnip">Snip (Capture Area)</label>
+        <div class="shortcut-input-wrapper">
+            <input type="text" id="shortcut-snip" class="shortcut-input" readonly value="" data-i18n-placeholder="shortcutClickToSet">
+            <button class="shortcut-clear" title="Clear">&times;</button>
+        </div>
     </div>
 
     <div class="shortcut-row">
         <label data-i18n="shortcutFocusInput">Focus Input</label>
-        <input type="text" class="shortcut-input" readonly value="Ctrl+P">
+        <div class="shortcut-input-wrapper">
+            <input type="text" id="shortcut-focus-input" class="shortcut-input" readonly value="Ctrl+P" data-i18n-placeholder="shortcutClickToSet">
+            <button class="shortcut-clear" title="Clear">&times;</button>
+        </div>
     </div>
 
     <div class="shortcut-row">
         <label data-i18n="shortcutSwitchModel">Switch Model</label>
-        <input type="text" class="shortcut-input" readonly value="Tab">
+        <div class="shortcut-input-wrapper">
+            <input type="text" id="shortcut-switch-model" class="shortcut-input" readonly value="Tab" data-i18n-placeholder="shortcutClickToSet">
+            <button class="shortcut-clear" title="Clear">&times;</button>
+        </div>
     </div>
 
     <div class="settings-actions">

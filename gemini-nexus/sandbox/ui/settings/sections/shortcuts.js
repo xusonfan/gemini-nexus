@@ -14,19 +14,26 @@ export class ShortcutsSection {
             inputQuickAsk: get('shortcut-quick-ask'),
             inputOpenPanel: get('shortcut-open-panel'),
             inputBrowserControl: get('shortcut-browser-control'),
-            inputSummarizePage: get('shortcut-summarize-page')
+            inputSummarizePage: get('shortcut-summarize-page'),
+            inputPageChat: get('shortcut-page-chat'),
+            inputOCR: get('shortcut-ocr'),
+            inputTranslate: get('shortcut-translate'),
+            inputSnip: get('shortcut-snip'),
+            inputFocusInput: get('shortcut-focus-input'),
+            inputSwitchModel: get('shortcut-switch-model')
         };
     }
 
     bindEvents() {
-        this.setupShortcutInput(this.elements.inputQuickAsk);
-        this.setupShortcutInput(this.elements.inputOpenPanel);
-        this.setupShortcutInput(this.elements.inputBrowserControl);
-        this.setupShortcutInput(this.elements.inputSummarizePage);
+        Object.values(this.elements).forEach(inputEl => {
+            this.setupShortcutInput(inputEl);
+        });
     }
 
     setupShortcutInput(inputEl) {
         if (!inputEl) return;
+
+        // Handle keydown to set shortcut
         inputEl.addEventListener('keydown', (e) => {
             e.preventDefault(); e.stopPropagation();
             if (['Control', 'Alt', 'Shift', 'Meta'].includes(e.key)) return;
@@ -43,22 +50,58 @@ export class ShortcutsSection {
 
             inputEl.value = keys.join('+');
         });
+
+        // Handle clear button
+        const wrapper = inputEl.closest('.shortcut-input-wrapper');
+        if (wrapper) {
+            const clearBtn = wrapper.querySelector('.shortcut-clear');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    inputEl.value = '';
+                });
+            }
+        }
     }
 
     setData(shortcuts) {
-        if (this.elements.inputQuickAsk) this.elements.inputQuickAsk.value = shortcuts.quickAsk;
-        if (this.elements.inputOpenPanel) this.elements.inputOpenPanel.value = shortcuts.openPanel;
-        if (this.elements.inputBrowserControl) this.elements.inputBrowserControl.value = shortcuts.browserControl || "Ctrl+B";
-        if (this.elements.inputSummarizePage) this.elements.inputSummarizePage.value = shortcuts.summarizePage || "Alt+G";
+        const mapping = {
+            inputQuickAsk: 'quickAsk',
+            inputOpenPanel: 'openPanel',
+            inputBrowserControl: 'browserControl',
+            inputSummarizePage: 'summarizePage',
+            inputPageChat: 'pageChat',
+            inputOCR: 'ocr',
+            inputTranslate: 'screenshotTranslate',
+            inputSnip: 'snip',
+            inputFocusInput: 'focusInput',
+            inputSwitchModel: 'switchModel'
+        };
+
+        Object.entries(mapping).forEach(([elKey, dataKey]) => {
+            if (this.elements[elKey]) {
+                this.elements[elKey].value = shortcuts[dataKey] || "";
+            }
+        });
     }
 
     getData() {
-        const { inputQuickAsk, inputOpenPanel, inputBrowserControl, inputSummarizePage } = this.elements;
-        return {
-            quickAsk: inputQuickAsk ? inputQuickAsk.value : null,
-            openPanel: inputOpenPanel ? inputOpenPanel.value : null,
-            browserControl: inputBrowserControl ? inputBrowserControl.value : "Ctrl+B",
-            summarizePage: inputSummarizePage ? inputSummarizePage.value : "Alt+G"
+        const mapping = {
+            inputQuickAsk: 'quickAsk',
+            inputOpenPanel: 'openPanel',
+            inputBrowserControl: 'browserControl',
+            inputSummarizePage: 'summarizePage',
+            inputPageChat: 'pageChat',
+            inputOCR: 'ocr',
+            inputTranslate: 'screenshotTranslate',
+            inputSnip: 'snip',
+            inputFocusInput: 'focusInput',
+            inputSwitchModel: 'switchModel'
         };
+
+        const data = {};
+        Object.entries(mapping).forEach(([elKey, dataKey]) => {
+            data[dataKey] = this.elements[elKey] ? this.elements[elKey].value : "";
+        });
+        return data;
     }
 }

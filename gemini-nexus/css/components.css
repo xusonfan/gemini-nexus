@@ -313,9 +313,14 @@
     color: var(--text-secondary);
     flex: 1;
 }
+.shortcut-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
 .shortcut-input {
     width: 140px;
-    padding: 6px 10px;
+    padding: 6px 30px 6px 10px;
     border: 1px solid var(--border-color);
     border-radius: 6px;
     font-size: 13px;
@@ -326,6 +331,26 @@
     cursor: pointer;
     font-family: monospace;
     transition: all 0.2s;
+}
+.shortcut-clear {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+.shortcut-clear:hover {
+    color: var(--text-primary);
+    background: var(--bg-sidebar);
 }
 .shortcut-input:focus {
     border-color: var(--primary);
