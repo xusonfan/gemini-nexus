@@ -64,6 +64,7 @@
             // Sync Settings (Model & Provider) with Global State
             this.syncSettings();
             this.syncOpacity();
+            this.syncTheme();
             
             // Listen for global setting changes to keep toolbar in sync
             chrome.storage.onChanged.addListener((changes, area) => {
@@ -71,6 +72,9 @@
                     const keys = ['geminiModel', 'geminiProvider', 'geminiUseOfficialApi', 'geminiOpenaiModel'];
                     if (keys.some(k => changes[k])) {
                         this.syncSettings();
+                    }
+                    if (changes['gemini_nexus_theme']) {
+                        this.setTheme(changes['gemini_nexus_theme'].newValue);
                     }
                 }
             });
@@ -114,6 +118,18 @@
             this.setOpacity(opacity);
             // Save to storage
             chrome.storage.local.set({ 'gemini_nexus_opacity': opacity });
+        }
+
+        async syncTheme() {
+            const result = await chrome.storage.local.get(['gemini_nexus_theme', 'geminiTheme']);
+            const theme = result.gemini_nexus_theme || result.geminiTheme || 'system';
+            this.setTheme(theme);
+        }
+
+        setTheme(theme) {
+            if (this.ui) {
+                this.ui.setTheme(theme);
+            }
         }
         
         setSelectionEnabled(enabled) {

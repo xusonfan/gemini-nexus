@@ -101,6 +101,21 @@
         .ask-window[data-dock="left"]::after { right: 3px; }
         .ask-window[data-dock="right"]::after { left: 3px; }
 
+        /* --- Dark Theme Support --- */
+        .ask-window[data-theme="dark"] {
+            background: #1e1e1e;
+            border-color: #333;
+            color: #e3e3e3;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        .ask-window[data-theme="dark"] .window-scroll-container::-webkit-scrollbar-thumb {
+            background: #444;
+        }
+        .ask-window[data-theme="dark"] .window-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
         /* Mobile Layout */
         @media (max-width: 600px) {
             .ask-window {

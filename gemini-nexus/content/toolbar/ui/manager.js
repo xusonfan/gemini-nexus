@@ -218,6 +218,12 @@
             }
         }
 
+        setTheme(theme) {
+            if (this.view) {
+                this.view.setTheme(theme);
+            }
+        }
+
         // --- Model Selection ---
 
         getSelectedModel() {

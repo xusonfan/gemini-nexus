@@ -117,6 +117,21 @@
             }
         }
 
+        setTheme(theme) {
+            if (this.elements.askWindow) {
+                let applied = theme;
+                if (theme === 'system') {
+                    applied = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                }
+                this.elements.askWindow.setAttribute('data-theme', applied);
+                
+                // Also update the small toolbar if needed
+                if (this.elements.toolbar) {
+                    this.elements.toolbar.setAttribute('data-theme', applied);
+                }
+            }
+        }
+
         // --- Model Selection ---
         
         getSelectedModel() {

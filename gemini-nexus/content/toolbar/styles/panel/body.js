@@ -12,6 +12,10 @@
             position: relative;
         }
 
+        .ask-window[data-theme="dark"] .window-body {
+            background: #1e1e1e;
+        }
+
         /* Input Styles */
         .input-container {
             margin-bottom: 12px;
@@ -30,6 +34,16 @@
             box-sizing: border-box;
             transition: border-color 0.2s;
             font-family: inherit;
+        }
+
+        .ask-window[data-theme="dark"] input[type="text"]#ask-input {
+            background: #2d2e33;
+            border-color: #444;
+            color: #e3e3e3;
+        }
+        .ask-window[data-theme="dark"] input[type="text"]#ask-input:focus {
+            border-color: #a8c7fa;
+            box-shadow: 0 0 0 2px rgba(168, 199, 250, 0.1);
         }
         input[type="text"]#ask-input:focus {
             border-color: #0b57d0;
@@ -55,6 +69,14 @@
             flex-shrink: 0;
             display: flex;
             align-items: center;
+        }
+
+        .ask-window[data-theme="dark"] .context-preview {
+            background: #2d2e33;
+            color: #c4c7c5;
+        }
+        .ask-window[data-theme="dark"] .context-preview::before {
+            color: #a8c7fa;
         }
         .context-preview.hidden { display: none; }
         .context-preview::before {

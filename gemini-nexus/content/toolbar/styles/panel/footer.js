@@ -13,6 +13,11 @@
             justify-content: center; /* Centered by default for Stop button */
             box-sizing: border-box;
         }
+
+        .ask-window[data-theme="dark"] .window-footer {
+            background: #1e1e1e;
+            border-top: 1px solid #333;
+        }
         
         .window-footer.hidden { display: none; }
 
@@ -47,6 +52,14 @@
             background: #f0f4f9;
             color: #0b57d0;
         }
+
+        .ask-window[data-theme="dark"] .footer-btn {
+            color: #c4c7c5;
+        }
+        .ask-window[data-theme="dark"] .footer-btn:hover {
+            background: #333;
+            color: #a8c7fa;
+        }
         
         .footer-btn.text-btn {
             padding: 6px 10px;
@@ -63,14 +76,32 @@
             background: #0842a0;
         }
 
+        .ask-window[data-theme="dark"] .footer-btn.text-btn.primary {
+            background: #a8c7fa;
+            color: #062e6f;
+        }
+        .ask-window[data-theme="dark"] .footer-btn.text-btn.primary:hover {
+            background: #d2e3fc;
+        }
+
         #btn-insert, #btn-replace {
             background: #e8f0fe;
             color: #0b57d0;
             border: 1px solid #0b57d0;
-            border: 1px solid #0b57d0;
         }
         #btn-insert:hover, #btn-replace:hover {
             background: #d2e3fc;
+        }
+
+        .ask-window[data-theme="dark"] #btn-insert,
+        .ask-window[data-theme="dark"] #btn-replace {
+            background: #004a77;
+            color: #c2e7ff;
+            border-color: #004a77;
+        }
+        .ask-window[data-theme="dark"] #btn-insert:hover,
+        .ask-window[data-theme="dark"] #btn-replace:hover {
+            background: #00639b;
         }
 
         .footer-stop {
@@ -98,6 +129,15 @@
         .stop-pill-btn:hover {
             background: #f8f9fa;
             box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+
+        .ask-window[data-theme="dark"] .stop-pill-btn {
+            background: #2d2e33;
+            color: #e3e3e3;
+            border-color: #444;
+        }
+        .ask-window[data-theme="dark"] .stop-pill-btn:hover {
+            background: #38393e;
         }
     `;
 })();

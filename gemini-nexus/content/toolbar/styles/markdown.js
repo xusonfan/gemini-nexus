@@ -39,6 +39,15 @@
         .markdown-body p:last-child { margin-bottom: 0; }
         
         .markdown-body h1, .markdown-body h2, .markdown-body h3 { margin: 16px 0 8px 0; color: #1f1f1f; font-weight: 600; }
+
+        .ask-window[data-theme="dark"] .result-area {
+            color: #e3e3e3;
+        }
+        .ask-window[data-theme="dark"] .markdown-body h1,
+        .ask-window[data-theme="dark"] .markdown-body h2,
+        .ask-window[data-theme="dark"] .markdown-body h3 {
+            color: #e3e3e3;
+        }
         .markdown-body h1 { font-size: 20px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
         .markdown-body h2 { font-size: 18px; }
         .markdown-body h3 { font-size: 16px; }
@@ -55,6 +64,11 @@
             overflow: hidden;
         }
 
+        .ask-window[data-theme="dark"] .code-block-wrapper {
+            background: #0d1117;
+            border-color: #30363d;
+        }
+
         .code-header {
             display: flex;
             justify-content: space-between;
@@ -65,11 +79,20 @@
             font-family: sans-serif;
         }
 
+        .ask-window[data-theme="dark"] .code-header {
+            background: #161b22;
+            border-color: #30363d;
+        }
+
         .code-lang {
             font-size: 11px;
             color: #444;
             text-transform: uppercase;
             font-weight: 600;
+        }
+
+        .ask-window[data-theme="dark"] .code-lang {
+            color: #8b949e;
         }
 
         .copy-code-btn {
@@ -89,6 +112,14 @@
             color: #000;
         }
 
+        .ask-window[data-theme="dark"] .copy-code-btn {
+            color: #8b949e;
+        }
+        .ask-window[data-theme="dark"] .copy-code-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #c9d1d9;
+        }
+
         .markdown-body pre {
             background: transparent;
             padding: 12px;
@@ -106,12 +137,19 @@
             border-radius: 4px;
             color: #1f1f1f;
         }
+        .ask-window[data-theme="dark"] .markdown-body code {
+            background: rgba(255,255,255,0.1);
+            color: #e3e3e3;
+        }
         .markdown-body pre code {
             background: transparent;
             padding: 0;
             border: none;
             color: #1f1f1f;
             display: block;
+        }
+        .ask-window[data-theme="dark"] .markdown-body pre code {
+            color: #c9d1d9;
         }
 
         /* Syntax Highlighting */
@@ -123,6 +161,40 @@
         .hljs-built_in, .hljs-class .hljs-title { color: #6f42c1; }
         .hljs-attr, .hljs-variable, .hljs-template-variable, .hljs-type, .hljs-selector-class, .hljs-selector-attr, .hljs-selector-pseudo, .hljs-number { color: #005cc5; }
         .hljs-symbol, .hljs-bullet, .hljs-link, .hljs-meta, .hljs-selector-id, .hljs-title { color: #6f42c1; }
+
+        /* Dark Syntax Highlighting */
+        .ask-window[data-theme="dark"] .hljs-comment,
+        .ask-window[data-theme="dark"] .hljs-quote { color: #8b949e; }
+        .ask-window[data-theme="dark"] .hljs-doctag,
+        .ask-window[data-theme="dark"] .hljs-keyword,
+        .ask-window[data-theme="dark"] .hljs-formula { color: #ff7b72; }
+        .ask-window[data-theme="dark"] .hljs-section,
+        .ask-window[data-theme="dark"] .hljs-name,
+        .ask-window[data-theme="dark"] .hljs-selector-tag,
+        .ask-window[data-theme="dark"] .hljs-deletion,
+        .ask-window[data-theme="dark"] .hljs-subst { color: #7ee787; }
+        .ask-window[data-theme="dark"] .hljs-literal { color: #79c0ff; }
+        .ask-window[data-theme="dark"] .hljs-string,
+        .ask-window[data-theme="dark"] .hljs-regexp,
+        .ask-window[data-theme="dark"] .hljs-addition,
+        .ask-window[data-theme="dark"] .hljs-attribute,
+        .ask-window[data-theme="dark"] .hljs-meta-string { color: #a5d6ff; }
+        .ask-window[data-theme="dark"] .hljs-built_in,
+        .ask-window[data-theme="dark"] .hljs-class .hljs-title { color: #d2a8ff; }
+        .ask-window[data-theme="dark"] .hljs-attr,
+        .ask-window[data-theme="dark"] .hljs-variable,
+        .ask-window[data-theme="dark"] .hljs-template-variable,
+        .ask-window[data-theme="dark"] .hljs-type,
+        .ask-window[data-theme="dark"] .hljs-selector-class,
+        .ask-window[data-theme="dark"] .hljs-selector-attr,
+        .ask-window[data-theme="dark"] .hljs-selector-pseudo,
+        .ask-window[data-theme="dark"] .hljs-number { color: #79c0ff; }
+        .ask-window[data-theme="dark"] .hljs-symbol,
+        .ask-window[data-theme="dark"] .hljs-bullet,
+        .ask-window[data-theme="dark"] .hljs-link,
+        .ask-window[data-theme="dark"] .hljs-meta,
+        .ask-window[data-theme="dark"] .hljs-selector-id,
+        .ask-window[data-theme="dark"] .hljs-title { color: #d2a8ff; }
         .hljs-emphasis { font-style: italic; }
         .hljs-strong { font-weight: bold; }
 
@@ -138,18 +210,31 @@
             padding: 8px 12px;
             text-align: left;
         }
+        .ask-window[data-theme="dark"] .markdown-body th,
+        .ask-window[data-theme="dark"] .markdown-body td {
+            border-color: #30363d;
+        }
         .markdown-body th {
             background-color: #f8f9fa;
             font-weight: 600;
         }
+        .ask-window[data-theme="dark"] .markdown-body th {
+            background-color: #161b22;
+        }
         .markdown-body tr:nth-child(even) {
             background-color: #fcfcfc;
+        }
+        .ask-window[data-theme="dark"] .markdown-body tr:nth-child(even) {
+            background-color: #161b22;
         }
 
         /* Links */
         .markdown-body a {
             color: #0b57d0;
             text-decoration: none;
+        }
+        .ask-window[data-theme="dark"] .markdown-body a {
+            color: #58a6ff;
         }
         .markdown-body a:hover {
             text-decoration: underline;
@@ -196,10 +281,18 @@
             background: rgba(11, 87, 208, 0.04);
             border-radius: 0 4px 4px 0;
         }
+        .ask-window[data-theme="dark"] .markdown-body blockquote {
+            border-left-color: #30363d;
+            color: #8b949e;
+            background: rgba(48, 54, 61, 0.2);
+        }
         .markdown-body hr {
             border: none;
             border-top: 1px solid #e1e3e1;
             margin: 16px 0;
+        }
+        .ask-window[data-theme="dark"] .markdown-body hr {
+            border-top-color: #30363d;
         }
     `;
 })();

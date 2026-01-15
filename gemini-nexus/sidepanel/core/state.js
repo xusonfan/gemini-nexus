@@ -17,6 +17,7 @@ export class StateManager {
             'pendingMode', // Fetch pending mode (e.g. browser_control)
             'geminiShortcuts',
             'geminiModel',
+            'geminiTheme',
             'pendingImage',
             'geminiSidebarBehavior',
             'geminiTextSelectionEnabled',
@@ -132,7 +133,7 @@ export class StateManager {
         }
 
         // 5. LocalStorage Sync (Theme/Lang)
-        const cachedTheme = localStorage.getItem('geminiTheme') || 'system';
+        const cachedTheme = this.data.geminiTheme || localStorage.getItem('geminiTheme') || 'system';
         const cachedLang = localStorage.getItem('geminiLanguage') || 'system';
         
         this.frame.postMessage({ action: 'RESTORE_LANGUAGE', payload: cachedLang });
@@ -157,14 +158,18 @@ export class StateManager {
         chrome.storage.local.set(update);
 
         // Special handling for localStorage items
-        if (key === 'geminiTheme') localStorage.setItem('geminiTheme', value);
+        if (key === 'geminiTheme') {
+            localStorage.setItem('geminiTheme', value);
+            // Sync to content script via specific key
+            chrome.storage.local.set({ 'gemini_nexus_theme': value });
+        }
         if (key === 'geminiLanguage') localStorage.setItem('geminiLanguage', value);
     }
 
     // Getters for on-demand requests
     getCached(key) {
         // For localStorage items, read directly
-        if (key === 'geminiTheme') return localStorage.getItem('geminiTheme') || 'system';
+        if (key === 'geminiTheme') return this.data.geminiTheme || localStorage.getItem('geminiTheme') || 'system';
         if (key === 'geminiLanguage') return localStorage.getItem('geminiLanguage') || 'system';
         
         // For Async items, try memory cache first, else async fetch (handled by caller typically)

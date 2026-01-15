@@ -50,6 +50,34 @@
             background: rgba(255, 255, 255, 0.1);
             color: #fff;
         }
+
+        /* Dark Theme Overrides for Toolbar */
+        .toolbar[data-theme="dark"] {
+            background: #1e1e1e;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.1);
+        }
+        .toolbar[data-theme="dark"] .btn {
+            color: #e3e3e3;
+        }
+
+        /* Light Theme Overrides for Toolbar */
+        .toolbar[data-theme="light"] {
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+        }
+        .toolbar[data-theme="light"] .btn {
+            color: #444746;
+        }
+        .toolbar[data-theme="light"] .btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: #1f1f1f;
+        }
+        .toolbar[data-theme="light"] .toolbar-drag-handle {
+            color: #999;
+        }
+        .toolbar[data-theme="light"] .toolbar-drag-handle:hover {
+            color: #666;
+        }
         .btn.hidden {
             display: none;
         }
