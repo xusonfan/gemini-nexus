@@ -195,7 +195,13 @@ export class MessageBridge {
         }
     }
 
-    handleRuntimeMessage(message) {
+    handleRuntimeMessage(message, sender, sendResponse) {
+        if (message.action === 'PING_SIDE_PANEL') {
+            sendResponse({ isOpen: true });
+            return;
+        }
+
+
         if (message.action === 'SESSIONS_UPDATED') {
             this.state.updateSessions(message.sessions);
             this.frame.postMessage({

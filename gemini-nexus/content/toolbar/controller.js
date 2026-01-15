@@ -338,6 +338,23 @@
         }
 
         async handleSummarizePage() {
+            // 检查侧边栏是否已打开
+            try {
+                const response = await chrome.runtime.sendMessage({ action: "CHECK_SIDE_PANEL_OPEN" });
+                if (response && response.isOpen) {
+                    // 如果侧边栏已打开，直接在侧边栏中触发总结，不显示悬浮窗
+                    chrome.runtime.sendMessage({
+                        action: "QUICK_ASK",
+                        text: this.ui.t.prompts.summarizePage,
+                        model: this.ui.getSelectedModel(),
+                        includePageContext: true
+                    });
+                    return;
+                }
+            } catch (e) {
+                console.warn("Failed to check side panel state, falling back to floating window", e);
+            }
+
             const viewportW = window.innerWidth;
             const viewportH = window.innerHeight;
             const width = 400;

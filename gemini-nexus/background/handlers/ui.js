@@ -349,6 +349,27 @@ export class UIMessageHandler {
         }
 
         // --- BROWSER CONTROL TOGGLE ---
+        if (request.action === "CHECK_SIDE_PANEL_OPEN") {
+            (async () => {
+                try {
+                    // 尝试向 runtime 发送消息，如果侧边栏已打开，它会响应
+                    // 注意：chrome.sidePanel.getOptions 无法直接判断是否“当前显示”
+                    // 我们通过向 runtime 广播并等待侧边栏响应来判断
+                    const response = await new Promise((resolve) => {
+                        const timeout = setTimeout(() => resolve({ isOpen: false }), 100);
+                        chrome.runtime.sendMessage({ action: "PING_SIDE_PANEL" }, (res) => {
+                            clearTimeout(timeout);
+                            resolve(res || { isOpen: false });
+                        });
+                    });
+                    sendResponse(response);
+                } catch (e) {
+                    sendResponse({ isOpen: false });
+                }
+            })();
+            return true;
+        }
+
         if (request.action === "TOGGLE_BROWSER_CONTROL") {
             if (this.controlManager) {
                 if (request.enabled) {
