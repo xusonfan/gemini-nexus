@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'gemini-nexus/manifest.json'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: gemini-nexus/package-lock.json
+
+      - name: 安装依赖
+        run: npm ci
+        working-directory: gemini-nexus
+
+      - name: 编译项目
+        run: npm run build
+        working-directory: gemini-nexus
+
+      - name: 打包产物
+        run: |
+          VERSION=$(jq -r .version manifest.json)
+          mv dist gemini-nexus-${VERSION}
+          zip -r gemini-nexus-${VERSION}.zip gemini-nexus-${VERSION}
+        working-directory: gemini-nexus
+
+      - name: 检查版本是否变更
+        id: check_version
+        run: |
+          NEW_VERSION=$(jq -r .version gemini-nexus/manifest.json)
+          OLD_VERSION=$(git show HEAD^:gemini-nexus/manifest.json | jq -r .version)
+          if [ "$NEW_VERSION" != "$OLD_VERSION" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 创建 Release 并上传附件
+        if: steps.check_version.outputs.changed == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.check_version.outputs.version }}
+          name: Release v${{ steps.check_version.outputs.version }}
+          files: gemini-nexus/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
