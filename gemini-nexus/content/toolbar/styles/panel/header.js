@@ -66,7 +66,7 @@
             line-height: 30px; /* Ensure vertical centering */
             box-sizing: border-box;
             text-align: center;
-            max-width: 140px;
+            max-width: 200px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
