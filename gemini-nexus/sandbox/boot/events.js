@@ -122,6 +122,7 @@ export function bindAppEvents(app, ui, setResizeRef) {
         modelSelect.addEventListener('change', (e) => {
              app.handleModelChange(e.target.value);
              resizeModelSelect();
+             ui.updateInputPlaceholder();
         });
         // Call initial resize after a short delay to ensure fonts/styles loaded
         setTimeout(resizeModelSelect, 50);

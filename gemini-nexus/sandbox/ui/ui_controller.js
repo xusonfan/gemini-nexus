@@ -1,5 +1,6 @@
 
 // sandbox/ui/ui_controller.js
+import { t } from '../core/i18n.js';
 import { ChatController } from './chat.js';
 import { SidebarController } from './sidebar.js';
 import { SettingsController } from './settings.js';
@@ -109,6 +110,19 @@ export class UIController {
         }
         
         this._resizeModelSelect();
+        this.updateInputPlaceholder();
+    }
+
+    updateInputPlaceholder() {
+        if (!this.inputFn || !this.modelSelect) return;
+        
+        const selectedOption = this.modelSelect.options[this.modelSelect.selectedIndex];
+        if (!selectedOption) return;
+
+        const modelName = selectedOption.text;
+        const basePlaceholder = t('askPlaceholder');
+        
+        this.inputFn.placeholder = basePlaceholder.replace('{model}', modelName);
     }
 
     _resizeModelSelect() {

@@ -190,6 +190,11 @@ body.layout-wide .tools-container {
     resize: none;
     line-height: 1.5;
     margin-left: 6px; /* Spacing from buttons */
+    scrollbar-width: none; /* Firefox */
+}
+
+#prompt::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
 }
 
 #prompt::placeholder { color: var(--input-placeholder); }

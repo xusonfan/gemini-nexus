@@ -57,6 +57,8 @@ export function initAppMode() {
             modelSelect: document.getElementById('model-select')
         });
 
+        window.ui = ui; // Expose for i18n dynamic placeholder
+
         const imageManager = new ImageManager({
             imageInput: document.getElementById('image-input'),
             imagePreview: document.getElementById('image-preview'),

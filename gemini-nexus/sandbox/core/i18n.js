@@ -16,7 +16,7 @@ export const translations = {
         "snip": "Snip",
         "screenshotTranslate": "Translate",
         "uploadImage": "Upload Image",
-        "askPlaceholder": "Ask Gemini...",
+        "askPlaceholder": "Ask {model}...",
         "sendMessage": "Send message",
         "stopGenerating": "Stop generating",
         "settingsTitle": "Settings",
@@ -174,7 +174,7 @@ export const translations = {
         "snip": "截图",
         "screenshotTranslate": "截图翻译",
         "uploadImage": "上传图片",
-        "askPlaceholder": "询问 Gemini...",
+        "askPlaceholder": "询问 {model}...",
         "sendMessage": "发送消息",
         "stopGenerating": "停止生成",
         "settingsTitle": "设置",
@@ -335,7 +335,14 @@ export function applyTranslations() {
     placeholders.forEach(el => {
         const key = el.getAttribute('data-i18n-placeholder');
         const text = t(key);
-        if (text) el.placeholder = text;
+        if (text) {
+            // Special handling for prompt input to include model name
+            if (el.id === 'prompt' && window.ui && window.ui.updateInputPlaceholder) {
+                window.ui.updateInputPlaceholder();
+            } else {
+                el.placeholder = text;
+            }
+        }
     });
 
     // 3. Titles (Tooltips)
