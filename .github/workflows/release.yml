@@ -32,11 +32,19 @@ jobs:
         run: npm run build
         working-directory: gemini-nexus
 
+      - name: 组装插件资源
+        run: |
+          # 拷贝扩展程序必需的静态资源到 dist 目录
+          cp manifest.json logo.png metadata.json dist/
+          cp -r background content css lib services dist/
+        working-directory: gemini-nexus
+
       - name: 打包产物
         run: |
           VERSION=$(jq -r .version manifest.json)
-          mv dist gemini-nexus-${VERSION}
-          zip -r gemini-nexus-${VERSION}.zip gemini-nexus-${VERSION}
+          # 进入 dist 目录进行打包，确保 ZIP 根目录就是插件文件
+          cd dist
+          zip -r ../gemini-nexus-${VERSION}.zip .
         working-directory: gemini-nexus
 
       - name: 检查版本是否变更
