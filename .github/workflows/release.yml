@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'gemini-nexus/manifest.json'
+  workflow_dispatch: # 允许手动点击运行
 
 jobs:
   build-and-release:
@@ -42,12 +43,18 @@ jobs:
         id: check_version
         run: |
           NEW_VERSION=$(jq -r .version gemini-nexus/manifest.json)
-          OLD_VERSION=$(git show HEAD^:gemini-nexus/manifest.json | jq -r .version)
-          if [ "$NEW_VERSION" != "$OLD_VERSION" ]; then
+          # 如果是手动触发，强制运行
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           else
-            echo "changed=false" >> $GITHUB_OUTPUT
+            OLD_VERSION=$(git show HEAD^:gemini-nexus/manifest.json | jq -r .version || echo "0.0.0")
+            if [ "$NEW_VERSION" != "$OLD_VERSION" ]; then
+              echo "changed=true" >> $GITHUB_OUTPUT
+              echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+            else
+              echo "changed=false" >> $GITHUB_OUTPUT
+            fi
           fi
 
       - name: 创建 Release 并上传附件
