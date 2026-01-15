@@ -29,7 +29,7 @@ export function renderContent(contentDiv, text, role) {
         if (typeof mermaid !== 'undefined') {
             const mermaidBlocks = contentDiv.querySelectorAll('.mermaid');
             if (mermaidBlocks.length > 0) {
-                // Filter out already rendered blocks (marked has a tendency to be re-run)
+                // Filter out already rendered blocks (markdown-it has a tendency to be re-run)
                 const unrenderedBlocks = Array.from(mermaidBlocks).filter(block => !block.hasAttribute('data-processed'));
                 
                 if (unrenderedBlocks.length > 0) {

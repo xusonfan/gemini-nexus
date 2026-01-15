@@ -88,7 +88,7 @@ export function initAppMode() {
             if (app) app.rerender();
         });
 
-        // Configure Markdown (Initial pass, might be skipped if marked not loaded yet)
+        // Configure Markdown (Initial pass, might be skipped if markdown-it not loaded yet)
         configureMarkdown();
 
     })();

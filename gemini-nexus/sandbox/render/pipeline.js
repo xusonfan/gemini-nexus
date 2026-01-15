@@ -8,9 +8,9 @@ import { MathHandler } from './math_utils.js';
  * @returns {string} - HTML string
  */
 export function transformMarkdown(text) {
-    if (typeof marked === 'undefined') {
+    if (typeof markdownit === 'undefined' || !window.mdInstance) {
         // 库异步加载中；如果尚未加载，返回空字符串以避免原生 Markdown 闪烁
-        // 应用在 marked 加载完成后会触发重新渲染
+        // 应用在 markdown-it 加载完成后会触发重新渲染
         return '';
     }
 
@@ -20,7 +20,7 @@ export function transformMarkdown(text) {
     let processedText = mathHandler.protect(text || '');
     
     // 2. Parse Markdown
-    let html = marked.parse(processedText);
+    let html = window.mdInstance.render(processedText);
     
     // 3. Restore Math blocks
     html = mathHandler.restore(html);

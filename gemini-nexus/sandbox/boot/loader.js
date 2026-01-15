@@ -20,14 +20,14 @@ export function loadCSS(href) {
 
 export async function loadLibs() {
     try {
-        // Load Marked (Priority for chat rendering)
+        // Load Markdown-it (Priority for chat rendering)
         // We race against a timeout to ensure we don't block forever if CDN is slow
-        const loadMarked = loadScript('https://cdn.jsdelivr.net/npm/marked/marked.min.js');
+        const loadMd = loadScript('https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js');
         const timeout = new Promise((_, reject) => setTimeout(() => reject('CDN Timeout'), 5000));
         
-        await Promise.race([loadMarked, timeout]).catch(e => console.warn("Marked load issue:", e));
+        await Promise.race([loadMd, timeout]).catch(e => console.warn("Markdown-it load issue:", e));
         
-        // Re-run config now that marked is loaded
+        // Re-run config now that markdown-it is loaded
         configureMarkdown();
 
         // Load others in parallel

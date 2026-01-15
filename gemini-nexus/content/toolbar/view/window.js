@@ -115,7 +115,7 @@
             
             const resultArea = this.elements.resultArea;
             
-            // Content is now always HTML rendered via Bridge (using marked/katex/highlight.js)
+            // Content is now always HTML rendered via Bridge (using markdown-it/katex/highlight.js)
             this.elements.resultText.innerHTML = htmlContent;
 
             // Ensure Footer is visible
