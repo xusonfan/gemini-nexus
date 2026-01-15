@@ -1,4 +1,3 @@
-
 <div align="center">
   <a href="https://github.com/yeahhe365/gemini-nexus">
     <img src="https://github.com/user-attachments/assets/5c5c1f06-7fb2-43b7-b467-f08680d76e70" width="160" height="160" alt="Gemini Nova Logo">
@@ -93,12 +92,16 @@ Gemini Nova 可以选择连接到外部 MCP 服务器（通过 **SSE**、**可�
 
 ## ✨ 核心功能亮点
 
-*   **💬 智能侧边栏**：基于 `sidePanel` API，提供毫秒级唤起的对话空间，支持全文搜索历史记录与**批量管理**。
+*   **💬 智能侧边栏**：基于 `sidePanel` API，提供毫秒级唤起的对话空间，支持全文搜索历史记录、**按日期分组显示**与**批量管理**。
 *   **🪄 划词工具栏**：注入 Content Script，选中文字即刻进行**翻译、总结、重写**，支持窗口**固定**、**透明度调节**及一键回填表单。
 *   **🧠 智能交互增强**：
     *   **自动追问**：AI 根据上下文自动生成后续追问建议。
     *   **智能总结**：支持**网页一键总结**，并可根据对话内容自动生成标题。
     *   **流式动画**：内置流式传输加载动画，提供更平滑的响应体验。
+    *   **动态交互**：输入框占位符随模型动态更新，新增“滚动到底部”按钮及手动滚动检测。
+*   **📊 图表渲染 (Mermaid)**：
+    *   **原生渲染**：集成 Mermaid.js，支持 Markdown 中的流程图、时序图等。
+    *   **深度交互**：支持图表缩放预览、SVG 下载及**一键复制为图片**。
 *   **🖼️ 图像 AI 处理**：
     *   **OCR & 截图翻译**：集成 Canvas 裁剪技术，框选图片区域即刻提取文字并翻译。
     *   **浮窗探测**：自动识别网页图片并生成悬浮 AI 分析按钮。
@@ -116,7 +119,7 @@ Gemini Nova 可以选择连接到外部 MCP 服务器（通过 **SSE**、**可�
 ### 技术栈
 *   **构建工具**：Vite + TypeScript
 *   **架构协议**：Chrome MV3 + Browser Control Protocol
-*   **核心库**：Marked.js, KaTeX, Highlight.js
+*   **核心库**：Marked.js, KaTeX, Highlight.js, Mermaid.js
 
 ## 📄 许可证与致谢
 
