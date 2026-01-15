@@ -387,7 +387,7 @@
             const model = this.ui.getSelectedModel();
             
             this.ui.hide();
-            await this.ui.showAskWindow(rect, null, this.ui.t.titles.summarizePage);
+            await this.ui.showAskWindow(rect, null, this.ui.t.titles.summarizePage, null, true);
             this.ui.showLoading(this.ui.t.loading.summarizePage);
             this.ui.setInputValue(this.ui.t.inputs.summarizePage);
 

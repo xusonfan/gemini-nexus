@@ -98,6 +98,7 @@ class ToolbarActions {
     async handleQuickAction(actionType, selection, rect, model = "gemini-2.5-flash", mousePoint = null) {
         const t = this.t;
         let prompt, title, inputPlaceholder, loadingMsg;
+        let preventFocus = false;
 
         if (actionType === 'translate') {
             prompt = t.prompts.textTranslate(selection);
@@ -109,6 +110,7 @@ class ToolbarActions {
             title = t.titles.summarize;
             inputPlaceholder = t.inputs.summarize;
             loadingMsg = t.loading.summarize;
+            preventFocus = true;
         } else if (actionType === 'grammar') {
             prompt = t.prompts.grammar(selection);
             title = t.titles.grammar;
@@ -128,7 +130,7 @@ class ToolbarActions {
         }
 
         this.ui.hide();
-        await this.ui.showAskWindow(rect, selection, title, mousePoint);
+        await this.ui.showAskWindow(rect, selection, title, mousePoint, preventFocus);
         this.ui.showLoading(loadingMsg);
 
         this.ui.setInputValue(inputPlaceholder);

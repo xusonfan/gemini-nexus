@@ -160,8 +160,8 @@
             this.view.hideImageButton();
         }
 
-        showAskWindow(rect, contextText, title = DEFAULT_TITLE, mousePoint = null) {
-            return this.view.showAskWindow(rect, contextText, title, () => this.dragController.reset(), mousePoint);
+        showAskWindow(rect, contextText, title = DEFAULT_TITLE, mousePoint = null, preventFocus = false) {
+            return this.view.showAskWindow(rect, contextText, title, () => this.dragController.reset(), mousePoint, preventFocus);
         }
 
         showLoading(msg) {

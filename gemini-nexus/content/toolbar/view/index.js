@@ -92,7 +92,7 @@
         get isDocked() { return this.windowView.isDocked; }
         
         togglePin() { return this.windowView.togglePin(); }
-        showAskWindow(rect, contextText, title, resetDrag, mousePoint) { return this.windowView.show(rect, contextText, title, resetDrag, mousePoint); }
+        showAskWindow(rect, contextText, title, resetDrag, mousePoint, preventFocus = false) { return this.windowView.show(rect, contextText, title, resetDrag, mousePoint, preventFocus); }
         hideAskWindow() { this.windowView.hide(); }
         showLoading(msg) { this.windowView.showLoading(msg); }
         

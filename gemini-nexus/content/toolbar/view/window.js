@@ -44,7 +44,7 @@
             return this.isPinned;
         }
 
-        async show(rect, contextText, title, resetDrag = null, mousePoint = null) {
+        async show(rect, contextText, title, resetDrag = null, mousePoint = null, preventFocus = false) {
             if (!this.elements.askWindow) return;
 
             // Load and apply saved dimensions
@@ -86,7 +86,9 @@
             if (this.elements.windowFooter) this.elements.windowFooter.classList.add('hidden');
 
             this.elements.askWindow.classList.add('visible');
-            setTimeout(() => this.elements.askInput.focus(), 50);
+            if (!preventFocus) {
+                setTimeout(() => this.elements.askInput.focus(), 50);
+            }
         }
 
         hide() {
