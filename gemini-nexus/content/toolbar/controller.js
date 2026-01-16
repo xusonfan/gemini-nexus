@@ -356,7 +356,19 @@
         async handleSummarizePage() {
             // 检查侧边栏是否已打开
             try {
-                const response = await chrome.runtime.sendMessage({ action: "CHECK_SIDE_PANEL_OPEN" });
+                // 使用 Promise 封装带有超时的消息发送，以防侧边栏未打开导致无响应
+                const response = await new Promise((resolve) => {
+                    const timeout = setTimeout(() => resolve(null), 150);
+                    chrome.runtime.sendMessage({ action: "CHECK_SIDE_PANEL_OPEN" }, (res) => {
+                        clearTimeout(timeout);
+                        if (chrome.runtime.lastError) {
+                            resolve(null);
+                        } else {
+                            resolve(res);
+                        }
+                    });
+                });
+
                 if (response && response.isOpen) {
                     // 如果侧边栏已打开，直接在侧边栏中触发总结，不显示悬浮窗
                     chrome.runtime.sendMessage({
