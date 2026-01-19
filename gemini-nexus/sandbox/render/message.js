@@ -114,7 +114,8 @@ export function appendMessage(container, text, role, attachment = null, thoughts
             footerDiv.style.display = 'flex';
             footerDiv.style.alignItems = 'flex-start';
             footerDiv.style.gap = '8px';
-            footerDiv.style.marginTop = '8px'; // Adjusted for balanced spacing
+            footerDiv.style.marginTop = '8px'; // 调整平衡间距
+            footerDiv.style.marginBottom = '8px'; // 优化底部间距
             footerDiv.style.minHeight = '32px';
 
             // --- Add Copy Button ---
