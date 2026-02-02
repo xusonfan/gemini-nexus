@@ -35,6 +35,21 @@
             .sk-icon { background: #333537; }
             .sk-input { background: #1e1f20; }
         }
+
+        @media print {
+            body, html {
+                height: auto !important;
+                overflow: visible !important;
+            }
+            #skeleton {
+                display: none !important;
+            }
+            iframe {
+                height: auto !important;
+                overflow: visible !important;
+                position: static !important;
+            }
+        }
     </style>
 </head>
 <body>

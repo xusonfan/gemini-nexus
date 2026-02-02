@@ -8,7 +8,7 @@
     justify-content: space-between;
     align-items: flex-start;
     padding: 16px 20px;
-    z-index: 10;
+    z-index: 1000; /* Ensure header is above chat history */
     pointer-events: none; /* Let clicks pass through empty space */
 }
 
@@ -25,7 +25,7 @@ body.layout-wide #history-toggle {
     display: flex;
     align-items: center;
     gap: 12px;
-    pointer-events: auto;
+    pointer-events: auto; /* Ensure buttons inside are clickable */
 }
 
 .header .icon-btn {

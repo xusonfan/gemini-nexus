@@ -34,6 +34,7 @@ export class UIController {
         this.sendBtn = this.chat.sendBtn;
         this.modelSelect = elements.modelSelect;
         this.tabSwitcherBtn = document.getElementById('tab-switcher-btn');
+        this.exportPdfBtn = document.getElementById('export-pdf-btn');
 
         // Initialize Layout Detection
         this.checkLayout();
@@ -47,6 +48,12 @@ export class UIController {
             document.body.classList.add('layout-wide');
         } else {
             document.body.classList.remove('layout-wide');
+        }
+
+        // Only show Export PDF button in Full Page mode (where window.print works)
+        if (this.exportPdfBtn) {
+            const isFullPage = window.innerWidth > 800;
+            this.exportPdfBtn.style.display = isFullPage ? 'flex' : 'none';
         }
     }
 

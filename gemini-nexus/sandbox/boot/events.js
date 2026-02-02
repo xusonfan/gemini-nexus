@@ -16,6 +16,25 @@ export function bindAppEvents(app, ui, setResizeRef) {
     // New Chat Buttons
     document.getElementById('new-chat-header-btn').addEventListener('click', () => app.handleNewChat());
     
+    // Export PDF Button
+    const exportPdfBtn = document.getElementById('export-pdf-btn');
+    if (exportPdfBtn) {
+        exportPdfBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (ui && ui.chat) {
+                ui.chat.exportToPDF();
+            } else {
+                window.print();
+            }
+        });
+        
+        // Ensure the button is visible and pointer-events are active
+        exportPdfBtn.style.pointerEvents = 'auto';
+        exportPdfBtn.style.visibility = 'visible';
+    }
+
     // Tab Switcher Button
     const tabSwitcherBtn = document.getElementById('tab-switcher-btn');
     if (tabSwitcherBtn) {

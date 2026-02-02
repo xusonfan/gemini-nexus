@@ -12,6 +12,7 @@ export class ChatController {
         this.sendBtn = elements.sendBtn;
         this.pageContextBtn = document.getElementById('page-context-btn');
         this.scrollBottomBtn = document.getElementById('scroll-bottom-btn');
+        this.exportPdfBtn = document.getElementById('export-pdf-btn');
 
         this.initListeners();
     }
@@ -44,6 +45,7 @@ export class ChatController {
                 this.scrollBottomBtn.classList.remove('visible');
             });
         }
+
 
         // Auto-resize Textarea
         if (this.inputFn) {
@@ -130,6 +132,29 @@ export class ChatController {
     togglePageContext(isActive) {
         if (this.pageContextBtn) {
             this.pageContextBtn.classList.toggle('active', isActive);
+        }
+    }
+
+    exportToPDF() {
+        // 获取当前会话标题作为文件名
+        const activeItem = document.querySelector('.history-item.active');
+        const sessionTitle = activeItem ? activeItem.querySelector('.history-title')?.textContent : 'Chat Export';
+        
+        // 尝试直接打印
+        try {
+            const originalTitle = document.title;
+            document.title = sessionTitle;
+            window.print();
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 1000);
+        } catch (e) {
+            console.warn("Direct print failed, trying via bridge", e);
+            // 发送消息给父窗口（侧边栏桥接层）触发打印
+            window.parent.postMessage({
+                action: 'PRINT',
+                payload: { title: sessionTitle }
+            }, '*');
         }
     }
 

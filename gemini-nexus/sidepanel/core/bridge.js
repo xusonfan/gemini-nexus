@@ -32,7 +32,18 @@ export class MessageBridge {
             return;
         }
 
-        // 3. Background Forwarding
+        // 3. Printing
+        if (action === 'PRINT') {
+            const originalTitle = document.title;
+            document.title = payload.title || 'Chat Export';
+            window.print();
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 1000);
+            return;
+        }
+
+        // 4. Background Forwarding
         if (action === 'FORWARD_TO_BACKGROUND') {
             chrome.runtime.sendMessage(payload)
                 .then(response => {
