@@ -1,11 +1,13 @@
 
 // background/handlers/session/quick_ask_handler.js
 import { saveToHistory } from '../../managers/history_manager.js';
+import { PromptBuilder } from './prompt/builder.js';
 
 export class QuickAskHandler {
-    constructor(sessionManager, imageHandler) {
+    constructor(sessionManager, imageHandler, controlManager, mcpManager) {
         this.sessionManager = sessionManager;
         this.imageHandler = imageHandler;
+        this.builder = new PromptBuilder(controlManager, mcpManager);
     }
 
     async handleQuickAsk(request, sender) {
@@ -27,7 +29,15 @@ export class QuickAskHandler {
             }
         };
 
-        const result = await this.sessionManager.handleSendPrompt(request, onUpdate);
+        // Build prompt with system instructions (time injection)
+        const buildResult = await this.builder.build(request);
+        const promptRequest = {
+            ...request,
+            text: buildResult.userPrompt,
+            systemInstruction: buildResult.systemInstruction
+        };
+
+        const result = await this.sessionManager.handleSendPrompt(promptRequest, onUpdate);
         
         let savedSession = null;
         if (result && result.status === 'success') {
@@ -58,7 +68,7 @@ export class QuickAskHandler {
             return;
         }
 
-        const promptRequest = {
+        const initialRequest = {
             text: request.text,
             model: request.model,
             files: [{
@@ -66,6 +76,14 @@ export class QuickAskHandler {
                 type: imgRes.type,
                 name: imgRes.name
             }]
+        };
+
+        // Build prompt with system instructions (time injection)
+        const buildResult = await this.builder.build(initialRequest);
+        const promptRequest = {
+            ...initialRequest,
+            text: buildResult.userPrompt,
+            systemInstruction: buildResult.systemInstruction
         };
 
         await this.sessionManager.resetContext();

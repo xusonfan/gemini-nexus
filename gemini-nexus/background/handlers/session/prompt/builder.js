@@ -11,6 +11,7 @@ export class PromptBuilder {
 
     async build(request) {
         let systemPreamble = `Current Time: ${new Date().toLocaleString()}
+(Note: Please pay attention to the current time when necessary to provide accurate and context-aware responses.)
 
 `;
 
