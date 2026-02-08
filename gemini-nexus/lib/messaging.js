@@ -66,6 +66,17 @@ export function saveTextSelectionToStorage(enabled) {
     }, '*');
 }
 
+export function requestToolbarTextFromStorage() {
+    window.parent.postMessage({ action: 'GET_TOOLBAR_TEXT' }, '*');
+}
+
+export function saveToolbarTextToStorage(enabled) {
+    window.parent.postMessage({
+        action: 'SAVE_TOOLBAR_TEXT',
+        payload: enabled
+    }, '*');
+}
+
 export function requestImageToolsFromStorage() {
     window.parent.postMessage({ action: 'GET_IMAGE_TOOLS' }, '*');
 }

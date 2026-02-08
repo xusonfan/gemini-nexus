@@ -224,6 +224,12 @@
             }
         }
 
+        setToolbarTextEnabled(enabled) {
+            if (this.view) {
+                this.view.setToolbarTextEnabled(enabled);
+            }
+        }
+
         // --- Model Selection ---
 
         getSelectedModel() {

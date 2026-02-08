@@ -126,6 +126,13 @@ export class MessageBridge {
             });
             return;
         }
+        if (action === 'GET_TOOLBAR_TEXT') {
+            chrome.storage.local.get(['geminiToolbarTextEnabled'], (res) => {
+                const val = res.geminiToolbarTextEnabled === true;
+                this.frame.postMessage({ action: 'RESTORE_TOOLBAR_TEXT', payload: val });
+            });
+            return;
+        }
         if (action === 'GET_ACCOUNT_INDICES') {
             chrome.storage.local.get(['geminiAccountIndices'], (res) => {
                 this.frame.postMessage({ action: 'RESTORE_ACCOUNT_INDICES', payload: res.geminiAccountIndices || "0" });
@@ -184,6 +191,7 @@ export class MessageBridge {
         if (action === 'SAVE_OPACITY') this.state.save('gemini_nexus_opacity', payload);
         if (action === 'SAVE_TEXT_SELECTION') this.state.save('geminiTextSelectionEnabled', payload);
         if (action === 'SAVE_IMAGE_TOOLS') this.state.save('geminiImageToolsEnabled', payload);
+        if (action === 'SAVE_TOOLBAR_TEXT') this.state.save('geminiToolbarTextEnabled', payload);
         if (action === 'SAVE_SIDEBAR_BEHAVIOR') this.state.save('geminiSidebarBehavior', payload);
         if (action === 'SAVE_ACCOUNT_INDICES') this.state.save('geminiAccountIndices', payload);
         if (action === 'SAVE_SUMMARY_MODEL') this.state.save('geminiSummaryModel', payload);

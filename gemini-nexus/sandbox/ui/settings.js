@@ -1,6 +1,6 @@
 
 // sandbox/ui/settings.js
-import { saveShortcutsToStorage, saveThemeToStorage, requestThemeFromStorage, saveOpacityToStorage, requestOpacityFromStorage, saveLanguageToStorage, requestLanguageFromStorage, saveTextSelectionToStorage, requestTextSelectionFromStorage, saveSidebarBehaviorToStorage, saveImageToolsToStorage, requestImageToolsFromStorage, saveAccountIndicesToStorage, requestAccountIndicesFromStorage, saveSummaryModelToStorage, requestSummaryModelFromStorage, saveConnectionSettingsToStorage, requestConnectionSettingsFromStorage, sendToBackground } from '../../lib/messaging.js';
+import { saveShortcutsToStorage, saveThemeToStorage, requestThemeFromStorage, saveOpacityToStorage, requestOpacityFromStorage, saveLanguageToStorage, requestLanguageFromStorage, saveTextSelectionToStorage, requestTextSelectionFromStorage, saveToolbarTextToStorage, requestToolbarTextFromStorage, saveSidebarBehaviorToStorage, saveImageToolsToStorage, requestImageToolsFromStorage, saveAccountIndicesToStorage, requestAccountIndicesFromStorage, saveSummaryModelToStorage, requestSummaryModelFromStorage, saveConnectionSettingsToStorage, requestConnectionSettingsFromStorage, sendToBackground } from '../../lib/messaging.js';
 import { setLanguagePreference, getLanguagePreference } from '../core/i18n.js';
 import { SettingsView } from './settings/view.js';
 import { DEFAULT_SHORTCUTS } from '../../lib/constants.js';
@@ -14,6 +14,7 @@ export class SettingsController {
         this.shortcuts = { ...this.defaultShortcuts };
         
         this.textSelectionEnabled = true;
+        this.toolbarTextEnabled = false;
         this.imageToolsEnabled = true;
         this.accountIndices = "0";
         this.summaryModel = "";
@@ -53,6 +54,7 @@ export class SettingsController {
             onThemeChange: (theme) => this.setTheme(theme),
             onOpacityChange: (opacity) => this.setOpacity(opacity),
             onLanguageChange: (lang) => this.setLanguage(lang),
+            onToolbarTextChange: (enabled) => { this.toolbarTextEnabled = enabled; saveToolbarTextToStorage(enabled); },
             
             onTextSelectionChange: (val) => { this.textSelectionEnabled = (val === 'on' || val === true); saveTextSelectionToStorage(this.textSelectionEnabled); },
             onImageToolsChange: (val) => { this.imageToolsEnabled = (val === 'on' || val === true); saveImageToolsToStorage(this.imageToolsEnabled); },
@@ -90,7 +92,9 @@ export class SettingsController {
         this.view.setShortcuts(this.shortcuts);
         this.view.setLanguageValue(getLanguagePreference());
         requestOpacityFromStorage();
+        requestToolbarTextFromStorage();
         this.view.setToggles(this.textSelectionEnabled, this.imageToolsEnabled);
+        this.view.setToolbarTextValue(this.toolbarTextEnabled);
         this.view.setAccountIndices(this.accountIndices);
         this.view.setConnectionSettings({ ...this.connectionData, summaryModel: this.summaryModel });
         
@@ -225,6 +229,11 @@ export class SettingsController {
     updateTextSelection(enabled) {
         this.textSelectionEnabled = enabled;
         this.view.setToggles(this.textSelectionEnabled, this.imageToolsEnabled);
+    }
+
+    updateToolbarText(enabled) {
+        this.toolbarTextEnabled = enabled;
+        this.view.setToolbarTextValue(enabled);
     }
 
     updateImageTools(enabled) {

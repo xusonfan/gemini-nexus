@@ -38,6 +38,7 @@
             this.lastSessionId = null;
             this.currentMode = 'ask'; // 默认模式
             this.isSelectionEnabled = true;
+            this.isToolbarTextEnabled = false;
 
             // Bind Action Handler
             this.handleAction = this.handleAction.bind(this);
@@ -136,6 +137,13 @@
             this.isSelectionEnabled = enabled;
             if (!enabled) {
                 this.handleSelectionClear();
+            }
+        }
+
+        setToolbarTextEnabled(enabled) {
+            this.isToolbarTextEnabled = enabled;
+            if (this.ui) {
+                this.ui.setToolbarTextEnabled(enabled);
             }
         }
 

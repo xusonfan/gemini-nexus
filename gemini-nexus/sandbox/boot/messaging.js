@@ -87,6 +87,10 @@ export class AppMessageBridge {
             this.ui.settings.updateImageTools(payload);
             return;
         }
+        if (action === 'RESTORE_TOOLBAR_TEXT') {
+            this.ui.settings.updateToolbarText(payload);
+            return;
+        }
         if (action === 'RESTORE_ACCOUNT_INDICES') {
             this.ui.settings.updateAccountIndices(payload);
             return;

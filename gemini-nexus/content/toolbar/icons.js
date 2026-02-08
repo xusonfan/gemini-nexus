@@ -8,7 +8,7 @@
      * Constants for SVGs
      */
     window.GeminiToolbarIcons = {
-        LOGO: `<img src="${logoUrl}" style="width: 20px; height: 20px; display: block;" alt="Gemini">`,
+        LOGO: `<img src="${logoUrl}" style="width: 14px; height: 14px; display: block;" alt="Gemini">`,
         DRAG: `<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="8" cy="4" r="2.5"/><circle cx="8" cy="12" r="2.5"/><circle cx="8" cy="20" r="2.5"/><circle cx="16" cy="4" r="2.5"/><circle cx="16" cy="12" r="2.5"/><circle cx="16" cy="20" r="2.5"/></svg>`,
         ASK: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
         TRANSLATE: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg>`,

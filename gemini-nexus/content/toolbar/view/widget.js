@@ -9,6 +9,52 @@
     class WidgetView {
         constructor(elements) {
             this.elements = elements;
+            this.isTextEnabled = false;
+        }
+
+        setToolbarTextEnabled(enabled) {
+            this.isTextEnabled = enabled;
+            this.renderToolbarText();
+        }
+
+        renderToolbarText() {
+            const toolbar = this.elements.toolbar;
+            if (!toolbar) return;
+
+            const t = window.GeminiToolbarStrings || {};
+            const buttons = [
+                { id: 'btn-ask', text: t.askAi },
+                { id: 'btn-copy', text: t.copy },
+                { id: 'btn-grammar', text: t.fixGrammar },
+                { id: 'btn-translate', text: t.translate },
+                { id: 'btn-explain', text: t.explain },
+                { id: 'btn-summarize', text: t.summarize }
+            ];
+
+            buttons.forEach(btnInfo => {
+                const btn = toolbar.querySelector(`#${btnInfo.id}`);
+                if (btn) {
+                    let textSpan = btn.querySelector('.btn-text');
+                    if (this.isTextEnabled) {
+                        if (!textSpan) {
+                            textSpan = document.createElement('span');
+                            textSpan.className = 'btn-text';
+                            btn.appendChild(textSpan);
+                        }
+                        textSpan.textContent = btnInfo.text;
+                        btn.classList.add('with-text');
+                    } else {
+                        if (textSpan) textSpan.remove();
+                        btn.classList.remove('with-text');
+                    }
+                }
+            });
+
+            if (this.isTextEnabled) {
+                toolbar.classList.add('with-text');
+            } else {
+                toolbar.classList.remove('with-text');
+            }
         }
 
         showToolbar(rect, mousePoint) {

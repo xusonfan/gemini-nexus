@@ -15,12 +15,13 @@ export class AppearanceSection {
             themeSelect: get('theme-select'),
             opacitySlider: get('opacity-slider'),
             opacityValue: get('opacity-value'),
-            languageSelect: get('language-select')
+            languageSelect: get('language-select'),
+            toolbarTextToggle: get('toolbar-text-toggle')
         };
     }
 
     bindEvents() {
-        const { themeSelect, opacitySlider, opacityValue, languageSelect } = this.elements;
+        const { themeSelect, opacitySlider, opacityValue, languageSelect, toolbarTextToggle } = this.elements;
 
         if (themeSelect) {
             themeSelect.addEventListener('change', (e) => this.fire('onThemeChange', e.target.value));
@@ -34,6 +35,9 @@ export class AppearanceSection {
         }
         if (languageSelect) {
             languageSelect.addEventListener('change', (e) => this.fire('onLanguageChange', e.target.value));
+        }
+        if (toolbarTextToggle) {
+            toolbarTextToggle.addEventListener('change', (e) => this.fire('onToolbarTextChange', e.target.checked));
         }
 
         // System Theme Listener
@@ -57,6 +61,10 @@ export class AppearanceSection {
 
     setLanguage(lang) {
         if (this.elements.languageSelect) this.elements.languageSelect.value = lang;
+    }
+
+    setToolbarText(enabled) {
+        if (this.elements.toolbarTextToggle) this.elements.toolbarTextToggle.checked = enabled;
     }
 
     applyVisualTheme(theme) {

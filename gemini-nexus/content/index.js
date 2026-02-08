@@ -21,7 +21,7 @@ console.log("%c Gemini Nexus v4.2.3 Ready ", "background: #333; color: #00ff00; 
     shortcuts.setController(floatingToolbar);
 
     // Handle initial settings that don't fit in dedicated modules yet
-    chrome.storage.local.get(['geminiTextSelectionEnabled', 'geminiImageToolsEnabled'], (result) => {
+    chrome.storage.local.get(['geminiTextSelectionEnabled', 'geminiImageToolsEnabled', 'geminiToolbarTextEnabled'], (result) => {
         const selectionEnabled = result.geminiTextSelectionEnabled !== false;
         if (floatingToolbar) {
             floatingToolbar.setSelectionEnabled(selectionEnabled);
@@ -30,6 +30,11 @@ console.log("%c Gemini Nexus v4.2.3 Ready ", "background: #333; color: #00ff00; 
         const imageToolsEnabled = result.geminiImageToolsEnabled !== false;
         if (floatingToolbar) {
             floatingToolbar.setImageToolsEnabled(imageToolsEnabled);
+        }
+
+        const toolbarTextEnabled = result.geminiToolbarTextEnabled === true;
+        if (floatingToolbar) {
+            floatingToolbar.setToolbarTextEnabled(toolbarTextEnabled);
         }
     });
 
@@ -42,6 +47,10 @@ console.log("%c Gemini Nexus v4.2.3 Ready ", "background: #333; color: #00ff00; 
             if (changes.geminiImageToolsEnabled) {
                  const enabled = changes.geminiImageToolsEnabled.newValue !== false;
                  if (floatingToolbar) floatingToolbar.setImageToolsEnabled(enabled);
+            }
+            if (changes.geminiToolbarTextEnabled) {
+                 const enabled = changes.geminiToolbarTextEnabled.newValue === true;
+                 if (floatingToolbar) floatingToolbar.setToolbarTextEnabled(enabled);
             }
         }
     });

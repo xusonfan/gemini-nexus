@@ -23,7 +23,8 @@ export class SettingsView {
         this.appearance = new AppearanceSection({
             onThemeChange: (val) => this.fire('onThemeChange', val),
             onOpacityChange: (val) => this.fire('onOpacityChange', val),
-            onLanguageChange: (val) => this.fire('onLanguageChange', val)
+            onLanguageChange: (val) => this.fire('onLanguageChange', val),
+            onToolbarTextChange: (val) => this.fire('onToolbarTextChange', val)
         });
         
         this.shortcuts = new ShortcutsSection();
@@ -122,6 +123,10 @@ export class SettingsView {
 
     setLanguageValue(lang) {
         this.appearance.setLanguage(lang);
+    }
+
+    setToolbarTextValue(enabled) {
+        this.appearance.setToolbarText(enabled);
     }
     
     applyVisualTheme(theme) {

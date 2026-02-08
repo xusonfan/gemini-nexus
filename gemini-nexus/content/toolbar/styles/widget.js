@@ -32,7 +32,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0;
+            gap: 6px;
             background: transparent;
             border: none;
             color: #e3e3e3;
@@ -41,10 +41,19 @@
             font-size: 13px;
             font-weight: 500;
             cursor: pointer;
-            transition: background 0.15s;
+            transition: background 0.15s, width 0.2s;
             white-space: nowrap;
             width: 32px;
             height: 32px;
+            overflow: hidden;
+        }
+        .btn.with-text {
+            width: auto;
+            padding: 6px 10px;
+        }
+        .btn-text {
+            font-size: 12px;
+            line-height: 1;
         }
         .btn:hover {
             background: rgba(255, 255, 255, 0.1);

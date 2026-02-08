@@ -91,6 +91,24 @@ export function setupMessageListener(sessionManager, imageHandler, controlManage
             return false;
         }
 
+        if (request.action === 'GET_TOOLBAR_TEXT') {
+            chrome.storage.local.get(['geminiToolbarTextEnabled'], (res) => {
+                const payload = res.geminiToolbarTextEnabled === true;
+                if (sender.tab) {
+                    chrome.tabs.sendMessage(sender.tab.id, { action: 'RESTORE_TOOLBAR_TEXT', payload });
+                } else {
+                    chrome.runtime.sendMessage({ action: 'RESTORE_TOOLBAR_TEXT', payload });
+                }
+                sendResponse({ payload });
+            });
+            return true;
+        }
+
+        if (request.action === 'SAVE_TOOLBAR_TEXT') {
+            chrome.storage.local.set({ geminiToolbarTextEnabled: request.payload });
+            return false;
+        }
+
         // Delegate to Session Handler (Prompt, Context, Quick Ask, Browser Control)
         if (sessionHandler.handle(request, sender, sendResponse)) {
             return true;
