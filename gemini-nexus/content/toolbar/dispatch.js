@@ -15,6 +15,7 @@
 
         dispatch(actionType, data) {
             const currentModel = this.ui.getSelectedModel();
+            const modifiers = data && typeof data === 'object' ? data.modifiers : null;
 
             switch(actionType) {
                 case 'copy_selection':
@@ -99,7 +100,16 @@
                 case 'summarize':
                     if (!this.controller.currentSelection) return;
                     this.controller.lastSessionId = null;
-                    this.actions.handleQuickAction(actionType, this.controller.currentSelection, this.controller.lastRect, currentModel, this.controller.lastMousePoint);
+                    this.actions.handleQuickAction(
+                        actionType,
+                        this.controller.currentSelection,
+                        this.controller.lastRect,
+                        currentModel,
+                        this.controller.lastMousePoint,
+                        {
+                            includePageContext: actionType === 'explain' && modifiers ? !!modifiers.shift : false
+                        }
+                    );
                     break;
 
                 case 'grammar':

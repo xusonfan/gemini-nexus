@@ -95,10 +95,11 @@ class ToolbarActions {
         chrome.runtime.sendMessage(msg);
     }
 
-    async handleQuickAction(actionType, selection, rect, model = "gemini-2.5-flash", mousePoint = null) {
+    async handleQuickAction(actionType, selection, rect, model = "gemini-2.5-flash", mousePoint = null, options = {}) {
         const t = this.t;
         let prompt, title, inputPlaceholder, loadingMsg;
         let preventFocus = false;
+        const includePageContext = !!options.includePageContext;
 
         if (actionType === 'translate') {
             prompt = t.prompts.textTranslate(selection);
@@ -138,7 +139,8 @@ class ToolbarActions {
         const msg = {
             action: "QUICK_ASK",
             text: prompt,
-            model: model
+            model: model,
+            ...(includePageContext ? { includePageContext: true } : {})
         };
 
         this.lastRequest = msg;

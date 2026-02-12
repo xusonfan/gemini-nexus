@@ -14,7 +14,15 @@
 
         triggerAction(e, action) {
             e.preventDefault(); e.stopPropagation();
-            this.manager.fireCallback('onAction', action);
+
+            const modifiers = {
+                shift: !!e.shiftKey,
+                alt: !!e.altKey,
+                ctrl: !!e.ctrlKey,
+                meta: !!e.metaKey
+            };
+
+            this.manager.fireCallback('onAction', action, { modifiers });
         }
 
         cancelAsk(e) {
