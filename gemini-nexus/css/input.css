@@ -146,6 +146,11 @@ body.layout-wide .tools-container {
 .tools-row::-webkit-scrollbar {
     display: none; /* Chrome/Safari */
 }
+.tools-row.drag-scroll-active {
+    cursor: grabbing;
+    user-select: none;
+    -webkit-user-select: none;
+}
 
 .tool-btn {
     background: var(--tool-bg);

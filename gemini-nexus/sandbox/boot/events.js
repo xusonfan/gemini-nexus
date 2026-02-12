@@ -61,6 +61,77 @@ export function bindAppEvents(app, ui, setResizeRef) {
         scrollRightBtn.addEventListener('click', () => {
             toolsRow.scrollBy({ left: 150, behavior: 'smooth' });
         });
+
+        // Mouse wheel should scroll tools horizontally when overflowed
+        toolsRow.addEventListener('wheel', (e) => {
+            if (toolsRow.scrollWidth <= toolsRow.clientWidth) return;
+            const dominantDelta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+            if (!dominantDelta) return;
+            toolsRow.scrollLeft += dominantDelta;
+            e.preventDefault();
+        }, { passive: false });
+
+        // Middle-mouse drag to scroll (pan) the tools row
+        let isPanning = false;
+        let startClientX = 0;
+        let startScrollLeft = 0;
+        let activePointerId = null;
+
+        const stopPan = () => {
+            if (!isPanning) return;
+            isPanning = false;
+            activePointerId = null;
+            toolsRow.classList.remove('drag-scroll-active');
+        };
+
+        toolsRow.addEventListener('pointerdown', (e) => {
+            if (e.pointerType !== 'mouse') return;
+            if (e.button !== 1) return; // middle button
+            if (toolsRow.scrollWidth <= toolsRow.clientWidth) return;
+
+            isPanning = true;
+            activePointerId = e.pointerId;
+            startClientX = e.clientX;
+            startScrollLeft = toolsRow.scrollLeft;
+            toolsRow.classList.add('drag-scroll-active');
+
+            try { toolsRow.setPointerCapture(e.pointerId); } catch { /* noop */ }
+            e.preventDefault();
+            e.stopPropagation();
+        }, { passive: false });
+
+        toolsRow.addEventListener('pointermove', (e) => {
+            if (!isPanning) return;
+            if (activePointerId !== e.pointerId) return;
+            const dx = e.clientX - startClientX;
+            toolsRow.scrollLeft = startScrollLeft - dx;
+            e.preventDefault();
+        }, { passive: false });
+
+        toolsRow.addEventListener('pointerup', (e) => {
+            if (activePointerId !== e.pointerId) return;
+            try { toolsRow.releasePointerCapture(e.pointerId); } catch { /* noop */ }
+            stopPan();
+        });
+
+        toolsRow.addEventListener('pointercancel', (e) => {
+            if (activePointerId !== e.pointerId) return;
+            stopPan();
+        });
+
+        toolsRow.addEventListener('lostpointercapture', stopPan);
+
+        // Prevent default middle-click behaviors (autoscroll/auxclick)
+        toolsRow.addEventListener('auxclick', (e) => {
+            if (e.button !== 1) return;
+            e.preventDefault();
+        }, { passive: false });
+
+        toolsRow.addEventListener('mousedown', (e) => {
+            if (e.button !== 1) return;
+            if (toolsRow.scrollWidth <= toolsRow.clientWidth) return;
+            e.preventDefault();
+        }, { passive: false });
     }
 
     // Tools
