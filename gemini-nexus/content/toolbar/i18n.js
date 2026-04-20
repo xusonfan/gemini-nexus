@@ -4,6 +4,89 @@
 (function() {
     // Simple localization for Content Script
     const isZh = navigator.language.startsWith('zh');
+
+    const buildTranslationTargetRules = (lang) => lang === 'zh'
+        ? [
+            "- 如果原文是英文，翻译为中文。",
+            "- 如果原文是中文，翻译为英文。",
+            "- 如果原文是其他语言，翻译为中文。"
+        ].join('\n')
+        : [
+            "- If the source text is English, translate it into Chinese.",
+            "- If the source text is Chinese, translate it into English.",
+            "- If the source text is any other language, translate it into Chinese."
+        ].join('\n');
+
+    const buildProfessionalTranslatePrompt = (text, mode) => {
+        if (isZh) {
+            const header = mode === 'image'
+                ? "你是一名专业翻译顾问。请先识别图片中的文字，再进行高质量翻译。"
+                : "你是一名专业翻译顾问。请对下面的文本进行高质量翻译。";
+            const body = mode === 'image'
+                ? "如果 OCR 存在不确定内容，请保留原文并用 [识别不清] 标注，不要猜测。"
+                : "请先判断原文语言，再按规则翻译。";
+            const source = text ? `\n\n原文：\n\"${text}\"` : "";
+            return `${header}
+
+${buildTranslationTargetRules('zh')}
+
+${body}
+
+请使用 Markdown 输出，并严格遵守以下规则：
+1. 保留原文的语气、语境和专业含义；遇到术语时优先采用自然、专业、常用的译法。
+2. 不要输出类似“## 译文”“## 音标 / 发音”这类大标题，但要保留清晰层次。
+3. 使用紧凑列表格式输出，整体控制在 4 到 6 行内：
+- 第 1 行：直接给出完整译文，不加标题。
+- 第 2 行：如果有英文关键词、单词或短语，合并展示“词 + IPA + 词性”；多个词用分号分隔。没有则写“发音：无”。
+- 第 3 行：以“说明：”开头，用 1 句话说明核心含义、使用场景、常见搭配、语气差异或翻译取舍。
+- 第 4 到 5 行：以“例：”开头给出 1 到 2 条简短例句，格式使用“原句 -> 译文”。
+4. 不要把说明写成长段落，不要连续输出大段正文。
+5. 如果原文很短（如单词、短语），输出应更偏词典/词条风格。
+6. 如果原文较长（如句子、段落），输出应更偏专业翻译讲解风格，但保持简洁。
+7. 不要输出与翻译无关的客套话、免责声明或多余换行。
+
+输出示例（仅作格式参考，请按实际内容替换）：
+- 有韧性的；适应力强的；能迅速恢复的
+- resilient /rɪˈzɪliənt/ adj.
+- 说明：常用于描述人、系统或组织在压力、变化或挫折下依然能恢复和适应；相比 strong，更强调“受冲击后恢复”的能力。
+- 例：Children are often more resilient than adults expect. -> 孩子的适应力往往比成年人想象的更强。
+- 例：We need a more resilient supply chain. -> 我们需要一个更具韧性的供应链。${source}`;
+        }
+
+        const header = mode === 'image'
+            ? "You are a professional translator. First extract the text from the image, then provide a high-quality translation."
+            : "You are a professional translator. Provide a high-quality translation for the text below.";
+        const body = mode === 'image'
+            ? "If any OCR content is uncertain, keep the original fragment and mark it as [unclear] instead of guessing."
+            : "Detect the source language first, then translate according to the rules below.";
+        const source = text ? `\n\nSource text:\n\"${text}\"` : "";
+        return `${header}
+
+${buildTranslationTargetRules('en')}
+
+${body}
+
+Use Markdown and follow this exact structure:
+1. Do not output large section headers such as "Translation" or "Pronunciation", but keep the hierarchy clear.
+2. Use a compact bullet-card layout and keep the whole answer within 4 to 6 lines:
+- Line 1: the final translation only, without a heading.
+- Line 2: if there are English keywords, words, or phrases, merge them as "term + IPA + part of speech"; separate multiple items with semicolons. If not applicable, write "Pronunciation: N/A".
+- Line 3: start with "Notes:" and explain the key meaning, usage, collocations, tone differences, or translation choices in 1 concise sentence.
+- Line 4 to 5: start with "Example:" and provide 1 to 2 short examples in the format "Original -> Translation".
+3. Do not write long paragraphs or dense blocks of text.
+4. Preserve tone, context, and domain-specific meaning.
+5. For technical, legal, business, or academic content, prefer professional and standard terminology.
+6. For short input, make the answer more dictionary-like.
+7. For long input, keep it concise but still explanatory.
+8. Do not add filler, greetings, unrelated commentary, or excessive blank lines.
+
+Example output (format reference only, replace with the actual content):
+- resilient: resilient; adaptable; able to recover quickly
+- resilient /rɪˈzɪliənt/ adj.
+- Notes: Often used for people, systems, or organizations that can recover from stress, disruption, or setbacks; compared with strong, it emphasizes the ability to bounce back after difficulty.
+- Example: Children are often more resilient than adults expect. -> 孩子的适应力往往比成年人想象的更强。
+- Example: We need a more resilient supply chain. -> 我们需要一个更具韧性的供应链。${source}`;
+    };
     
     window.GeminiToolbarStrings = {
         askAi: isZh ? "询问 AI" : "Ask AI",
@@ -57,9 +140,7 @@
                 "请识别并提取这张图片中的文字 (OCR)。仅输出识别到的文本内容，不需要任何解释。" : 
                 "Please OCR this image. Extract the text content exactly as is, without any explanation.",
             
-            imageTranslate: isZh ? 
-                "请识别图片中的文字并翻译：如果是英文则译为中文，是中文则译为英文，其他语言译为中文。仅输出翻译结果。" : 
-                "Extract text and translate: If English -> Chinese, If Chinese -> English, Others -> Chinese. Output only translation.",
+            imageTranslate: buildProfessionalTranslatePrompt(null, 'image'),
             
             analyze: isZh ? 
                 "请详细分析并描述这张图片的内容。" : 
@@ -90,9 +171,7 @@
                 "Please describe the content of this screenshot in detail.",
 
             // Text Actions
-            textTranslate: (text) => isZh ? 
-                `请将以下文本翻译：\n- 如果是英文，翻译为中文。\n- 如果是中文，翻译为英文。\n- 如果是其他语言，翻译为中文。\n\n仅输出翻译结果，不要包含任何解释：\n\n"${text}"` : 
-                `Translate the following text:\n- If it is English, translate to Chinese.\n- If it is Chinese, translate to English.\n- If it is any other language, translate to Chinese.\n\nOutput ONLY the translation, no explanation:\n\n"${text}"`,
+            textTranslate: (text) => buildProfessionalTranslatePrompt(text, 'text'),
             
             explain: (text) => isZh ? 
                 `用通俗易懂的语言简要解释以下内容：\n\n"${text}"` : 

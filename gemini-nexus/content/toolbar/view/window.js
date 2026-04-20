@@ -47,6 +47,8 @@
         async show(rect, contextText, title, resetDrag = null, mousePoint = null, preventFocus = false, options = {}) {
             if (!this.elements.askWindow) return;
             const showInput = options.showInput !== false;
+            const showContext = options.showContext !== false;
+            const mode = options.mode || 'default';
 
             // Load and apply saved dimensions
             const stored = await chrome.storage.local.get('gemini_nexus_window_size');
@@ -72,7 +74,9 @@
             
             // Reset Content
             this.elements.windowTitle.textContent = title || DEFAULT_TITLE;
-            if (contextText) {
+            this.elements.askWindow.setAttribute('data-mode', mode);
+
+            if (showContext && contextText) {
                 this.elements.contextPreview.textContent = contextText;
                 this.elements.contextPreview.classList.remove('hidden');
             } else {

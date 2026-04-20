@@ -40,7 +40,7 @@ export class QuickAskHandler {
         const result = await this.sessionManager.handleSendPrompt(promptRequest, onUpdate);
         
         let savedSession = null;
-        if (result && result.status === 'success') {
+        if (!request.skipHistory && result && result.status === 'success') {
             savedSession = await saveToHistory(request.text, result, null);
         }
 
@@ -71,6 +71,7 @@ export class QuickAskHandler {
         const initialRequest = {
             text: request.text,
             model: request.model,
+            skipHistory: !!request.skipHistory,
             files: [{
                 base64: imgRes.base64,
                 type: imgRes.type,
@@ -101,7 +102,7 @@ export class QuickAskHandler {
         const result = await this.sessionManager.handleSendPrompt(promptRequest, onUpdate);
         
         let savedSession = null;
-        if (result && result.status === 'success') {
+        if (!request.skipHistory && result && result.status === 'success') {
             savedSession = await saveToHistory(request.text, result, [{ base64: imgRes.base64 }]);
         }
 

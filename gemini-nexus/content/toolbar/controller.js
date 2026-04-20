@@ -39,6 +39,7 @@
             this.currentMode = 'ask'; // 默认模式
             this.isSelectionEnabled = true;
             this.isToolbarTextEnabled = false;
+            this.selectionSuppressUntil = 0;
 
             // Bind Action Handler
             this.handleAction = this.handleAction.bind(this);
@@ -265,6 +266,7 @@
 
         handleSelection(data) {
             if (!this.isSelectionEnabled) return;
+            if (Date.now() < this.selectionSuppressUntil) return;
             
             const { text, rect, mousePoint } = data;
             this.currentSelection = text;
@@ -306,6 +308,12 @@
         }
 
         // --- Helper Methods ---
+
+        suppressSelectionToolbar(duration = 250) {
+            this.selectionSuppressUntil = Date.now() + duration;
+            this.ui.hide();
+            this.visible = false;
+        }
 
         show(rect, mousePoint) {
             this.lastRect = rect;

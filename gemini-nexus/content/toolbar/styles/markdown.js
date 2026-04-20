@@ -55,6 +55,74 @@
         .markdown-body ul, .markdown-body ol { margin: 0 0 12px 0; padding-left: 20px; }
         .markdown-body li { margin-bottom: 4px; }
 
+        /* Compact translation card styling */
+        .ask-window[data-mode="translate"] .markdown-body ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .ask-window[data-mode="translate"] .markdown-body li {
+            margin-bottom: 0;
+            padding: 0;
+            line-height: 1.55;
+            color: inherit;
+        }
+
+        .ask-window[data-mode="translate"] .markdown-body li::marker {
+            content: "";
+        }
+
+        .ask-window[data-mode="translate"] .markdown-body li:first-child {
+            font-size: 1.14em;
+            font-weight: 700;
+            line-height: 1.35;
+            color: #f1f3f4;
+            letter-spacing: 0.01em;
+        }
+
+        .ask-window[data-theme="light"][data-mode="translate"] .markdown-body li:first-child {
+            color: #111827;
+        }
+
+        .ask-window[data-mode="translate"] .markdown-body li:nth-child(2) {
+            font-size: 0.95em;
+            color: #9aa0a6;
+        }
+
+        .ask-window[data-theme="light"][data-mode="translate"] .markdown-body li:nth-child(2) {
+            color: #5f6368;
+        }
+
+        .ask-window[data-mode="translate"] .markdown-body li:nth-child(n + 3) {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+
+        .ask-window[data-theme="light"][data-mode="translate"] .markdown-body li:nth-child(n + 3) {
+            background: #f8fafc;
+            border-color: #e5e7eb;
+        }
+
+        .ask-window[data-mode="translate"] .markdown-body li:nth-child(n + 4) {
+            padding-left: 14px;
+            border-left: 3px solid rgba(138, 180, 248, 0.55);
+        }
+
+        .ask-window[data-theme="light"][data-mode="translate"] .markdown-body li:nth-child(n + 4) {
+            border-left-color: rgba(11, 87, 208, 0.45);
+        }
+
+        .ask-window[data-mode="translate"] .markdown-body p + ul,
+        .ask-window[data-mode="translate"] .markdown-body ul + p {
+            margin-top: 10px;
+        }
+
         /* Code Blocks */
         .code-block-wrapper {
             background: #f4f6f8;

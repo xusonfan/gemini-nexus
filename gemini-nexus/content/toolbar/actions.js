@@ -80,15 +80,22 @@ class ToolbarActions {
                 break;
         }
 
-        await this.ui.showAskWindow(rect, loadingMsg, title);
+        const windowOptions = mode === 'translate'
+            ? { showInput: false, showContext: false, mode: 'translate' }
+            : {};
+
+        await this.ui.showAskWindow(rect, loadingMsg, title, null, false, windowOptions);
         this.ui.showLoading(loadingMsg);
-        this.ui.setInputValue(inputVal);
+        if (windowOptions.showInput !== false) {
+            this.ui.setInputValue(inputVal);
+        }
 
         const msg = {
             action: "QUICK_ASK_IMAGE",
             url: imgBase64,
             text: prompt,
-            model: model
+            model: model,
+            ...(mode === 'translate' ? { skipHistory: true } : {})
         };
         
         this.lastRequest = msg;
@@ -130,16 +137,30 @@ class ToolbarActions {
              loadingMsg = t.loading.analyze;
         }
 
+        const windowOptions = actionType === 'translate'
+            ? { showInput: false, showContext: false, mode: 'translate' }
+            : {};
+
         this.ui.hide();
-        await this.ui.showAskWindow(rect, selection, title, mousePoint, preventFocus);
+        await this.ui.showAskWindow(
+            rect,
+            actionType === 'translate' ? null : selection,
+            title,
+            mousePoint,
+            preventFocus,
+            windowOptions
+        );
         this.ui.showLoading(loadingMsg);
 
-        this.ui.setInputValue(inputPlaceholder);
+        if (windowOptions.showInput !== false) {
+            this.ui.setInputValue(inputPlaceholder);
+        }
 
         const msg = {
             action: "QUICK_ASK",
             text: prompt,
             model: model,
+            ...(actionType === 'translate' ? { skipHistory: true } : {}),
             ...(includePageContext ? { includePageContext: true } : {})
         };
 

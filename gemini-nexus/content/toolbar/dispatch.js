@@ -88,6 +88,7 @@
 
                 case 'ask':
                     if (this.controller.currentSelection) {
+                        this.controller.suppressSelectionToolbar();
                         this.controller.hide(); // Hides small toolbar
                         const isZh = navigator.language.startsWith('zh');
                         this.ui.showAskWindow(this.controller.lastRect, this.controller.currentSelection, isZh ? "询问" : "Ask Gemini", this.controller.lastMousePoint);
@@ -99,6 +100,7 @@
                 case 'explain':
                 case 'summarize':
                     if (!this.controller.currentSelection) return;
+                    this.controller.suppressSelectionToolbar();
                     this.controller.lastSessionId = null;
                     this.actions.handleQuickAction(
                         actionType,
@@ -114,6 +116,7 @@
 
                 case 'grammar':
                     if (!this.controller.currentSelection) return;
+                    this.controller.suppressSelectionToolbar();
                     this.ui.setGrammarMode(true, this.inputManager.source, this.inputManager.range);
                     this.controller.lastSessionId = null;
                     this.actions.handleQuickAction(actionType, this.controller.currentSelection, this.controller.lastRect, currentModel, this.controller.lastMousePoint);

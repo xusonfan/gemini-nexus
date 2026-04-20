@@ -89,5 +89,9 @@
             margin-right: 6px;
             color: #0b57d0;
         }
+
+        .ask-window[data-mode="translate"] .window-body {
+            padding-top: 14px;
+        }
     `;
 })();
