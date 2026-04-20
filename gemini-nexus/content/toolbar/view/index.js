@@ -34,6 +34,7 @@
                 windowScrollContainer: get('window-scroll-container'),
                 askHeader: get('ask-header'),
                 windowTitle: get('window-title'),
+                inputContainer: get('input-container'),
                 contextPreview: get('context-preview'),
                 askInput: get('ask-input'),
                 resultArea: get('result-area'),
@@ -92,7 +93,7 @@
         get isDocked() { return this.windowView.isDocked; }
         
         togglePin() { return this.windowView.togglePin(); }
-        showAskWindow(rect, contextText, title, resetDrag, mousePoint, preventFocus = false) { return this.windowView.show(rect, contextText, title, resetDrag, mousePoint, preventFocus); }
+        showAskWindow(rect, contextText, title, resetDrag, mousePoint, preventFocus = false, options = {}) { return this.windowView.show(rect, contextText, title, resetDrag, mousePoint, preventFocus, options); }
         hideAskWindow() { this.windowView.hide(); }
         showLoading(msg) { this.windowView.showLoading(msg); }
         

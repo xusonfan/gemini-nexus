@@ -44,8 +44,9 @@
             return this.isPinned;
         }
 
-        async show(rect, contextText, title, resetDrag = null, mousePoint = null, preventFocus = false) {
+        async show(rect, contextText, title, resetDrag = null, mousePoint = null, preventFocus = false, options = {}) {
             if (!this.elements.askWindow) return;
+            const showInput = options.showInput !== false;
 
             // Load and apply saved dimensions
             const stored = await chrome.storage.local.get('gemini_nexus_window_size');
@@ -77,7 +78,8 @@
             } else {
                 this.elements.contextPreview.classList.add('hidden');
             }
-            
+
+            this.setInputVisible(showInput);
             this.elements.askInput.value = '';
             this.elements.resultText.innerHTML = '';
             this.isUserScrolling = false; // Reset on new show
@@ -86,7 +88,7 @@
             if (this.elements.windowFooter) this.elements.windowFooter.classList.add('hidden');
 
             this.elements.askWindow.classList.add('visible');
-            if (!preventFocus) {
+            if (!preventFocus && showInput) {
                 setTimeout(() => this.elements.askInput.focus(), 50);
             }
         }
@@ -200,6 +202,11 @@
 
         setInputValue(text) {
             if (this.elements.askInput) this.elements.askInput.value = text;
+        }
+
+        setInputVisible(visible) {
+            if (!this.elements.inputContainer) return;
+            this.elements.inputContainer.classList.toggle('hidden', !visible);
         }
 
         dockWindow(side, top) {

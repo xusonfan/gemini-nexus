@@ -407,9 +407,8 @@
             const model = this.ui.getSelectedModel();
             
             this.ui.hide();
-            await this.ui.showAskWindow(rect, null, this.ui.t.titles.summarizePage, null, true);
+            await this.ui.showAskWindow(rect, null, this.ui.t.titles.summarizePage, null, true, { showInput: false });
             this.ui.showLoading(this.ui.t.loading.summarizePage);
-            this.ui.setInputValue(this.ui.t.inputs.summarizePage);
 
             // 重置会话状态，确保总结内容不会追加到旧对话
             this.lastSessionId = null;

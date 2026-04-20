@@ -70,7 +70,7 @@
             
             <div class="window-scroll-container" id="window-scroll-container">
                 <div class="window-body">
-                    <div class="input-container">
+                    <div class="input-container" id="input-container">
                         <input type="text" id="ask-input" placeholder="${t.askPlaceholder}" autocomplete="off">
                     </div>
                     

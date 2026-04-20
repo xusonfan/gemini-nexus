@@ -21,6 +21,10 @@
             margin-bottom: 12px;
             flex-shrink: 0;
         }
+
+        .input-container.hidden {
+            display: none;
+        }
         
         input[type="text"]#ask-input {
             width: 100%;
