@@ -13,11 +13,16 @@ export class PromptHandler {
         this.controlManager = controlManager;
         this.builder = new PromptBuilder(controlManager, mcpManager);
         this.toolExecutor = new ToolExecutor(controlManager, mcpManager);
-        this.isCancelled = false;
+        this.activeRequestIds = new Set();
+        this.cancelledRequestIds = new Set();
     }
 
-    cancel() {
-        this.isCancelled = true;
+    cancel(requestId = null) {
+        if (requestId) {
+            this.cancelledRequestIds.add(requestId);
+            return;
+        }
+        this.activeRequestIds.forEach(id => this.cancelledRequestIds.add(id));
     }
 
     async generateFollowUpQuestions(sessionId, aiText, sender) {
@@ -125,12 +130,19 @@ ${aiText}`;
     }
 
     handle(request, sender, sendResponse) {
-        this.isCancelled = false;
+        const requestId = request.requestId || request.sessionId || crypto.randomUUID();
+        let streamSessionId = request.sessionId || null;
+        this.activeRequestIds.add(requestId);
+        this.cancelledRequestIds.delete(requestId);
+        request.requestId = requestId;
 
         (async () => {
+            const isCancelled = () => this.cancelledRequestIds.has(requestId);
             const onUpdate = (partialText, partialThoughts) => {
                 const msg = {
                     action: "GEMINI_STREAM_UPDATE",
+                    requestId,
+                    sessionId: streamSessionId,
                     text: partialText,
                     thoughts: partialThoughts
                 };
@@ -200,6 +212,7 @@ ${aiText}`;
                         const newSession = await saveToHistory(currentPromptText, mockResult, currentFiles);
                         if (newSession) {
                             ephemeralSessionId = newSession.id;
+                            streamSessionId = ephemeralSessionId;
                             
                             // 立即通知 UI 切换到新会话，防止流式更新追加到旧会话
                             chrome.runtime.sendMessage({
@@ -222,7 +235,7 @@ ${aiText}`;
 
                 // --- AUTOMATED FEEDBACK LOOP ---
                 while (keepLooping && loopCount < MAX_LOOPS) {
-                    if (this.isCancelled) break;
+                    if (isCancelled()) break;
                     
                     // 2. Send to Gemini
                     const result = await this.sessionManager.handleSendPrompt({
@@ -232,11 +245,13 @@ ${aiText}`;
                         files: currentFiles
                     }, onUpdate);
 
-                    if (this.isCancelled) break;
+                    if (isCancelled()) break;
 
                     if (!result || result.status !== 'success') {
                         // If error, notify UI and break loop
                         if (result) {
+                            result.requestId = requestId;
+                            result.sessionId = streamSessionId;
                             chrome.runtime.sendMessage(result).catch(() => {});
                             if (sender.tab && sender.tab.id) {
                                 chrome.tabs.sendMessage(sender.tab.id, result).catch(() => {});
@@ -269,6 +284,7 @@ ${aiText}`;
                     const doneMsg = {
                         ...result,
                         action: "GEMINI_STREAM_DONE",
+                        requestId,
                         result: result,
                         sessionId: activeSessionId
                     };
@@ -283,7 +299,7 @@ ${aiText}`;
                         toolResult = await this.toolExecutor.executeIfPresent(result.text, request, onUpdate);
                     }
 
-                    if (this.isCancelled) break;
+                    if (isCancelled()) break;
 
                     // 5. Decide Next Step
                     if (toolResult) {
@@ -349,7 +365,7 @@ ${aiText}`;
                         // This prevents "No valid response" errors caused by rapid-fire requests.
                         await delay(2000 + Math.random() * 2000);
                         
-                        if (this.isCancelled) break;
+                        if (isCancelled()) break;
 
                     } else {
                         // No tool execution, final answer reached
@@ -367,10 +383,14 @@ ${aiText}`;
                 console.error("Prompt loop error:", e);
                 chrome.runtime.sendMessage({
                     action: "GEMINI_REPLY",
+                    requestId,
+                    sessionId: streamSessionId,
                     text: "Error: " + e.message,
                     status: "error"
                 }).catch(() => {});
             } finally {
+                this.activeRequestIds.delete(requestId);
+                this.cancelledRequestIds.delete(requestId);
                 sendResponse({ status: "completed" });
             }
         })();

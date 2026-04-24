@@ -1,6 +1,12 @@
 
 // content/toolbar/ui/renderer.js
 (function() {
+    const sendRuntimeMessage = (message) => {
+        try {
+            chrome.runtime.sendMessage(message).catch(() => {});
+        } catch (e) {}
+    };
+
     /**
      * Handles the rendering of results in the toolbar window,
      * including Markdown transformation (via Bridge) and Generated Images grid.
@@ -91,7 +97,7 @@
                 const img = container.querySelector(`img[data-req-id="${task.reqId}"]`);
                 if(img) {
                     // Send message to background to fetch actual image
-                    chrome.runtime.sendMessage({ 
+                    sendRuntimeMessage({ 
                         action: "FETCH_GENERATED_IMAGE", 
                         url: task.url, 
                         reqId: task.reqId 

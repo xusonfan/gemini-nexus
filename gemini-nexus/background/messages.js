@@ -3,6 +3,9 @@
 import { SessionMessageHandler } from './handlers/session.js';
 import { UIMessageHandler } from './handlers/ui.js';
 
+const sendRuntimeMessage = (message) => chrome.runtime.sendMessage(message).catch(() => {});
+const sendTabMessage = (tabId, message) => chrome.tabs.sendMessage(tabId, message).catch(() => {});
+
 /**
  * Sets up the global runtime message listener.
  * @param {GeminiSessionManager} sessionManager 
@@ -21,7 +24,7 @@ export function setupMessageListener(sessionManager, imageHandler, controlManage
             chrome.storage.local.get('gemini_nexus_opacity', (res) => {
                 const opacity = res.gemini_nexus_opacity !== undefined ? res.gemini_nexus_opacity : 1.0;
                 if (sender.tab) {
-                    chrome.tabs.sendMessage(sender.tab.id, { action: 'RESTORE_OPACITY', payload: opacity });
+                    sendTabMessage(sender.tab.id, { action: 'RESTORE_OPACITY', payload: opacity });
                 } else {
                     // From Sandbox
                     const views = chrome.extension.getViews({ type: 'tab' }); // This is not ideal for sidepanel
@@ -59,9 +62,9 @@ export function setupMessageListener(sessionManager, imageHandler, controlManage
             chrome.storage.local.get(['geminiAccountIndices'], (res) => {
                 const payload = res.geminiAccountIndices || "0";
                 if (sender.tab) {
-                    chrome.tabs.sendMessage(sender.tab.id, { action: 'RESTORE_ACCOUNT_INDICES', payload });
+                    sendTabMessage(sender.tab.id, { action: 'RESTORE_ACCOUNT_INDICES', payload });
                 } else {
-                    chrome.runtime.sendMessage({ action: 'RESTORE_ACCOUNT_INDICES', payload });
+                    sendRuntimeMessage({ action: 'RESTORE_ACCOUNT_INDICES', payload });
                 }
                 sendResponse({ payload });
             });
@@ -77,9 +80,9 @@ export function setupMessageListener(sessionManager, imageHandler, controlManage
             chrome.storage.local.get(['geminiSummaryModel'], (res) => {
                 const payload = res.geminiSummaryModel || "";
                 if (sender.tab) {
-                    chrome.tabs.sendMessage(sender.tab.id, { action: 'RESTORE_SUMMARY_MODEL', payload });
+                    sendTabMessage(sender.tab.id, { action: 'RESTORE_SUMMARY_MODEL', payload });
                 } else {
-                    chrome.runtime.sendMessage({ action: 'RESTORE_SUMMARY_MODEL', payload });
+                    sendRuntimeMessage({ action: 'RESTORE_SUMMARY_MODEL', payload });
                 }
                 sendResponse({ payload });
             });
@@ -95,9 +98,9 @@ export function setupMessageListener(sessionManager, imageHandler, controlManage
             chrome.storage.local.get(['geminiToolbarTextEnabled'], (res) => {
                 const payload = res.geminiToolbarTextEnabled === true;
                 if (sender.tab) {
-                    chrome.tabs.sendMessage(sender.tab.id, { action: 'RESTORE_TOOLBAR_TEXT', payload });
+                    sendTabMessage(sender.tab.id, { action: 'RESTORE_TOOLBAR_TEXT', payload });
                 } else {
-                    chrome.runtime.sendMessage({ action: 'RESTORE_TOOLBAR_TEXT', payload });
+                    sendRuntimeMessage({ action: 'RESTORE_TOOLBAR_TEXT', payload });
                 }
                 sendResponse({ payload });
             });

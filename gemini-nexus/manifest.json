@@ -23,10 +23,6 @@
   },
   "commands": {
     "_execute_action": {
-      "suggested_key": {
-        "default": "Alt+S",
-        "mac": "Alt+S"
-      },
       "description": "Open Gemini Nexus Sidebar"
     }
   },

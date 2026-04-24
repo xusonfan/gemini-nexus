@@ -11,6 +11,7 @@ export class PromptController {
         this.imageManager = imageManager;
         this.app = appController;
         this.cancellationTimestamp = 0;
+        this.activeRequestId = null;
     }
 
     async send() {
@@ -30,6 +31,8 @@ export class PromptController {
         }
 
         const currentId = this.sessionManager.currentSessionId;
+        const requestId = crypto.randomUUID();
+        this.activeRequestId = requestId;
         const session = this.sessionManager.getCurrentSession();
 
         // Update Title if needed (Initial placeholder, will be replaced by AI summary)
@@ -108,6 +111,7 @@ export class PromptController {
             mcpServerId: activeMcpServer ? activeMcpServer.id : null,
             mcpToolMode: activeMcpServer && activeMcpServer.toolMode ? activeMcpServer.toolMode : 'all',
             mcpEnabledTools: activeMcpServer && Array.isArray(activeMcpServer.enabledTools) ? activeMcpServer.enabledTools : [],
+            requestId: requestId,
             sessionId: currentId // Important: Pass session ID so background can save history independently
         });
     }
@@ -117,10 +121,11 @@ export class PromptController {
         
         this.cancellationTimestamp = Date.now();
         
-        sendToBackground({ action: "CANCEL_PROMPT" });
+        sendToBackground({ action: "CANCEL_PROMPT", requestId: this.activeRequestId });
         this.app.messageHandler.resetStream();
         
         this.app.isGenerating = false;
+        this.activeRequestId = null;
         this.ui.setLoading(false);
         this.ui.updateStatus(t('cancelled'));
     }

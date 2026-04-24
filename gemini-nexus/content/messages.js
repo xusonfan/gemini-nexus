@@ -2,6 +2,12 @@
 // content/messages.js
 
 (function() {
+    const sendRuntimeMessage = (message) => {
+        try {
+            chrome.runtime.sendMessage(message).catch(() => {});
+        } catch (e) {}
+    };
+
     class MessageRouter {
         constructor() {
             this.toolbarController = null;
@@ -56,7 +62,7 @@
             if (request.action === "CROP_SCREENSHOT") {
                 if (this.captureSource === 'sidepanel') {
                     // Forward back to sidepanel via background
-                    chrome.runtime.sendMessage({ 
+                    sendRuntimeMessage({ 
                         action: "PROCESS_CROP_IN_SIDEPANEL", 
                         payload: request 
                     });

@@ -12,6 +12,7 @@ export class MessageHandler {
         this.imageManager = imageManager;
         this.app = appController; // Reference back to app for state like captureMode
         this.streamingBubble = null;
+        this.streamingRequestId = null;
     }
 
     async handle(request) {
@@ -155,6 +156,9 @@ export class MessageHandler {
         // Prevent race condition: Ignore stream updates arriving shortly after user cancelled
         if (this.app.prompt.isCancellationRecent()) return;
 
+        const session = this.sessionManager.getCurrentSession();
+        if (request.sessionId && (!session || session.id !== request.sessionId)) return;
+
         // If we don't have a bubble yet, create one
         if (!this.streamingBubble) {
             // Check if there's a pending "..." bubble from history restore/ephemeral save
@@ -177,6 +181,9 @@ export class MessageHandler {
             }
             
             this.streamingBubble = appendMessage(this.ui.historyDiv, "", 'ai', null, "");
+            this.streamingRequestId = request.requestId || null;
+        } else if (request.requestId && this.streamingRequestId && request.requestId !== this.streamingRequestId) {
+            return;
         }
         
         // Update content if text or thoughts exist
@@ -191,10 +198,16 @@ export class MessageHandler {
     }
 
     handleGeminiReply(request) {
-        this.app.isGenerating = false;
-        this.ui.setLoading(false);
-        
         const session = this.sessionManager.getCurrentSession();
+        if (request.sessionId && (!session || session.id !== request.sessionId)) return;
+        if (request.requestId && this.streamingRequestId && request.requestId !== this.streamingRequestId) return;
+
+        this.app.isGenerating = false;
+        if (!request.requestId || this.app.prompt.activeRequestId === request.requestId) {
+            this.app.prompt.activeRequestId = null;
+        }
+        this.ui.setLoading(false);
+
         if (session) {
             // Note: We do NOT save to sessionManager/storage here anymore.
             // The background script saves the AI response to storage and broadcasts 'SESSIONS_UPDATED'.
@@ -223,6 +236,7 @@ export class MessageHandler {
                 
                 // Clear reference
                 this.streamingBubble = null;
+                this.streamingRequestId = null;
             } else {
                 // Fallback if no stream occurred (or single short response)
                 appendMessage(this.ui.historyDiv, request.text, 'ai', request.images, request.thoughts);
@@ -311,5 +325,6 @@ export class MessageHandler {
         if (this.streamingBubble) {
              this.streamingBubble = null;
         }
+        this.streamingRequestId = null;
     }
 }

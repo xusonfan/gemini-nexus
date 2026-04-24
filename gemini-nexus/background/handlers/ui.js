@@ -359,6 +359,10 @@ export class UIMessageHandler {
                         const timeout = setTimeout(() => resolve({ isOpen: false }), 100);
                         chrome.runtime.sendMessage({ action: "PING_SIDE_PANEL" }, (res) => {
                             clearTimeout(timeout);
+                            if (chrome.runtime.lastError) {
+                                resolve({ isOpen: false });
+                                return;
+                            }
                             resolve(res || { isOpen: false });
                         });
                     });

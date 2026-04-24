@@ -2,6 +2,16 @@
 // content/toolbar/controller.js
 
 (function() {
+    const sendRuntimeMessage = (message, callback = null) => {
+        try {
+            if (callback) {
+                chrome.runtime.sendMessage(message, callback);
+                return;
+            }
+            chrome.runtime.sendMessage(message).catch(() => {});
+        } catch (e) {}
+    };
+
     class ToolbarController {
         constructor() {
             // Dependencies
@@ -166,7 +176,7 @@
                 this.handleSummarizePage();
             } else {
                 // 需要截图的操作模式：ocr, snip, screenshot_translate
-                chrome.runtime.sendMessage({ action: "INITIATE_CAPTURE" });
+                sendRuntimeMessage({ action: "INITIATE_CAPTURE" });
             }
         }
 
@@ -375,7 +385,7 @@
                 // 使用 Promise 封装带有超时的消息发送，以防侧边栏未打开导致无响应
                 const response = await new Promise((resolve) => {
                     const timeout = setTimeout(() => resolve(null), 150);
-                    chrome.runtime.sendMessage({ action: "CHECK_SIDE_PANEL_OPEN" }, (res) => {
+                    sendRuntimeMessage({ action: "CHECK_SIDE_PANEL_OPEN" }, (res) => {
                         clearTimeout(timeout);
                         if (chrome.runtime.lastError) {
                             resolve(null);
@@ -387,8 +397,9 @@
 
                 if (response && response.isOpen) {
                     // 如果侧边栏已打开，直接在侧边栏中触发总结，不显示悬浮窗
-                    chrome.runtime.sendMessage({
+                    sendRuntimeMessage({
                         action: "QUICK_ASK",
+                        requestId: crypto.randomUUID(),
                         text: this.ui.t.prompts.summarizePage,
                         model: this.ui.getSelectedModel(),
                         includePageContext: true
@@ -424,13 +435,14 @@
 
             const msg = {
                 action: "QUICK_ASK",
+                requestId: crypto.randomUUID(),
                 text: this.ui.t.prompts.summarizePage,
                 model: model,
                 includePageContext: true
             };
 
             this.actions.lastRequest = msg;
-            chrome.runtime.sendMessage(msg);
+            sendRuntimeMessage(msg);
             
             this.visible = true;
         }

@@ -1,6 +1,12 @@
 
 // content/overlay.js
 
+function sendRuntimeMessage(message) {
+    try {
+        chrome.runtime.sendMessage(message).catch(() => {});
+    } catch (e) {}
+}
+
 class SelectionOverlay {
     constructor() {
         this.overlay = null;
@@ -181,7 +187,7 @@ class SelectionOverlay {
         }
 
         setTimeout(() => {
-            chrome.runtime.sendMessage({
+            sendRuntimeMessage({
                 action: "AREA_SELECTED",
                 area: {
                     x: rect.left,

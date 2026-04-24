@@ -1,6 +1,12 @@
 
 // content/toolbar/actions.js
 
+function sendRuntimeMessage(message) {
+    try {
+        chrome.runtime.sendMessage(message).catch(() => {});
+    } catch (e) {}
+}
+
 class ToolbarActions {
     constructor(uiController) {
         this.ui = uiController;
@@ -99,7 +105,7 @@ class ToolbarActions {
         };
         
         this.lastRequest = msg;
-        chrome.runtime.sendMessage(msg);
+        sendRuntimeMessage(msg);
     }
 
     async handleQuickAction(actionType, selection, rect, model = "gemini-2.5-flash", mousePoint = null, options = {}) {
@@ -158,6 +164,7 @@ class ToolbarActions {
 
         const msg = {
             action: "QUICK_ASK",
+            requestId: crypto.randomUUID(),
             text: prompt,
             model: model,
             ...(actionType === 'translate' ? { skipHistory: true } : {}),
@@ -165,7 +172,7 @@ class ToolbarActions {
         };
 
         this.lastRequest = msg;
-        chrome.runtime.sendMessage(msg);
+        sendRuntimeMessage(msg);
     }
 
     handleSubmitAsk(question, context, sessionId = null, model = "gemini-2.5-flash") {
@@ -185,6 +192,7 @@ class ToolbarActions {
         
         const msg = {
             action: "QUICK_ASK",
+            requestId: crypto.randomUUID(),
             text: prompt,
             model: model,
             sessionId: sessionId,
@@ -192,7 +200,7 @@ class ToolbarActions {
         };
         
         this.lastRequest = msg;
-        chrome.runtime.sendMessage(msg);
+        sendRuntimeMessage(msg);
     }
     
     handleRetry() {
@@ -202,18 +210,22 @@ class ToolbarActions {
         if (currentModel) {
             this.lastRequest.model = currentModel;
         }
+        this.lastRequest.requestId = crypto.randomUUID();
         
         const loadingMsg = this.t.loading.regenerate;
         this.ui.showLoading(loadingMsg);
-        chrome.runtime.sendMessage(this.lastRequest);
+        sendRuntimeMessage(this.lastRequest);
     }
 
     handleCancel() {
-        chrome.runtime.sendMessage({ action: "CANCEL_PROMPT" });
+        sendRuntimeMessage({
+            action: "CANCEL_PROMPT",
+            requestId: this.lastRequest ? this.lastRequest.requestId : null
+        });
     }
 
     handleContinueChat(sessionId) {
-        chrome.runtime.sendMessage({ 
+        sendRuntimeMessage({ 
             action: "OPEN_SIDE_PANEL",
             sessionId: sessionId
         });

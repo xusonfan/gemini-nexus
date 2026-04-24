@@ -8,7 +8,7 @@ export class GeminiSessionManager {
     constructor() {
         this.auth = new AuthManager();
         this.dispatcher = new RequestDispatcher(this.auth);
-        this.abortController = null;
+        this.abortControllers = new Map();
     }
 
     async ensureInitialized() {
@@ -16,13 +16,13 @@ export class GeminiSessionManager {
     }
 
     async handleSendPrompt(request, onUpdate, isInternal = false) {
-        // Cancel previous main request if exists, but don't cancel if this is an internal utility task
-        // and don't let internal tasks cancel the main one.
         let signal = null;
+        let requestId = null;
         if (!isInternal) {
-            this.cancelCurrentRequest();
-            this.abortController = new AbortController();
-            signal = this.abortController.signal;
+            requestId = request.requestId || request.sessionId || crypto.randomUUID();
+            const abortController = new AbortController();
+            this.abortControllers.set(requestId, abortController);
+            signal = abortController.signal;
         }
 
         try {
@@ -76,17 +76,25 @@ export class GeminiSessionManager {
                 status: "error"
             };
         } finally {
-            this.abortController = null;
+            if (requestId) {
+                this.abortControllers.delete(requestId);
+            }
         }
     }
 
-    cancelCurrentRequest() {
-        if (this.abortController) {
-            this.abortController.abort();
-            this.abortController = null;
+    cancelCurrentRequest(requestId = null) {
+        if (requestId) {
+            const abortController = this.abortControllers.get(requestId);
+            if (!abortController) return false;
+            abortController.abort();
+            this.abortControllers.delete(requestId);
             return true;
         }
-        return false;
+
+        if (this.abortControllers.size === 0) return false;
+        this.abortControllers.forEach(abortController => abortController.abort());
+        this.abortControllers.clear();
+        return true;
     }
 
     async setContext(context, model) {

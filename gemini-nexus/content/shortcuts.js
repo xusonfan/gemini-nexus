@@ -2,6 +2,12 @@
 // content/shortcuts.js
 
 (function() {
+    const sendRuntimeMessage = (message) => {
+        try {
+            chrome.runtime.sendMessage(message).catch(() => {});
+        } catch (e) {}
+    };
+
     const DEFAULT_SHORTCUTS = {
         quickAsk: "Ctrl+G",
         openPanel: "Alt+S",
@@ -43,7 +49,7 @@
             // Open Side Panel
             if (this.match(e, this.appShortcuts.openPanel)) {
                 e.preventDefault(); e.stopPropagation();
-                chrome.runtime.sendMessage({ action: "OPEN_SIDE_PANEL" });
+                sendRuntimeMessage({ action: "OPEN_SIDE_PANEL" });
                 return;
             }
 
@@ -57,7 +63,7 @@
             // Browser Control
             if (this.match(e, this.appShortcuts.browserControl)) {
                 e.preventDefault(); e.stopPropagation();
-                chrome.runtime.sendMessage({ action: "TOGGLE_SIDE_PANEL_CONTROL" });
+                sendRuntimeMessage({ action: "TOGGLE_SIDE_PANEL_CONTROL" });
                 return;
             }
 

@@ -7,6 +7,14 @@ import { getHighResImageUrl } from '../../lib/utils.js';
 
 export function initRendererMode() {
     document.body.innerHTML = ''; // Clear UI
+
+    // Some third-party renderers still register removed DOM mutation events.
+    // Chrome logs these as extension errors even though the events no longer fire.
+    const originalAddEventListener = EventTarget.prototype.addEventListener;
+    EventTarget.prototype.addEventListener = function(type, ...args) {
+        if (type === 'DOMNodeInsertedIntoDocument') return;
+        return originalAddEventListener.call(this, type, ...args);
+    };
     
     // Load libs immediately
     loadLibs();

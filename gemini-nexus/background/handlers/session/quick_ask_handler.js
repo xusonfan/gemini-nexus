@@ -1,6 +1,6 @@
 
 // background/handlers/session/quick_ask_handler.js
-import { saveToHistory } from '../../managers/history_manager.js';
+import { appendAiMessage, appendUserMessage, saveToHistory } from '../../managers/history_manager.js';
 import { PromptBuilder } from './prompt/builder.js';
 
 export class QuickAskHandler {
@@ -12,6 +12,8 @@ export class QuickAskHandler {
 
     async handleQuickAsk(request, sender) {
         const tabId = sender.tab ? sender.tab.id : null;
+        const requestId = request.requestId || crypto.randomUUID();
+        request.requestId = requestId;
         
         if (!request.sessionId) {
             await this.sessionManager.resetContext();
@@ -23,6 +25,8 @@ export class QuickAskHandler {
             if (tabId) {
                 chrome.tabs.sendMessage(tabId, {
                     action: "GEMINI_STREAM_UPDATE",
+                    requestId,
+                    sessionId: request.sessionId || null,
                     text: partialText,
                     thoughts: partialThoughts
                 }).catch(() => {});
@@ -39,22 +43,30 @@ export class QuickAskHandler {
 
         const result = await this.sessionManager.handleSendPrompt(promptRequest, onUpdate);
         
-        let savedSession = null;
+        let responseSessionId = request.sessionId || null;
         if (!request.skipHistory && result && result.status === 'success') {
-            savedSession = await saveToHistory(request.text, result, null);
+            if (request.sessionId) {
+                await appendUserMessage(request.sessionId, request.text, null);
+                await appendAiMessage(request.sessionId, result);
+            } else {
+                const savedSession = await saveToHistory(request.text, result, null);
+                responseSessionId = savedSession ? savedSession.id : null;
+            }
         }
 
         if (tabId) {
             chrome.tabs.sendMessage(tabId, {
                 action: "GEMINI_STREAM_DONE",
+                requestId,
                 result: result,
-                sessionId: savedSession ? savedSession.id : null
+                sessionId: responseSessionId
             }).catch(() => {});
         }
     }
 
     async handleQuickAskImage(request, sender) {
         const tabId = sender.tab ? sender.tab.id : null;
+        const requestId = request.requestId || crypto.randomUUID();
 
         const imgRes = await this.imageHandler.fetchImage(request.url);
         
@@ -69,8 +81,10 @@ export class QuickAskHandler {
         }
 
         const initialRequest = {
+            requestId,
             text: request.text,
             model: request.model,
+            sessionId: request.sessionId || null,
             skipHistory: !!request.skipHistory,
             files: [{
                 base64: imgRes.base64,
@@ -87,12 +101,18 @@ export class QuickAskHandler {
             systemInstruction: buildResult.systemInstruction
         };
 
-        await this.sessionManager.resetContext();
+        if (!request.sessionId) {
+            await this.sessionManager.resetContext();
+        } else {
+            await this.sessionManager.ensureInitialized();
+        }
 
         const onUpdate = (partialText, partialThoughts) => {
             if (tabId) {
                 chrome.tabs.sendMessage(tabId, {
                     action: "GEMINI_STREAM_UPDATE",
+                    requestId,
+                    sessionId: request.sessionId || null,
                     text: partialText,
                     thoughts: partialThoughts
                 }).catch(() => {});
@@ -101,16 +121,23 @@ export class QuickAskHandler {
 
         const result = await this.sessionManager.handleSendPrompt(promptRequest, onUpdate);
         
-        let savedSession = null;
+        let responseSessionId = request.sessionId || null;
         if (!request.skipHistory && result && result.status === 'success') {
-            savedSession = await saveToHistory(request.text, result, [{ base64: imgRes.base64 }]);
+            if (request.sessionId) {
+                await appendUserMessage(request.sessionId, request.text, [imgRes.base64]);
+                await appendAiMessage(request.sessionId, result);
+            } else {
+                const savedSession = await saveToHistory(request.text, result, [{ base64: imgRes.base64 }]);
+                responseSessionId = savedSession ? savedSession.id : null;
+            }
         }
 
         if (tabId) {
             chrome.tabs.sendMessage(tabId, {
                 action: "GEMINI_STREAM_DONE",
+                requestId,
                 result: result,
-                sessionId: savedSession ? savedSession.id : null
+                sessionId: responseSessionId
             }).catch(() => {});
         }
     }
