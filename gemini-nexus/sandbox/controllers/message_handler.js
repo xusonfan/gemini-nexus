@@ -13,6 +13,7 @@ export class MessageHandler {
         this.app = appController; // Reference back to app for state like captureMode
         this.streamingBubble = null;
         this.streamingRequestId = null;
+        this.shouldAnchorStreamingBubble = false;
     }
 
     async handle(request) {
@@ -182,13 +183,18 @@ export class MessageHandler {
             
             this.streamingBubble = appendMessage(this.ui.historyDiv, "", 'ai', null, "");
             this.streamingRequestId = request.requestId || null;
+            this.shouldAnchorStreamingBubble = true;
         } else if (request.requestId && this.streamingRequestId && request.requestId !== this.streamingRequestId) {
             return;
         }
         
         // Update content if text or thoughts exist
         this.streamingBubble.update(request.text, request.thoughts);
-        this.ui.scrollToBottom();
+        if (this.shouldAnchorStreamingBubble) {
+            this.ui.scrollToMessageStart(this.streamingBubble.div, true);
+        } else {
+            this.ui.scrollToBottom();
+        }
         
         // Ensure UI state reflects generation
         if (!this.app.isGenerating) {
@@ -237,6 +243,7 @@ export class MessageHandler {
                 // Clear reference
                 this.streamingBubble = null;
                 this.streamingRequestId = null;
+                this.shouldAnchorStreamingBubble = false;
             } else {
                 // Fallback if no stream occurred (or single short response)
                 appendMessage(this.ui.historyDiv, request.text, 'ai', request.images, request.thoughts);
@@ -326,5 +333,6 @@ export class MessageHandler {
              this.streamingBubble = null;
         }
         this.streamingRequestId = null;
+        this.shouldAnchorStreamingBubble = false;
     }
 }

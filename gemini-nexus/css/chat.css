@@ -91,7 +91,7 @@
     padding: 100px 20px 0 20px;
     position: relative;
     z-index: 1;
-    padding-bottom: 140px; /* Space for input */
+    padding-bottom: 168px; /* Space for input */
     display: flex; 
     flex-direction: column; 
     gap: 24px; /* Increased gap for breathing room */
@@ -141,6 +141,10 @@ body.layout-wide .msg.ai {
     max-width: 85%; 
     white-space: pre-wrap;
     overflow: visible; /* Allow copy button to float outside */
+}
+
+.msg.user:last-child {
+    margin-bottom: 24px;
 }
 
 /* User Copy Button - Floating on Hover */
@@ -433,7 +437,7 @@ body.layout-wide .msg.ai {
 @media (max-width: 600px) {
     #chat-history {
         padding: 100px 16px 0 16px;
-        padding-bottom: 120px;
+        padding-bottom: 148px;
     }
 }
 

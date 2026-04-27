@@ -163,7 +163,8 @@ export class UIController {
     // Chat / Input
     updateStatus(text) { this.chat.updateStatus(text); }
     clearChatHistory() { this.chat.clear(); }
-    scrollToBottom() { this.chat.scrollToBottom(); }
+    scrollToBottom(force = false) { this.chat.scrollToBottom(force); }
+    scrollToMessageStart(messageEl, force = false) { this.chat.scrollToMessageStart(messageEl, force); }
     resetInput() { this.chat.resetInput(); }
     setLoading(isLoading) { this.chat.setLoading(isLoading); }
     

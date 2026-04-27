@@ -121,6 +121,19 @@ export class ChatController {
         }
     }
 
+    scrollToMessageStart(messageEl, force = false) {
+        if (!this.historyDiv || !messageEl) return;
+        if (this.isUserScrolling && !force) return;
+
+        requestAnimationFrame(() => {
+            const top = Math.max(0, messageEl.offsetTop - 80);
+            this.historyDiv.scrollTo({
+                top,
+                behavior: 'smooth'
+            });
+        });
+    }
+
     resetInput() {
         if (this.inputFn) {
             this.inputFn.value = '';
