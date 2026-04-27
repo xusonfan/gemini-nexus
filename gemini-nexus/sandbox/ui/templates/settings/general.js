@@ -19,6 +19,14 @@ export const GeneralSettingsTemplate = `
         <input type="checkbox" id="image-tools-toggle" style="width: 20px; height: 20px; cursor: pointer;">
     </div>
 
+    <div class="shortcut-row" style="margin-bottom: 12px;">
+        <div style="flex: 1;">
+            <label data-i18n="explainPageContext" style="font-weight: 500; display: block; margin-bottom: 2px;">Explain With Page Context</label>
+            <span class="setting-desc" data-i18n="explainPageContextDesc">Include current page content when using Explain.</span>
+        </div>
+        <input type="checkbox" id="explain-page-context-toggle" style="width: 20px; height: 20px; cursor: pointer;">
+    </div>
+
     <div class="shortcut-row" style="margin-bottom: 12px; align-items: flex-start;">
         <div style="flex: 1; margin-right: 12px;">
             <label data-i18n="accountIndices" style="font-weight: 500; display: block; margin-bottom: 2px;">Account Indices</label>

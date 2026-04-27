@@ -112,6 +112,24 @@ export function setupMessageListener(sessionManager, imageHandler, controlManage
             return false;
         }
 
+        if (request.action === 'GET_EXPLAIN_PAGE_CONTEXT') {
+            chrome.storage.local.get(['geminiExplainPageContextEnabled'], (res) => {
+                const payload = res.geminiExplainPageContextEnabled !== false;
+                if (sender.tab) {
+                    sendTabMessage(sender.tab.id, { action: 'RESTORE_EXPLAIN_PAGE_CONTEXT', payload });
+                } else {
+                    sendRuntimeMessage({ action: 'RESTORE_EXPLAIN_PAGE_CONTEXT', payload });
+                }
+                sendResponse({ payload });
+            });
+            return true;
+        }
+
+        if (request.action === 'SAVE_EXPLAIN_PAGE_CONTEXT') {
+            chrome.storage.local.set({ geminiExplainPageContextEnabled: request.payload });
+            return false;
+        }
+
         // Delegate to Session Handler (Prompt, Context, Quick Ask, Browser Control)
         if (sessionHandler.handle(request, sender, sendResponse)) {
             return true;

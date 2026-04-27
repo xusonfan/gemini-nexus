@@ -100,6 +100,10 @@
                 case 'explain':
                 case 'summarize':
                     if (!this.controller.currentSelection) return;
+                    const includePageContext = actionType === 'explain' && (
+                        this.controller.explainPageContextEnabled !== false ||
+                        (modifiers ? !!modifiers.shift : false)
+                    );
                     this.controller.suppressSelectionToolbar();
                     this.controller.lastSessionId = null;
                     this.actions.handleQuickAction(
@@ -109,7 +113,7 @@
                         currentModel,
                         this.controller.lastMousePoint,
                         {
-                            includePageContext: actionType === 'explain' && modifiers ? !!modifiers.shift : false
+                            includePageContext
                         }
                     );
                     break;

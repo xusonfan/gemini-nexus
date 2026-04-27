@@ -17,6 +17,7 @@ export class SettingsView {
         this.general = new GeneralSection({
             onTextSelectionChange: (val) => this.fire('onTextSelectionChange', val),
             onImageToolsChange: (val) => this.fire('onImageToolsChange', val),
+            onExplainPageContextChange: (val) => this.fire('onExplainPageContextChange', val),
             onSidebarBehaviorChange: (val) => this.fire('onSidebarBehaviorChange', val)
         });
         
@@ -81,6 +82,7 @@ export class SettingsView {
             connection: connectionData,
             textSelection: generalData.textSelection,
             imageTools: generalData.imageTools,
+            explainPageContext: generalData.explainPageContext,
             accountIndices: generalData.accountIndices
         };
         
@@ -136,6 +138,10 @@ export class SettingsView {
     // Delegation to General
     setToggles(textSelection, imageTools) {
         this.general.setToggles(textSelection, imageTools);
+    }
+
+    setExplainPageContext(enabled) {
+        this.general.setExplainPageContext(enabled);
     }
     
     setSidebarBehavior(behavior) {

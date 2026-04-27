@@ -88,6 +88,17 @@ export function saveImageToolsToStorage(enabled) {
     }, '*');
 }
 
+export function requestExplainPageContextFromStorage() {
+    window.parent.postMessage({ action: 'GET_EXPLAIN_PAGE_CONTEXT' }, '*');
+}
+
+export function saveExplainPageContextToStorage(enabled) {
+    window.parent.postMessage({
+        action: 'SAVE_EXPLAIN_PAGE_CONTEXT',
+        payload: enabled
+    }, '*');
+}
+
 export function saveSidebarBehaviorToStorage(behavior) {
     window.parent.postMessage({
         action: 'SAVE_SIDEBAR_BEHAVIOR',

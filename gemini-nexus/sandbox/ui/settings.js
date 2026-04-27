@@ -1,6 +1,6 @@
 
 // sandbox/ui/settings.js
-import { saveShortcutsToStorage, saveThemeToStorage, requestThemeFromStorage, saveOpacityToStorage, requestOpacityFromStorage, saveLanguageToStorage, requestLanguageFromStorage, saveTextSelectionToStorage, requestTextSelectionFromStorage, saveToolbarTextToStorage, requestToolbarTextFromStorage, saveSidebarBehaviorToStorage, saveImageToolsToStorage, requestImageToolsFromStorage, saveAccountIndicesToStorage, requestAccountIndicesFromStorage, saveSummaryModelToStorage, requestSummaryModelFromStorage, saveConnectionSettingsToStorage, requestConnectionSettingsFromStorage, sendToBackground } from '../../lib/messaging.js';
+import { saveShortcutsToStorage, saveThemeToStorage, requestThemeFromStorage, saveOpacityToStorage, requestOpacityFromStorage, saveLanguageToStorage, requestLanguageFromStorage, saveTextSelectionToStorage, requestTextSelectionFromStorage, saveToolbarTextToStorage, requestToolbarTextFromStorage, saveSidebarBehaviorToStorage, saveImageToolsToStorage, requestImageToolsFromStorage, saveExplainPageContextToStorage, requestExplainPageContextFromStorage, saveAccountIndicesToStorage, requestAccountIndicesFromStorage, saveSummaryModelToStorage, requestSummaryModelFromStorage, saveConnectionSettingsToStorage, requestConnectionSettingsFromStorage, sendToBackground } from '../../lib/messaging.js';
 import { setLanguagePreference, getLanguagePreference } from '../core/i18n.js';
 import { SettingsView } from './settings/view.js';
 import { DEFAULT_SHORTCUTS } from '../../lib/constants.js';
@@ -16,6 +16,7 @@ export class SettingsController {
         this.textSelectionEnabled = true;
         this.toolbarTextEnabled = false;
         this.imageToolsEnabled = true;
+        this.explainPageContextEnabled = true;
         this.accountIndices = "0";
         this.summaryModel = "";
         
@@ -58,6 +59,7 @@ export class SettingsController {
             
             onTextSelectionChange: (val) => { this.textSelectionEnabled = (val === 'on' || val === true); saveTextSelectionToStorage(this.textSelectionEnabled); },
             onImageToolsChange: (val) => { this.imageToolsEnabled = (val === 'on' || val === true); saveImageToolsToStorage(this.imageToolsEnabled); },
+            onExplainPageContextChange: (val) => { this.explainPageContextEnabled = (val === 'on' || val === true); saveExplainPageContextToStorage(this.explainPageContextEnabled); },
             onSidebarBehaviorChange: (val) => saveSidebarBehaviorToStorage(val),
             onDownloadLogs: () => this.downloadLogs()
         });
@@ -94,6 +96,7 @@ export class SettingsController {
         requestOpacityFromStorage();
         requestToolbarTextFromStorage();
         this.view.setToggles(this.textSelectionEnabled, this.imageToolsEnabled);
+        this.view.setExplainPageContext(this.explainPageContextEnabled);
         this.view.setToolbarTextValue(this.toolbarTextEnabled);
         this.view.setAccountIndices(this.accountIndices);
         this.view.setConnectionSettings({ ...this.connectionData, summaryModel: this.summaryModel });
@@ -101,6 +104,7 @@ export class SettingsController {
         // Refresh from storage
         requestTextSelectionFromStorage();
         requestImageToolsFromStorage();
+        requestExplainPageContextFromStorage();
         requestAccountIndicesFromStorage();
         requestSummaryModelFromStorage();
         requestConnectionSettingsFromStorage();
@@ -119,6 +123,9 @@ export class SettingsController {
         
         this.imageToolsEnabled = data.imageTools;
         saveImageToolsToStorage(this.imageToolsEnabled);
+
+        this.explainPageContextEnabled = data.explainPageContext;
+        saveExplainPageContextToStorage(this.explainPageContextEnabled);
         
         // Accounts
         let val = data.accountIndices.trim();
@@ -239,6 +246,11 @@ export class SettingsController {
     updateImageTools(enabled) {
         this.imageToolsEnabled = enabled;
         this.view.setToggles(this.textSelectionEnabled, this.imageToolsEnabled);
+    }
+
+    updateExplainPageContext(enabled) {
+        this.explainPageContextEnabled = enabled;
+        this.view.setExplainPageContext(enabled);
     }
     
     updateConnectionSettings(settings) {

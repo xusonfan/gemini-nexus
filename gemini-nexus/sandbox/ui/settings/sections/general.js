@@ -14,19 +14,23 @@ export class GeneralSection {
         this.elements = {
             textSelectionToggle: get('text-selection-toggle'),
             imageToolsToggle: get('image-tools-toggle'),
+            explainPageContextToggle: get('explain-page-context-toggle'),
             accountIndicesInput: get('account-indices-input'),
             sidebarRadios: document.querySelectorAll('input[name="sidebar-behavior"]')
         };
     }
 
     bindEvents() {
-        const { textSelectionToggle, imageToolsToggle, sidebarRadios } = this.elements;
+        const { textSelectionToggle, imageToolsToggle, explainPageContextToggle, sidebarRadios } = this.elements;
 
         if (textSelectionToggle) {
             textSelectionToggle.addEventListener('change', (e) => this.fire('onTextSelectionChange', e.target.checked));
         }
         if (imageToolsToggle) {
             imageToolsToggle.addEventListener('change', (e) => this.fire('onImageToolsChange', e.target.checked));
+        }
+        if (explainPageContextToggle) {
+            explainPageContextToggle.addEventListener('change', (e) => this.fire('onExplainPageContextChange', e.target.checked));
         }
         if (sidebarRadios) {
             sidebarRadios.forEach(radio => {
@@ -40,6 +44,10 @@ export class GeneralSection {
     setToggles(textSelection, imageTools) {
         if (this.elements.textSelectionToggle) this.elements.textSelectionToggle.checked = textSelection;
         if (this.elements.imageToolsToggle) this.elements.imageToolsToggle.checked = imageTools;
+    }
+
+    setExplainPageContext(enabled) {
+        if (this.elements.explainPageContextToggle) this.elements.explainPageContextToggle.checked = enabled;
     }
 
     setAccountIndices(val) {
@@ -56,10 +64,11 @@ export class GeneralSection {
     }
 
     getData() {
-        const { textSelectionToggle, imageToolsToggle, accountIndicesInput } = this.elements;
+        const { textSelectionToggle, imageToolsToggle, explainPageContextToggle, accountIndicesInput } = this.elements;
         return {
             textSelection: textSelectionToggle ? textSelectionToggle.checked : true,
             imageTools: imageToolsToggle ? imageToolsToggle.checked : true,
+            explainPageContext: explainPageContextToggle ? explainPageContextToggle.checked : true,
             accountIndices: accountIndicesInput ? accountIndicesInput.value : "0"
         };
     }

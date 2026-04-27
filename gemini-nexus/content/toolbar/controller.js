@@ -49,6 +49,7 @@
             this.currentMode = 'ask'; // 默认模式
             this.isSelectionEnabled = true;
             this.isToolbarTextEnabled = false;
+            this.explainPageContextEnabled = true;
             this.selectionSuppressUntil = 0;
 
             // Bind Action Handler
@@ -160,6 +161,10 @@
 
         setImageToolsEnabled(enabled) {
             this.imageDetector.setEnabled(enabled);
+        }
+
+        setExplainPageContextEnabled(enabled) {
+            this.explainPageContextEnabled = enabled !== false;
         }
 
         /**
