@@ -5,6 +5,8 @@ on:
     branches:
       - main
     paths:
+      - 'gemini-nexus/package.json'
+      - 'gemini-nexus/package-lock.json'
       - 'gemini-nexus/manifest.json'
   workflow_dispatch: # 允许手动点击运行
 
@@ -41,7 +43,7 @@ jobs:
 
       - name: 打包产物
         run: |
-          VERSION=$(jq -r .version manifest.json)
+          VERSION=$(jq -r .version package.json)
           # 进入 dist 目录进行打包，确保 ZIP 根目录就是插件文件
           cd dist
           zip -r ../gemini-nexus-${VERSION}.zip .
@@ -50,13 +52,13 @@ jobs:
       - name: 检查版本是否变更
         id: check_version
         run: |
-          NEW_VERSION=$(jq -r .version gemini-nexus/manifest.json)
+          NEW_VERSION=$(jq -r .version gemini-nexus/package.json)
           # 如果是手动触发，强制运行
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           else
-            OLD_VERSION=$(git show HEAD^:gemini-nexus/manifest.json | jq -r .version || echo "0.0.0")
+            OLD_VERSION=$(git show HEAD^:gemini-nexus/package.json | jq -r .version || echo "0.0.0")
             if [ "$NEW_VERSION" != "$OLD_VERSION" ]; then
               echo "changed=true" >> $GITHUB_OUTPUT
               echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT

@@ -12,7 +12,7 @@ export const AboutSettingsTemplate = `
     <h4 data-i18n="about">About</h4>
     <p class="setting-info">
         <strong>Gemini Nexus</strong> 
-        <span id="app-current-version">v4.2.3</span>
+        <span id="app-current-version">v0.0.0</span>
         <span id="app-update-status" style="font-size: 13px; margin-left: 8px; font-weight: normal;"></span>
     </p>
     

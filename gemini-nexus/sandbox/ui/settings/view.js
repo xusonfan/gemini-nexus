@@ -170,6 +170,10 @@ export class SettingsView {
         return this.about.getCurrentVersion();
     }
 
+    setCurrentVersion(version) {
+        this.about.setCurrentVersion(version);
+    }
+
     displayUpdateStatus(latest, current, isUpdateAvailable) {
         this.about.displayUpdateStatus(latest, current, isUpdateAvailable);
     }

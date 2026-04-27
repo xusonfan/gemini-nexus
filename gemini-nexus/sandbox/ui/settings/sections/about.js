@@ -49,6 +49,12 @@ export class AboutSection {
         return this.elements.currentVersionEl ? this.elements.currentVersionEl.textContent : null;
     }
 
+    setCurrentVersion(version) {
+        if (this.elements.currentVersionEl) {
+            this.elements.currentVersionEl.textContent = version;
+        }
+    }
+
     displayUpdateStatus(latest, current, isUpdateAvailable) {
         const { updateStatusEl } = this.elements;
         if (!updateStatusEl) return;

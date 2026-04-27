@@ -1,6 +1,6 @@
 
 // sandbox/ui/settings.js
-import { saveShortcutsToStorage, saveThemeToStorage, requestThemeFromStorage, saveOpacityToStorage, requestOpacityFromStorage, saveLanguageToStorage, requestLanguageFromStorage, saveTextSelectionToStorage, requestTextSelectionFromStorage, saveToolbarTextToStorage, requestToolbarTextFromStorage, saveSidebarBehaviorToStorage, saveImageToolsToStorage, requestImageToolsFromStorage, saveExplainPageContextToStorage, requestExplainPageContextFromStorage, saveAccountIndicesToStorage, requestAccountIndicesFromStorage, saveSummaryModelToStorage, requestSummaryModelFromStorage, saveConnectionSettingsToStorage, requestConnectionSettingsFromStorage, sendToBackground } from '../../lib/messaging.js';
+import { saveShortcutsToStorage, saveThemeToStorage, requestThemeFromStorage, saveOpacityToStorage, requestOpacityFromStorage, saveLanguageToStorage, requestLanguageFromStorage, saveTextSelectionToStorage, requestTextSelectionFromStorage, saveToolbarTextToStorage, requestToolbarTextFromStorage, saveSidebarBehaviorToStorage, saveImageToolsToStorage, requestImageToolsFromStorage, saveExplainPageContextToStorage, requestExplainPageContextFromStorage, saveAccountIndicesToStorage, requestAccountIndicesFromStorage, saveSummaryModelToStorage, requestSummaryModelFromStorage, saveConnectionSettingsToStorage, requestConnectionSettingsFromStorage, requestAppVersion, sendToBackground } from '../../lib/messaging.js';
 import { setLanguagePreference, getLanguagePreference } from '../core/i18n.js';
 import { SettingsView } from './settings/view.js';
 import { DEFAULT_SHORTCUTS } from '../../lib/constants.js';
@@ -108,6 +108,7 @@ export class SettingsController {
         requestAccountIndicesFromStorage();
         requestSummaryModelFromStorage();
         requestConnectionSettingsFromStorage();
+        requestAppVersion();
         
         this.fetchGithubData();
     }
@@ -320,6 +321,10 @@ export class SettingsController {
     updateSummaryModel(model) {
         this.summaryModel = model || "";
         this.view.setConnectionSettings({ ...this.connectionData, summaryModel: this.summaryModel });
+    }
+
+    updateAppVersion(version) {
+        this.view.setCurrentVersion(version ? `v${version.replace(/^v/, '')}` : 'v0.0.0');
     }
 
     async fetchGithubData() {

@@ -1,9 +1,12 @@
 {
   "name": "gemini-nexus",
   "private": true,
-  "version": "4.5.1",
+  "version": "4.5.2",
   "type": "module",
   "scripts": {
+    "sync-version": "node scripts/sync-version.mjs",
+    "prebuild": "npm run sync-version",
+    "version": "npm run sync-version",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"

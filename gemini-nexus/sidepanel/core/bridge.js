@@ -22,6 +22,10 @@ export class MessageBridge {
         // 1. Handshake
         if (action === 'UI_READY') {
             this.state.markUiReady();
+            this.frame.postMessage({
+                action: 'RESTORE_APP_VERSION',
+                payload: chrome.runtime.getManifest().version
+            });
             return;
         }
 
@@ -185,6 +189,13 @@ export class MessageBridge {
                         mcpActiveServerId: res.geminiMcpActiveServerId || null
                     } 
                 });
+            });
+            return;
+        }
+        if (action === 'GET_APP_VERSION') {
+            this.frame.postMessage({
+                action: 'RESTORE_APP_VERSION',
+                payload: chrome.runtime.getManifest().version
             });
             return;
         }

@@ -103,6 +103,10 @@ export class AppMessageBridge {
             this.ui.settings.updateSummaryModel(payload);
             return;
         }
+        if (action === 'RESTORE_APP_VERSION') {
+            this.ui.settings.updateAppVersion(payload);
+            return;
+        }
         
         // Note: RESTORE_CONNECTION_SETTINGS is handled by AppController to update Model List
         

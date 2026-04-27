@@ -138,3 +138,7 @@ export function saveConnectionSettingsToStorage(data) {
         payload: data
     }, '*');
 }
+
+export function requestAppVersion() {
+    window.parent.postMessage({ action: 'GET_APP_VERSION' }, '*');
+}
