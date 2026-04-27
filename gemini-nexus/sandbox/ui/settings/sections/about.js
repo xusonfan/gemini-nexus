@@ -60,7 +60,7 @@ export class AboutSection {
         if (!updateStatusEl) return;
 
         if (isUpdateAvailable) {
-            updateStatusEl.innerHTML = `<a href="https://github.com/yeahhe365/gemini-nexus/releases" target="_blank" style="color: #d93025; text-decoration: none; border-bottom: 1px dashed;">Update available: ${latest}</a>`;
+            updateStatusEl.innerHTML = `<a href="https://github.com/xusonfan/gemini-nexus/releases" target="_blank" style="color: #d93025; text-decoration: none; border-bottom: 1px dashed;">Update available: ${latest}</a>`;
         } else {
             updateStatusEl.textContent = `(Latest: ${latest})`;
             updateStatusEl.style.color = "var(--text-tertiary)";
