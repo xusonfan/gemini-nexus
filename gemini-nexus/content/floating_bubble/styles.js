@@ -26,6 +26,7 @@
         '.gemini-bubble[data-side="left"] .gemini-bubble-menu{right:auto;left:calc(100% + 10px);}' +
         '.gemini-bubble:hover .gemini-bubble-menu,.gemini-bubble.menu-open .gemini-bubble-menu{opacity:1;pointer-events:auto;}' +
         '.gemini-bubble.dragging .gemini-bubble-menu{opacity:0;pointer-events:none;transition:none;}' +
+        '.gemini-bubble.menu-force-closed .gemini-bubble-menu{opacity:0;pointer-events:none;}' +
         '.gemini-bubble.dragging .gemini-bubble-settings{opacity:0;pointer-events:none;transition:none;}' +
         '.gemini-bubble-menu-items{display:flex;flex-direction:row-reverse;gap:4px;background:#1e1e2e;border-radius:24px;padding:4px;box-shadow:0 4px 16px rgba(0,0,0,0.3),0 0 0 1px rgba(255,255,255,0.06);white-space:nowrap;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}' +
         '.gemini-bubble-menu-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:20px;border:none;background:transparent;color:#c4c7c5;font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s;font-family:inherit;line-height:1;}' +
