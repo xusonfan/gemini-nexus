@@ -77,6 +77,17 @@ export function saveToolbarTextToStorage(enabled) {
     }, '*');
 }
 
+export function requestBubbleEnabledFromStorage() {
+    window.parent.postMessage({ action: 'GET_BUBBLE_ENABLED' }, '*');
+}
+
+export function saveBubbleEnabledToStorage(enabled) {
+    window.parent.postMessage({
+        action: 'SAVE_BUBBLE_ENABLED',
+        payload: enabled
+    }, '*');
+}
+
 export function requestImageToolsFromStorage() {
     window.parent.postMessage({ action: 'GET_IMAGE_TOOLS' }, '*');
 }

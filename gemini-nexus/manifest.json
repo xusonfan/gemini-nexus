@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Gemini Nexus",
-  "version": "4.5.2",
+  "version": "4.6.0",
   "permissions": ["sidePanel", "storage", "unlimitedStorage", "contextMenus", "scripting", "alarms", "debugger", "downloads", "tabs"],
   "host_permissions": [
     "https://gemini.google.com/*",
@@ -47,6 +47,7 @@
         "content/toolbar/styles/panel/footer.js",
         "content/toolbar/styles/panel/index.js",
         "content/toolbar/styles/index.js",
+        "content/floating_bubble/styles.js",
         "content/toolbar/bridge.js",
         "content/toolbar/utils/drag.js",
         "content/toolbar/i18n.js",
@@ -72,6 +73,7 @@
         "content/toolbar/controller.js",
         "content/shortcuts.js",
         "content/messages.js",
+        "content/floating_bubble/bubble.js",
         "content/index.js"
       ],
       "run_at": "document_end"

@@ -29,4 +29,8 @@ export const AppearanceSettingsTemplate = `
         <label data-i18n="showToolbarText">Show Toolbar Text</label>
         <input type="checkbox" id="toolbar-text-toggle" style="width: 20px; height: 20px; cursor: pointer;">
     </div>
+    <div class="shortcut-row">
+        <label data-i18n="showFloatingBubble">Floating Bubble</label>
+        <input type="checkbox" id="bubble-toggle" style="width: 20px; height: 20px; cursor: pointer;">
+    </div>
 </div>`;

@@ -203,6 +203,10 @@ export class AppController {
                 if(this.ui.inputFn) this.ui.inputFn.focus();
                 return;
             }
+            if (payload.action === 'OPEN_SETTINGS') {
+                if (this.ui && this.ui.settings) this.ui.settings.open();
+                return;
+            }
             // Tab list response
             if (payload.action === 'OPEN_TABS_RESULT') {
                 this.ui.openTabSelector(payload.tabs, (tabId, shouldSwitch) => this.handleTabSelected(tabId, shouldSwitch), payload.lockedTabId);
