@@ -324,6 +324,20 @@ export class MessageBridge {
 
         }
 
+        if (action === 'GET_BUBBLE_CLICK_ACTION') {
+
+            chrome.storage.local.get(['gemini_bubble_click_action'], (res) => {
+
+                const val = res.gemini_bubble_click_action || 'summarize_page';
+
+                this.frame.postMessage({ action: 'RESTORE_BUBBLE_CLICK_ACTION', payload: val });
+
+            });
+
+            return;
+
+        }
+
         if (action === 'GET_ACCOUNT_INDICES') {
 
             chrome.storage.local.get(['geminiAccountIndices'], (res) => {
@@ -459,6 +473,8 @@ export class MessageBridge {
         if (action === 'SAVE_TOOLBAR_TEXT') this.state.save('geminiToolbarTextEnabled', payload);
 
         if (action === 'SAVE_BUBBLE_ENABLED') this.state.save('gemini_bubble_enabled', payload);
+
+        if (action === 'SAVE_BUBBLE_CLICK_ACTION') this.state.save('gemini_bubble_click_action', payload);
 
         if (action === 'SAVE_SIDEBAR_BEHAVIOR') this.state.save('geminiSidebarBehavior', payload);
 

@@ -33,4 +33,14 @@ export const AppearanceSettingsTemplate = `
         <label data-i18n="showFloatingBubble">Floating Bubble</label>
         <input type="checkbox" id="bubble-toggle" style="width: 20px; height: 20px; cursor: pointer;">
     </div>
+    <div class="shortcut-row">
+        <label data-i18n="bubbleClickAction">On Click</label>
+        <select id="bubble-click-action" class="shortcut-input" style="width: auto; padding: 6px 12px; text-align: left;">
+            <option value="open_menu" data-i18n="bubbleClickOpenMenu">Open Menu</option>
+            <option value="summarize_page" data-i18n="shortcutSummarizePage">Summarize Page</option>
+            <option value="ask" data-i18n="quickAsk">Quick Ask</option>
+            <option value="ocr" data-i18n="shortcutOCR">OCR</option>
+            <option value="snip" data-i18n="shortcutSnip">Snip</option>
+        </select>
+    </div>
 </div>`;

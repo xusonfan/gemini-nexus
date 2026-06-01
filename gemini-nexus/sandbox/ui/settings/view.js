@@ -54,7 +54,8 @@ export class SettingsView {
 
             onToolbarTextChange: (val) => this.fire('onToolbarTextChange', val),
 
-            onBubbleChange: (val) => this.fire('onBubbleChange', val)
+            onBubbleChange: (val) => this.fire('onBubbleChange', val),
+            onBubbleClickActionChange: (val) => this.fire('onBubbleClickActionChange', val)
 
         });
 
@@ -269,6 +270,12 @@ export class SettingsView {
     setBubbleValue(enabled) {
 
         this.appearance.setBubbleEnabled(enabled);
+
+    }
+
+    setBubbleClickActionValue(action) {
+
+        this.appearance.setBubbleClickAction(action);
 
     }
 

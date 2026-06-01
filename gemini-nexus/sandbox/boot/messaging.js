@@ -99,6 +99,10 @@ export class AppMessageBridge {
             this.ui.settings.updateBubbleEnabled(payload);
             return;
         }
+        if (action === 'RESTORE_BUBBLE_CLICK_ACTION') {
+            this.ui.settings.updateBubbleClickAction(payload);
+            return;
+        }
         if (action === 'RESTORE_ACCOUNT_INDICES') {
             this.ui.settings.updateAccountIndices(payload);
             return;

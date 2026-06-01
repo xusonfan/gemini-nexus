@@ -14,7 +14,7 @@
 
 
 
-import { saveShortcutsToStorage, saveThemeToStorage, requestThemeFromStorage, saveOpacityToStorage, requestOpacityFromStorage, saveLanguageToStorage, requestLanguageFromStorage, saveTextSelectionToStorage, requestTextSelectionFromStorage, saveToolbarTextToStorage, requestToolbarTextFromStorage, saveSidebarBehaviorToStorage, saveImageToolsToStorage, requestImageToolsFromStorage, saveExplainPageContextToStorage, requestExplainPageContextFromStorage, saveAccountIndicesToStorage, requestAccountIndicesFromStorage, saveSummaryModelToStorage, requestSummaryModelFromStorage, saveConnectionSettingsToStorage, requestConnectionSettingsFromStorage, requestAppVersion, sendToBackground, saveBubbleEnabledToStorage, requestBubbleEnabledFromStorage } from '../../lib/messaging.js';
+import { saveShortcutsToStorage, saveThemeToStorage, requestThemeFromStorage, saveOpacityToStorage, requestOpacityFromStorage, saveLanguageToStorage, requestLanguageFromStorage, saveTextSelectionToStorage, requestTextSelectionFromStorage, saveToolbarTextToStorage, requestToolbarTextFromStorage, saveSidebarBehaviorToStorage, saveImageToolsToStorage, requestImageToolsFromStorage, saveExplainPageContextToStorage, requestExplainPageContextFromStorage, saveAccountIndicesToStorage, requestAccountIndicesFromStorage, saveSummaryModelToStorage, requestSummaryModelFromStorage, saveConnectionSettingsToStorage, requestConnectionSettingsFromStorage, requestAppVersion, sendToBackground, saveBubbleEnabledToStorage, requestBubbleEnabledFromStorage, saveBubbleClickAction, requestBubbleClickActionFromStorage } from '../../lib/messaging.js';
 
 
 
@@ -464,6 +464,8 @@ export class SettingsController {
 
             onBubbleChange: (enabled) => { saveBubbleEnabledToStorage(enabled); },
 
+            onBubbleClickActionChange: (action) => { saveBubbleClickAction(action); },
+
 
 
 
@@ -779,6 +781,7 @@ export class SettingsController {
 
 
         requestBubbleEnabledFromStorage();
+        requestBubbleClickActionFromStorage();
 
 
 
@@ -1995,6 +1998,23 @@ export class SettingsController {
     }
 
 
+    updateBubbleClickAction(action) {
+
+
+
+
+
+
+
+        this.view.setBubbleClickActionValue(action);
+
+
+
+
+
+
+
+    }
 
 
 

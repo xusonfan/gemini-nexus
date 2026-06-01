@@ -150,6 +150,17 @@ export function saveConnectionSettingsToStorage(data) {
     }, '*');
 }
 
+export function requestBubbleClickActionFromStorage() {
+    window.parent.postMessage({ action: 'GET_BUBBLE_CLICK_ACTION' }, '*');
+}
+
+export function saveBubbleClickAction(action) {
+    window.parent.postMessage({
+        action: 'SAVE_BUBBLE_CLICK_ACTION',
+        payload: action
+    }, '*');
+}
+
 export function requestAppVersion() {
     window.parent.postMessage({ action: 'GET_APP_VERSION' }, '*');
 }
