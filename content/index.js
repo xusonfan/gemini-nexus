@@ -4,6 +4,7 @@
     const router = window.GeminiMessageRouter;
     const Overlay = window.GeminiNexusOverlay;
     const Controller = window.GeminiToolbarController;
+    const Bubble = window.GeminiFloatingBubble;
     const settingsSync = window.GeminiContentSettingsSync;
 
     if (window.GeminiNexusContentReady === true) {
@@ -20,6 +21,12 @@
         }
 
         shortcuts?.setController?.(floatingToolbar);
+
+        if (Bubble && floatingToolbar && !window.GeminiNexusFloatingBubbleInstance) {
+            const floatingBubble = new Bubble(floatingToolbar);
+            floatingBubble.init();
+            window.GeminiNexusFloatingBubbleInstance = floatingBubble;
+        }
         return;
     }
 
@@ -33,6 +40,12 @@
     shortcuts?.setController?.(floatingToolbar);
 
     settingsSync?.init?.(floatingToolbar);
+
+    if (Bubble) {
+        const floatingBubble = new Bubble(floatingToolbar);
+        floatingBubble.init();
+        window.GeminiNexusFloatingBubbleInstance = floatingBubble;
+    }
 
     window.GeminiNexusContentReady = true;
 })();

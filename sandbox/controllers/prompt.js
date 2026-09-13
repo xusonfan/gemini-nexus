@@ -300,6 +300,11 @@ export class PromptController {
             this.getMessageEditOptions(messageIndex)
         );
 
+        const followUpContainers = this.ui.historyDiv?.querySelectorAll('.follow-up-container');
+        followUpContainers?.forEach((container) => {
+            container.style.display = 'none';
+        });
+
         this.sessionManager.addMessage(currentId, 'user', text, displayAttachments);
 
         saveSessionsToStorage(this.sessionManager.getPersistableSessions(), {

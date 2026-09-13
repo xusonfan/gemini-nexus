@@ -148,14 +148,22 @@
                     case 'explain':
                     case 'summarize':
                         if (!this.controller.currentSelection) return;
-                        this.controller.lastSessionId = null;
-                        this.actions.handleQuickAction(
-                            actionType,
-                            this.controller.currentSelection,
-                            this.controller.lastRect,
-                            currentModel,
-                            this.controller.lastMousePoint
-                        );
+                        {
+                            const modifiers = actionPayload?.modifiers;
+                            const includePageContext =
+                                actionType === 'explain' &&
+                                (this.controller.explainPageContextEnabled !== false ||
+                                    (modifiers ? !!modifiers.shift : false));
+                            this.controller.lastSessionId = null;
+                            this.actions.handleQuickAction(
+                                actionType,
+                                this.controller.currentSelection,
+                                this.controller.lastRect,
+                                currentModel,
+                                this.controller.lastMousePoint,
+                                { includePageContext }
+                            );
+                        }
                         break;
 
                     case 'generate_image':

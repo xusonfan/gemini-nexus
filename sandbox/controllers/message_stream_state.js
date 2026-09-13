@@ -104,6 +104,10 @@ export function createStreamingBubble(handler, state = {}) {
     });
     handler.streamingBubble = bubble;
     handler.streamingBubbleSessionId = state.sessionId || handler.app?.generatingSessionId || null;
+    if (bubble?.div) {
+        handler.ui.setStreamingAnchor?.(bubble.div);
+        handler.ui.scrollToMessageStart?.(bubble.div, true);
+    }
 }
 
 export function finalizeActiveStream(handler, state = {}) {
@@ -146,6 +150,7 @@ export function finalizeActiveStream(handler, state = {}) {
     }
     handler.streamingBubble = null;
     handler.streamingBubbleSessionId = null;
+    handler.ui.clearStreamingAnchor?.();
 }
 
 export function resetStream(handler, options = {}) {
@@ -159,6 +164,7 @@ export function resetStream(handler, options = {}) {
         handler.streamingBubble = null;
         handler.streamingBubbleSessionId = null;
     }
+    handler.ui.clearStreamingAnchor?.();
     if (handler.contextCompressionNotice && options.remove === true) {
         handler.contextCompressionNotice.dispose?.();
     }

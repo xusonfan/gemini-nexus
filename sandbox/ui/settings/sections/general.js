@@ -26,6 +26,7 @@ export class GeneralSection {
             textSelectionToggle: getSettingsElement(DOM_IDS.TEXT_SELECTION_TOGGLE),
             textSelectionBlacklistInput: getSettingsElement(DOM_IDS.TEXT_SELECTION_BLACKLIST),
             imageToolsToggle: getSettingsElement(DOM_IDS.IMAGE_TOOLS_TOGGLE),
+            explainPageContextToggle: getSettingsElement(DOM_IDS.EXPLAIN_PAGE_CONTEXT_TOGGLE),
             imageToolsBlacklistInput: getSettingsElement(DOM_IDS.IMAGE_TOOLS_BLACKLIST),
             generatedImageWatermarkToggle: getSettingsElement(
                 DOM_IDS.GENERATED_IMAGE_WATERMARK_TOGGLE
@@ -44,6 +45,7 @@ export class GeneralSection {
         const {
             textSelectionToggle,
             imageToolsToggle,
+            explainPageContextToggle,
             generatedImageWatermarkToggle,
             customSelectionToolAdd,
             customSelectionToolsList,
@@ -60,6 +62,11 @@ export class GeneralSection {
         if (imageToolsToggle) {
             imageToolsToggle.addEventListener('change', (event) =>
                 this.fire('onImageToolsChange', event.target.checked)
+            );
+        }
+        if (explainPageContextToggle) {
+            explainPageContextToggle.addEventListener('change', (event) =>
+                this.fire('onExplainPageContextChange', event.target.checked)
             );
         }
         if (this.elements.imageToolsBlacklistInput) {
@@ -142,6 +149,12 @@ export class GeneralSection {
     setImageToolsBlacklist(value) {
         if (this.elements.imageToolsBlacklistInput) {
             this.elements.imageToolsBlacklistInput.value = value || '';
+        }
+    }
+
+    setExplainPageContext(enabled) {
+        if (this.elements.explainPageContextToggle) {
+            this.elements.explainPageContextToggle.checked = enabled !== false;
         }
     }
 
@@ -250,6 +263,7 @@ export class GeneralSection {
             textSelectionToggle,
             textSelectionBlacklistInput,
             imageToolsToggle,
+            explainPageContextToggle,
             generatedImageWatermarkToggle,
             customSelectionToolsList,
             accountIndicesInput,
@@ -269,6 +283,7 @@ export class GeneralSection {
                 ? textSelectionBlacklistInput.value
                 : '',
             imageTools: imageToolsToggle ? imageToolsToggle.checked : true,
+            explainPageContext: explainPageContextToggle ? explainPageContextToggle.checked : true,
             generatedImageWatermarkRemoval: generatedImageWatermarkToggle
                 ? generatedImageWatermarkToggle.checked
                 : true,

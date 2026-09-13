@@ -20,6 +20,7 @@ export class SettingsView {
         this.general = new GeneralSection({
             onTextSelectionChange: (value) => this.fire('onTextSelectionChange', value),
             onImageToolsChange: (value) => this.fire('onImageToolsChange', value),
+            onExplainPageContextChange: (value) => this.fire('onExplainPageContextChange', value),
             onSidebarBehaviorChange: (value) => this.fire('onSidebarBehaviorChange', value),
             onSidePanelScopeChange: (value) => this.fire('onSidePanelScopeChange', value),
         });
@@ -27,6 +28,10 @@ export class SettingsView {
         this.appearance = new AppearanceSection({
             onThemeChange: (value) => this.fire('onThemeChange', value),
             onLanguageChange: (value) => this.fire('onLanguageChange', value),
+            onOpacityChange: (value) => this.fire('onOpacityChange', value),
+            onToolbarTextChange: (value) => this.fire('onToolbarTextChange', value),
+            onBubbleChange: (value) => this.fire('onBubbleChange', value),
+            onBubbleClickActionChange: (value) => this.fire('onBubbleClickActionChange', value),
         });
 
         this.shortcuts = new ShortcutsSection();
@@ -169,6 +174,7 @@ export class SettingsView {
             sidePanelScope: generalData.sidePanelScope,
             contextMode: generalData.contextMode,
             contextRecentTurns: generalData.contextRecentTurns,
+            explainPageContext: generalData.explainPageContext,
         };
     }
 
@@ -263,6 +269,26 @@ export class SettingsView {
 
     setContextSettings(settings) {
         this.general.setContextSettings(settings);
+    }
+
+    setExplainPageContext(enabled) {
+        this.general.setExplainPageContext(enabled);
+    }
+
+    setOpacityValue(opacity) {
+        this.appearance.setOpacity(opacity);
+    }
+
+    setToolbarTextValue(enabled) {
+        this.appearance.setToolbarText(enabled);
+    }
+
+    setBubbleEnabled(enabled) {
+        this.appearance.setBubbleEnabled(enabled);
+    }
+
+    setBubbleClickAction(action) {
+        this.appearance.setBubbleClickAction(action);
     }
 
     setConnectionSettings(data) {

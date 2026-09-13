@@ -18,7 +18,9 @@
 
         triggerAction(event, action) {
             consumeEvent(event);
-            this.manager.fireCallback('onAction', action);
+            this.manager.fireCallback('onAction', action, {
+                modifiers: { shift: event.shiftKey === true },
+            });
         }
 
         cancelAsk(event) {

@@ -40,6 +40,7 @@ export class UIController {
         this.modelSelect = elements.modelSelect;
         this.webThinkingToggle = document.getElementById('web-thinking-toggle');
         this.tabSwitcherBtn = document.getElementById('tab-switcher-btn');
+        this.exportPdfBtn = document.getElementById('export-pdf-btn');
         window.addEventListener('resize', () => this.scheduleLayoutCheck());
         document.addEventListener('gemini-language-changed', () =>
             this.updateWebThinkingToggle(this.settings.connectionData)
@@ -64,6 +65,10 @@ export class UIController {
 
     setHostContext(context = {}) {
         document.body.classList.toggle('host-tab', context.isTab === true);
+        if (this.exportPdfBtn) {
+            const isFullPage = context.isTab === true;
+            this.exportPdfBtn.style.display = isFullPage ? 'flex' : 'none';
+        }
     }
 
     setPageContextAvailable(isAvailable) {
@@ -151,6 +156,15 @@ export class UIController {
     }
     scrollToBottom(options) {
         this.chat.scrollToBottom(options);
+    }
+    scrollToMessageStart(messageEl, force = false) {
+        this.chat.scrollToMessageStart(messageEl, force);
+    }
+    setStreamingAnchor(messageEl) {
+        this.chat.setStreamingAnchor(messageEl);
+    }
+    clearStreamingAnchor() {
+        this.chat.clearStreamingAnchor();
     }
     resetInput() {
         this.chat.resetInput();

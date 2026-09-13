@@ -3,6 +3,29 @@ import { bindToolButtonEvents } from './tool_button_events.js';
 import { LIVE_ARTIFACT_FOLLOWUP_EVENT } from '../core/live_artifacts.js';
 
 export function bindAppEvents(app, ui, setResizeRef) {
+    document.addEventListener('gemini-send-followup', (event) => {
+        const question = event.detail;
+        if (ui.inputFn) {
+            ui.inputFn.value = question;
+            app.handleSendMessage();
+        }
+    });
+
+    const exportPdfBtn = document.getElementById('export-pdf-btn');
+    if (exportPdfBtn) {
+        exportPdfBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (ui?.chat) {
+                ui.chat.exportToPDF();
+            } else {
+                window.print();
+            }
+        });
+        exportPdfBtn.style.pointerEvents = 'auto';
+        exportPdfBtn.style.visibility = 'visible';
+    }
+
     ['new-chat-composer-btn', 'new-chat-sidebar-btn', 'collapsed-new-chat-btn'].forEach(
         (buttonId) => {
             const newChatBtn = document.getElementById(buttonId);

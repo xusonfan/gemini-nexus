@@ -36,6 +36,7 @@ export function buildGeneralSettingsForSave(formData) {
         accountIndices: normalizeAccountIndices(formData.accountIndices),
         sidebarBehavior: formData.sidebarBehavior || 'auto',
         sidePanelScope: formData.sidePanelScope || DEFAULT_SIDE_PANEL_SCOPE,
+        explainPageContextEnabled: formData.explainPageContext !== false,
     };
 }
 
@@ -65,6 +66,7 @@ export function buildConnectionSettingsForSave(connection, previousConnectionDat
         openaiThinkingLevel: connection.openaiThinkingLevel || DEFAULT_THINKING_LEVEL,
         openaiUseResponsesApi: openaiSettings.useResponsesApi,
         openaiWebSearch: openaiSettings.webSearch,
+        summaryModel: connection.summaryModel || '',
         dedicatedApiProviders: normalizeDedicatedApiSettingsPayload(
             connection.dedicatedApiProviders || previousConnectionData.dedicatedApiProviders
         ),

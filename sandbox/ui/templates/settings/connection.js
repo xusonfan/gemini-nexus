@@ -93,6 +93,10 @@ export const ConnectionSettingsTemplate = `
                         </div>
                         <input type="checkbox" id="openai-web-search-enabled" class="setting-toggle" />
                     </div>
+                    <div class="setting-field settings-section-offset">
+                        <span data-i18n="summaryModelId">Summary Model ID</span>
+                        <input type="text" id="summary-model-input" class="settings-input settings-full-input" data-i18n-placeholder="summaryModelIdPlaceholder">
+                    </div>
                 </div>
 
                 <div id="dedicated-api-fields" class="settings-stack tight" hidden>

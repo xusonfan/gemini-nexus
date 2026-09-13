@@ -81,6 +81,7 @@ export class ConnectionSection {
             openaiThinkingLevelSelect,
             openaiUseResponsesApi,
             openaiWebSearch,
+            summaryModelInput,
             mcpEnabled,
         } = this.elements;
 
@@ -108,6 +109,7 @@ export class ConnectionSection {
         const openaiSettings = normalizeOpenAIWebSearchSettings(data || {});
         if (openaiUseResponsesApi) openaiUseResponsesApi.checked = openaiSettings.useResponsesApi;
         if (openaiWebSearch) openaiWebSearch.checked = openaiSettings.webSearch;
+        if (summaryModelInput) summaryModelInput.value = data?.summaryModel || '';
 
         this.dedicatedApiProviders = normalizeDedicatedApiSettingsPayload(
             data?.dedicatedApiProviders
@@ -172,6 +174,7 @@ export class ConnectionSection {
             openaiThinkingLevelSelect,
             openaiUseResponsesApi,
             openaiWebSearch,
+            summaryModelInput,
             mcpEnabled,
         } = this.elements;
 
@@ -206,6 +209,7 @@ export class ConnectionSection {
                 ? openaiUseResponsesApi.checked === true
                 : false,
             openaiWebSearch: openaiWebSearch ? openaiWebSearch.checked === true : false,
+            summaryModel: summaryModelInput ? summaryModelInput.value.trim() : '',
             dedicatedApiProviders: this.dedicatedApiProviders,
 
             mcpEnabled: mcpEnabled ? mcpEnabled.checked === true : false,

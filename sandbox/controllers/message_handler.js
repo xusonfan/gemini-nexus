@@ -79,9 +79,37 @@ export class MessageHandler {
             case 'SELECTION_RESULT':
                 this.handleSelectionResult(request);
                 return;
+            case 'FOLLOW_UP_QUESTIONS':
+                this.handleFollowUpQuestions(request);
+                return;
             default:
                 return;
         }
+    }
+
+    handleFollowUpQuestions(request) {
+        if (!this.isCurrentSessionMessage(request)) return;
+
+        const aiMsgs = this.ui.historyDiv?.querySelectorAll('.msg.ai');
+        if (!aiMsgs || aiMsgs.length === 0) return;
+
+        const lastAiMsg = aiMsgs[aiMsgs.length - 1];
+        const followUpContainer = lastAiMsg.querySelector('.follow-up-container');
+        if (!followUpContainer || !Array.isArray(request.questions)) return;
+
+        followUpContainer.innerHTML = '';
+        request.questions.forEach((question) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'follow-up-btn';
+            btn.textContent = question;
+            btn.addEventListener('click', () => {
+                document.dispatchEvent(
+                    new CustomEvent('gemini-send-followup', { detail: question })
+                );
+            });
+            followUpContainer.appendChild(btn);
+        });
     }
 
     handleMcpTestResult(request) {
@@ -159,6 +187,9 @@ export class MessageHandler {
         }
 
         this.streamingBubble.update(displayText, request.thoughts, { isStreaming: true });
+        if (this.streamingBubble?.div) {
+            this.ui.scrollToMessageStart?.(this.streamingBubble.div, true);
+        }
 
         if (!this.app.isGenerating) {
             // Use the prompt controller's canonical state setter so the watchdog is armed

@@ -6,6 +6,7 @@
         'geminiImageToolsEnabled',
         'geminiImageToolsBlacklist',
         'geminiGeneratedImageWatermarkRemovalEnabled',
+        'geminiExplainPageContextEnabled',
     ];
 
     function isSelectionBlacklisted(blacklist) {
@@ -34,6 +35,9 @@
             Array.isArray(result.geminiCustomSelectionTools)
                 ? result.geminiCustomSelectionTools
                 : []
+        );
+        toolbar?.setExplainPageContextEnabled?.(
+            result.geminiExplainPageContextEnabled !== false
         );
     }
 
@@ -117,6 +121,12 @@
                     Array.isArray(changes.geminiCustomSelectionTools.newValue)
                         ? changes.geminiCustomSelectionTools.newValue
                         : []
+                );
+            }
+
+            if (changes.geminiExplainPageContextEnabled) {
+                toolbar?.setExplainPageContextEnabled?.(
+                    changes.geminiExplainPageContextEnabled.newValue !== false
                 );
             }
         });

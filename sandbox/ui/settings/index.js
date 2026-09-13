@@ -22,6 +22,16 @@ import {
     requestContextSettingsFromStorage,
     saveConnectionSettingsToStorage,
     requestConnectionSettingsFromStorage,
+    saveOpacityToStorage,
+    requestOpacityFromStorage,
+    saveToolbarTextToStorage,
+    requestToolbarTextFromStorage,
+    saveBubbleEnabledToStorage,
+    requestBubbleEnabledFromStorage,
+    saveBubbleClickActionToStorage,
+    requestBubbleClickActionFromStorage,
+    saveExplainPageContextToStorage,
+    requestExplainPageContextFromStorage,
     exportHistoryData,
     importHistoryData,
     exportSettingsData,
@@ -72,6 +82,11 @@ export class SettingsController {
         this.accountIndices = '0';
         this.sidebarBehavior = 'auto';
         this.sidePanelScope = DEFAULT_SIDE_PANEL_SCOPE;
+        this.opacity = 1;
+        this.toolbarTextEnabled = false;
+        this.bubbleEnabled = true;
+        this.bubbleClickAction = 'summarize_page';
+        this.explainPageContextEnabled = true;
         this.contextSettings = {
             mode: DEFAULT_CONTEXT_MODE,
             recentTurns: DEFAULT_CONTEXT_RECENT_TURNS,
@@ -94,6 +109,7 @@ export class SettingsController {
             openaiThinkingLevel: DEFAULT_THINKING_LEVEL,
             openaiUseResponsesApi: false,
             openaiWebSearch: false,
+            summaryModel: '',
             dedicatedApiProviders: normalizeDedicatedApiSettingsPayload(),
             mcpEnabled: false,
             mcpTransport: DEFAULT_MCP_TRANSPORT,
@@ -109,6 +125,23 @@ export class SettingsController {
 
             onThemeChange: (theme) => this.setTheme(theme),
             onLanguageChange: (lang) => this.setLanguage(lang),
+            onOpacityChange: (opacity) => this.setOpacity(opacity),
+            onToolbarTextChange: (enabled) => {
+                this.toolbarTextEnabled = enabled === true;
+                saveToolbarTextToStorage(this.toolbarTextEnabled);
+            },
+            onBubbleChange: (enabled) => {
+                this.bubbleEnabled = enabled !== false;
+                saveBubbleEnabledToStorage(this.bubbleEnabled);
+            },
+            onBubbleClickActionChange: (action) => {
+                this.bubbleClickAction = action || 'summarize_page';
+                saveBubbleClickActionToStorage(this.bubbleClickAction);
+            },
+            onExplainPageContextChange: (enabled) => {
+                this.explainPageContextEnabled = enabled !== false;
+                saveExplainPageContextToStorage(this.explainPageContextEnabled);
+            },
 
             onTextSelectionChange: (value) => {
                 this.textSelectionEnabled = value === 'on' || value === true;
@@ -176,6 +209,11 @@ export class SettingsController {
         this.view.setSidePanelScope(this.sidePanelScope);
         this.view.setContextSettings(this.contextSettings);
         this.view.setConnectionSettings(this.connectionData);
+        this.view.setExplainPageContext(this.explainPageContextEnabled);
+        this.view.setOpacityValue(this.opacity);
+        this.view.setToolbarTextValue(this.toolbarTextEnabled);
+        this.view.setBubbleEnabled(this.bubbleEnabled);
+        this.view.setBubbleClickAction(this.bubbleClickAction);
 
         requestTextSelectionFromStorage();
         requestTextSelectionBlacklistFromStorage();
@@ -186,6 +224,11 @@ export class SettingsController {
         requestAccountIndicesFromStorage();
         requestContextSettingsFromStorage();
         requestConnectionSettingsFromStorage();
+        requestOpacityFromStorage();
+        requestToolbarTextFromStorage();
+        requestBubbleEnabledFromStorage();
+        requestBubbleClickActionFromStorage();
+        requestExplainPageContextFromStorage();
 
         this.refreshGithubMetadata();
     }
@@ -228,6 +271,10 @@ export class SettingsController {
 
         this.contextSettings = buildContextSettingsForSave(formData);
         saveContextSettingsToStorage(this.contextSettings);
+
+        this.explainPageContextEnabled = generalSettings.explainPageContextEnabled;
+        saveExplainPageContextToStorage(this.explainPageContextEnabled);
+        this.view.setExplainPageContext(this.explainPageContextEnabled);
 
         this.connectionData = buildConnectionSettingsForSave(
             formData.connection,
@@ -320,6 +367,39 @@ export class SettingsController {
         setLanguagePreference(newLang);
         saveLanguageToStorage(newLang);
         document.dispatchEvent(new CustomEvent('gemini-language-changed'));
+    }
+
+    setOpacity(opacity) {
+        const value = Number(opacity);
+        this.opacity = Number.isFinite(value) ? value : 1;
+        this.view.setOpacityValue(this.opacity);
+        saveOpacityToStorage(this.opacity);
+    }
+
+    updateOpacity(opacity) {
+        const value = Number(opacity);
+        this.opacity = Number.isFinite(value) ? value : 1;
+        this.view.setOpacityValue(this.opacity);
+    }
+
+    updateToolbarText(enabled) {
+        this.toolbarTextEnabled = enabled === true;
+        this.view.setToolbarTextValue(this.toolbarTextEnabled);
+    }
+
+    updateBubbleEnabled(enabled) {
+        this.bubbleEnabled = enabled !== false;
+        this.view.setBubbleEnabled(this.bubbleEnabled);
+    }
+
+    updateBubbleClickAction(action) {
+        this.bubbleClickAction = action || 'summarize_page';
+        this.view.setBubbleClickAction(this.bubbleClickAction);
+    }
+
+    updateExplainPageContext(enabled) {
+        this.explainPageContextEnabled = enabled !== false;
+        this.view.setExplainPageContext(this.explainPageContextEnabled);
     }
 
     updateLanguage(lang) {

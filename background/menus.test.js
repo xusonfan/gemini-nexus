@@ -148,7 +148,7 @@ describe('context menu actions', () => {
         expect(pending.map((task) => task.type)).toEqual(['removeAll']);
 
         async function flushNextMenuBuild() {
-            for (let index = 0; index < 9; index += 1) {
+            for (let index = 0; index < 10; index += 1) {
                 expect(pending.length).toBeGreaterThan(0);
                 pending.shift().run();
                 await Promise.resolve();
@@ -172,6 +172,6 @@ describe('context menu actions', () => {
         const childCreates = chrome.contextMenus.create.mock.calls.filter(
             ([item]) => item.parentId === 'gemini-nexus-parent'
         );
-        expect(childCreates).toHaveLength(14);
+        expect(childCreates).toHaveLength(16);
     });
 });

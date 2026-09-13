@@ -61,6 +61,13 @@ export function appendMessage(
 
     messageElement.appendChild(row);
 
+    let followUpContainer = null;
+    if (role === 'ai') {
+        followUpContainer = document.createElement('div');
+        followUpContainer.className = 'follow-up-container';
+        messageElement.appendChild(followUpContainer);
+    }
+
     let currentText = text || '';
     let currentThoughts = thoughts || '';
 
@@ -389,6 +396,22 @@ export function appendMessage(
 
             sourcesDiv = builtSources;
             contentHost.appendChild(sourcesDiv);
+        },
+        addFollowUps: (questions) => {
+            if (!followUpContainer || !Array.isArray(questions)) return;
+            followUpContainer.innerHTML = '';
+            questions.forEach((question) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'follow-up-btn';
+                btn.textContent = question;
+                btn.addEventListener('click', () => {
+                    document.dispatchEvent(
+                        new CustomEvent('gemini-send-followup', { detail: question })
+                    );
+                });
+                followUpContainer.appendChild(btn);
+            });
         },
         // Mark an already-finalized bubble as an error so CSS can add an
         // error tint and the UI can offer a retry affordance. Called by

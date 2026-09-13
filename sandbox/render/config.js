@@ -1,6 +1,7 @@
 import { t } from '../core/i18n.js';
 import { TemplateIcons } from '../ui/templates/icons.js';
 import { escapeHtml } from '../../shared/utils/escape.js';
+import { preprocessCjkEmphasis } from './cjk_emphasis.js';
 
 export function configureMarkdown() {
     if (typeof marked === 'undefined') return;
@@ -78,6 +79,11 @@ export function configureMarkdown() {
         breaks: true,
         gfm: true,
         renderer: renderer,
+        hooks: {
+            preprocess(markdown) {
+                return preprocessCjkEmphasis(markdown);
+            },
+        },
     };
 
     // Use marked.use() if available (v5+), otherwise fallback to setOptions (deprecated)

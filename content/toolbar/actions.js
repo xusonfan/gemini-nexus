@@ -230,7 +230,15 @@
             this.ui.setInputValue('');
         }
 
-        async handleQuickAction(actionType, selection, rect, model = '', mousePoint = null) {
+        async handleQuickAction(
+            actionType,
+            selection,
+            rect,
+            model = '',
+            mousePoint = null,
+            options = {}
+        ) {
+            const includePageContext = options.includePageContext === true;
             const strings = this.t;
             let prompt, title, inputPlaceholder, loadingMessage;
 
@@ -274,6 +282,7 @@
                     action: 'QUICK_ASK',
                     text: prompt,
                     model: model || getDefaultToolbarModel(),
+                    ...(includePageContext ? { includePageContext: true } : {}),
                 },
                 provider,
                 this.getCurrentWebThinkingLevel()

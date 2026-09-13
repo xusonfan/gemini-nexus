@@ -20,8 +20,11 @@ import {
 } from './prompt/tool_loop.js';
 import { toControlTabSummary } from '../../control/tabs.js';
 import { classifyProviderError } from '../../managers/session/error_classifier.js';
+import { getConnectionSettings } from '../../managers/session/settings_store.js';
 
 export { hasInlinePageSnapshot } from './prompt/tool_loop.js';
+
+const AUXILIARY_ABORT_KEY = 'auxiliary';
 
 // One free retry when the model narrates a browser step without tool JSON.
 const MAX_NARRATION_NUDGES = 1;
@@ -119,6 +122,118 @@ export class PromptHandler {
 
     isRunCancelled(run) {
         return !run || run.cancelled || this.activeRun !== run;
+    }
+
+    async getSummaryModel() {
+        const settings = await getConnectionSettings();
+        return settings.summaryModel || '';
+    }
+
+    async generateFollowUpQuestions(sessionId, aiText) {
+        try {
+            const summaryModel = await this.getSummaryModel();
+            if (!summaryModel) return;
+
+            const isZh = chrome.i18n.getUILanguage().startsWith('zh');
+            const prompt = isZh
+                ? `根据以下 AI 的回答，生成 3 个简短的后续追问问题，让用户可以继续深入探讨。要求：
+1. 必须是疑问句。
+2. 每个问题不超过 20 个字。
+3. 直接输出问题列表，每行一个，不要包含数字编号或任何多余文字。
+
+AI 回答内容：
+${aiText}`
+                : `Based on the following AI response, generate 3 short follow-up questions for the user to continue the conversation.
+Requirements:
+1. Must be questions.
+2. Max 15 words per question.
+3. Output ONLY the questions, one per line, no numbers or extra text.
+
+AI Response:
+${aiText}`;
+
+            const result = await this.sessionManager.handleSendPrompt(
+                {
+                    text: prompt,
+                    model: summaryModel,
+                    systemInstruction:
+                        'You are a helpful assistant that generates relevant follow-up questions.',
+                },
+                () => {},
+                AUXILIARY_ABORT_KEY
+            );
+
+            if (result?.status !== 'success' || !result.text) return;
+
+            const questions = result.text
+                .split('\n')
+                .map((question) => question.trim().replace(/^\d+\.\s*/, ''))
+                .filter(
+                    (question) =>
+                        question.length > 0 && (question.endsWith('?') || question.endsWith('？'))
+                )
+                .slice(0, 3);
+
+            if (questions.length === 0) return;
+
+            await sendRuntimeMessage({
+                action: 'FOLLOW_UP_QUESTIONS',
+                sessionId,
+                questions,
+            });
+        } catch (error) {
+            console.error('Error generating follow-up questions:', error);
+        }
+    }
+
+    async generateAiTitle(sessionId, userText, aiText) {
+        try {
+            const { geminiSessions = [] } = await chrome.storage.local.get(['geminiSessions']);
+            const session = geminiSessions.find((item) => item.id === sessionId);
+            if (session?.messages && session.messages.length > 1) return;
+
+            const summaryModel = await this.getSummaryModel();
+            if (!summaryModel) {
+                console.info(
+                    '[Gemini Nexus] AI Title generation skipped: No summary model configured.'
+                );
+                return;
+            }
+
+            const isZh = chrome.i18n.getUILanguage().startsWith('zh');
+            const prompt = isZh
+                ? `请根据以下对话内容，总结一个简短的标题（不超过10个字）。直接输出标题，不要有任何解释或标点符号。\n\n用户: ${userText}\nAI: ${aiText}`
+                : `Generate a very short title (max 6 words) for this conversation. Output ONLY the title text.\n\nUser: ${userText}\nAI: ${aiText}`;
+
+            const result = await this.sessionManager.handleSendPrompt(
+                {
+                    text: prompt,
+                    model: summaryModel,
+                    systemInstruction:
+                        'You are a helpful assistant that summarizes conversation titles.',
+                },
+                () => {},
+                AUXILIARY_ABORT_KEY
+            );
+
+            if (result?.status !== 'success' || !result.text) return;
+
+            let title = result.text.trim().replace(/["'“”‘’]/g, '');
+            if (title.length > 40) title = `${title.substring(0, 40)}...`;
+
+            const sessions = Array.isArray(geminiSessions) ? [...geminiSessions] : [];
+            const sessionIndex = sessions.findIndex((item) => item.id === sessionId);
+            if (sessionIndex === -1) return;
+
+            sessions[sessionIndex] = { ...sessions[sessionIndex], title };
+            await chrome.storage.local.set({ geminiSessions: sessions });
+            await sendRuntimeMessage({
+                action: 'SESSIONS_UPDATED',
+                sessions,
+            });
+        } catch (error) {
+            console.error('Error generating AI title:', error);
+        }
     }
 
     handle(request, sendResponse) {
@@ -390,6 +505,20 @@ export class PromptHandler {
                         }
 
                         chrome.runtime.sendMessage(result).catch(() => {});
+
+                        if (result?.status === 'success' && request.sessionId) {
+                            this.generateAiTitle(
+                                request.sessionId,
+                                currentHistoryText,
+                                result.text
+                            ).catch((error) =>
+                                console.error('AI Title generation failed:', error)
+                            );
+                            this.generateFollowUpQuestions(request.sessionId, result.text).catch(
+                                (error) => console.error('Follow-up generation failed:', error)
+                            );
+                        }
+
                         keepLooping = false;
                     }
                 }

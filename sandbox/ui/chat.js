@@ -15,7 +15,9 @@ export class ChatController {
         this.imagePreview = elements.imagePreview || document.getElementById('image-preview');
         this.footerEl = document.querySelector('.footer');
         this.shouldFollowBottom = true;
+        this.streamingAnchorEl = null;
         this.scrollFrame = null;
+        this.exportPdfBtn = document.getElementById('export-pdf-btn');
         this.resizeObserver = null;
         this.footerResizeObserver = null;
         this.observedResizeElements = new WeakSet();
@@ -235,8 +237,32 @@ export class ChatController {
         });
     }
 
+    scheduleMessageStartScroll(messageEl, behavior = 'instant') {
+        if (!this.historyDiv || !messageEl) return;
+        if (this.scrollFrame !== null) return;
+
+        this.scrollFrame = window.requestAnimationFrame(() => {
+            this.scrollFrame = null;
+            if (!this.historyDiv || !messageEl) return;
+            const top = Math.max(0, messageEl.offsetTop - 20);
+            this.historyDiv.scrollTo({ top, behavior });
+        });
+    }
+
+    setStreamingAnchor(messageEl) {
+        this.streamingAnchorEl = messageEl || null;
+    }
+
+    clearStreamingAnchor() {
+        this.streamingAnchorEl = null;
+    }
+
     followStreamingContent() {
         if (!this.shouldFollowBottom) return;
+        if (this.streamingAnchorEl) {
+            this.scheduleMessageStartScroll(this.streamingAnchorEl, 'instant');
+            return;
+        }
         this.scheduleBottomScroll('instant');
     }
 
@@ -279,6 +305,37 @@ export class ChatController {
                     this.historyDiv.scrollTop = this.historyDiv.scrollHeight;
                 }
             }, 50);
+        }
+    }
+
+    scrollToMessageStart(messageEl, force = false) {
+        if (!this.historyDiv || !messageEl) return;
+        if (!force && !this.shouldFollowBottom) return;
+        this.scheduleMessageStartScroll(messageEl, 'smooth');
+    }
+
+    exportToPDF() {
+        const activeItem = document.querySelector('.history-item.active');
+        const sessionTitle = activeItem
+            ? activeItem.querySelector('.history-title')?.textContent
+            : 'Chat Export';
+
+        try {
+            const originalTitle = document.title;
+            document.title = sessionTitle || 'Chat Export';
+            window.print();
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 1000);
+        } catch (error) {
+            console.warn('Direct print failed, trying via bridge', error);
+            window.parent.postMessage(
+                {
+                    action: 'PRINT',
+                    payload: { title: sessionTitle || 'Chat Export' },
+                },
+                '*'
+            );
         }
     }
 

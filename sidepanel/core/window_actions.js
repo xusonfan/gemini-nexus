@@ -24,13 +24,18 @@ import { normalizeWebThinkingLevel } from '../../shared/models/web_thinking.js';
 import { publishHostContext } from './host_context.js';
 import {
     restoreAccountIndices,
+    restoreBubbleClickAction,
+    restoreBubbleEnabled,
     restoreContextSettings,
     restoreCustomSelectionTools,
+    restoreExplainPageContext,
     restoreGeneratedImageWatermarkRemoval,
     restoreImageTools,
     restoreImageToolsBlacklist,
+    restoreOpacity,
     restoreTextSelection,
     restoreTextSelectionBlacklist,
+    restoreToolbarText,
 } from './preferences.js';
 
 const WINDOW_MESSAGE_HANDLERS = {
@@ -46,6 +51,14 @@ const WINDOW_MESSAGE_HANDLERS = {
     },
     OPEN_EXTERNAL_URL(payload, bridge) {
         bridge.openExternalUrl(payload);
+    },
+    PRINT(payload) {
+        const originalTitle = document.title;
+        document.title = payload?.title || 'Chat Export';
+        window.print();
+        setTimeout(() => {
+            document.title = originalTitle;
+        }, 1000);
     },
     REQUEST_SCREEN_CAPTURE(payload, bridge) {
         bridge.requestScreenCapture();
@@ -102,6 +115,21 @@ const WINDOW_MESSAGE_HANDLERS = {
     GET_CONTEXT_SETTINGS(payload, bridge) {
         restoreContextSettings(bridge.frame);
     },
+    GET_OPACITY(payload, bridge) {
+        restoreOpacity(bridge.frame);
+    },
+    GET_TOOLBAR_TEXT(payload, bridge) {
+        restoreToolbarText(bridge.frame);
+    },
+    GET_BUBBLE_ENABLED(payload, bridge) {
+        restoreBubbleEnabled(bridge.frame);
+    },
+    GET_BUBBLE_CLICK_ACTION(payload, bridge) {
+        restoreBubbleClickAction(bridge.frame);
+    },
+    GET_EXPLAIN_PAGE_CONTEXT(payload, bridge) {
+        restoreExplainPageContext(bridge.frame);
+    },
     GET_CONNECTION_SETTINGS(payload, bridge) {
         bridge.restoreConnectionSettings();
     },
@@ -128,6 +156,26 @@ const WINDOW_MESSAGE_HANDLERS = {
     },
     SAVE_LANGUAGE(payload, bridge) {
         bridge.state.save('geminiLanguage', normalizeLanguageSetting(payload));
+    },
+    SAVE_OPACITY(payload, bridge) {
+        const opacity = Number(payload);
+        bridge.state.save(
+            'gemini_nexus_opacity',
+            Number.isFinite(opacity) ? Math.min(1, Math.max(0.1, opacity)) : 1
+        );
+    },
+    SAVE_TOOLBAR_TEXT(payload, bridge) {
+        bridge.state.save('geminiToolbarTextEnabled', payload === true);
+    },
+    SAVE_BUBBLE_ENABLED(payload, bridge) {
+        bridge.state.save('gemini_bubble_enabled', normalizeToggleEnabled(payload));
+    },
+    SAVE_BUBBLE_CLICK_ACTION(payload, bridge) {
+        const action = typeof payload === 'string' && payload.trim() ? payload.trim() : 'summarize_page';
+        bridge.state.save('gemini_bubble_click_action', action);
+    },
+    SAVE_EXPLAIN_PAGE_CONTEXT(payload, bridge) {
+        bridge.state.save('geminiExplainPageContextEnabled', normalizeToggleEnabled(payload));
     },
     SAVE_TEXT_SELECTION(payload, bridge) {
         bridge.state.save('geminiTextSelectionEnabled', normalizeToggleEnabled(payload));

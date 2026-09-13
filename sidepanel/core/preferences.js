@@ -101,3 +101,47 @@ export function restoreContextSettings(frame) {
         }
     );
 }
+
+export function restoreOpacity(frame) {
+    restorePreference(['gemini_nexus_opacity'], 'opacity', (result) => {
+        const opacity =
+            result.gemini_nexus_opacity !== undefined ? result.gemini_nexus_opacity : 1.0;
+        frame.postMessage({ action: 'RESTORE_OPACITY', payload: opacity });
+    });
+}
+
+export function restoreToolbarText(frame) {
+    restorePreference(['geminiToolbarTextEnabled'], 'toolbar text setting', (result) => {
+        frame.postMessage({
+            action: 'RESTORE_TOOLBAR_TEXT',
+            payload: result.geminiToolbarTextEnabled === true,
+        });
+    });
+}
+
+export function restoreBubbleEnabled(frame) {
+    restorePreference(['gemini_bubble_enabled'], 'floating bubble setting', (result) => {
+        frame.postMessage({
+            action: 'RESTORE_BUBBLE_ENABLED',
+            payload: result.gemini_bubble_enabled !== false,
+        });
+    });
+}
+
+export function restoreBubbleClickAction(frame) {
+    restorePreference(['gemini_bubble_click_action'], 'bubble click action', (result) => {
+        frame.postMessage({
+            action: 'RESTORE_BUBBLE_CLICK_ACTION',
+            payload: result.gemini_bubble_click_action || 'summarize_page',
+        });
+    });
+}
+
+export function restoreExplainPageContext(frame) {
+    restorePreference(['geminiExplainPageContextEnabled'], 'explain page context setting', (result) => {
+        frame.postMessage({
+            action: 'RESTORE_EXPLAIN_PAGE_CONTEXT',
+            payload: result.geminiExplainPageContextEnabled !== false,
+        });
+    });
+}

@@ -4,6 +4,9 @@
     "version": "5.4.0",
     "type": "module",
     "scripts": {
+        "sync-version": "node scripts/sync-version.mjs",
+        "prebuild": "npm run sync-version",
+        "version": "npm run sync-version",
         "dev": "vite",
         "build": "vite build",
         "format": "prettier --write .",

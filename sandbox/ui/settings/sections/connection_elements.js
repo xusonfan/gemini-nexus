@@ -22,6 +22,7 @@ export function queryConnectionElements(getElement = getSettingsElement) {
         openaiThinkingLevelSelect: getElement(DOM_IDS.OPENAI_THINKING_LEVEL),
         openaiUseResponsesApi: getElement(DOM_IDS.OPENAI_USE_RESPONSES_API),
         openaiWebSearch: getElement(DOM_IDS.OPENAI_WEB_SEARCH),
+        summaryModelInput: getElement(DOM_IDS.SUMMARY_MODEL),
 
         dedicatedApiFields: getElement(DOM_IDS.DEDICATED_API_FIELDS),
         dedicatedApiBaseUrl: getElement(DOM_IDS.DEDICATED_API_BASE_URL),

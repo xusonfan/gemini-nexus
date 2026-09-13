@@ -15,6 +15,7 @@ describe('connection settings helpers', () => {
             provider: 'web',
             useOfficialApi: false,
             selectedModel: '56fdd199312815e2',
+            summaryModel: '',
             webThinkingLevel: 'minimal',
             webTemporaryChat: false,
             openaiSelectedModel: '',

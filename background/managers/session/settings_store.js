@@ -103,6 +103,7 @@ export async function getConnectionSettings(options = {}) {
         openaiThinkingLevel: stored.geminiOpenaiThinkingLevel || DEFAULT_THINKING_LEVEL,
         openaiUseResponsesApi: openaiSettings.useResponsesApi,
         openaiWebSearch: openaiSettings.webSearch,
+        summaryModel: stored.geminiSummaryModel || '',
         dedicatedApiProviders: createDedicatedApiSettingsPayload(stored),
         contextMode: stored.geminiContextMode || DEFAULT_CONTEXT_MODE,
         contextRecentTurns: stored.geminiContextRecentTurns || DEFAULT_CONTEXT_RECENT_TURNS,

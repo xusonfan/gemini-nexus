@@ -122,6 +122,8 @@
                 "content/shortcuts.js",
                 "content/settings_sync.js",
                 "content/messages.js",
+                "content/floating_bubble/styles.js",
+                "content/floating_bubble/bubble.js",
                 "content/index.js"
             ],
             "run_at": "document_end"

@@ -229,6 +229,16 @@
                 return;
             }
 
+            if (
+                this.appShortcuts.summarizePage &&
+                this.match(event, this.appShortcuts.summarizePage)
+            ) {
+                event.preventDefault();
+                event.stopPropagation();
+                this.toolbarController?.handleSummarizePage?.();
+                return;
+            }
+
             if (this.match(event, this.effectiveShortcut('ocrCapture'))) {
                 event.preventDefault();
                 event.stopPropagation();

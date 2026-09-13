@@ -187,6 +187,7 @@
             // event during the async storage-read window would flash the toolbar
             // once on blacklisted pages.
             this.isSelectionEnabled = false;
+            this.explainPageContextEnabled = true;
 
             this.handleAction = this.handleAction.bind(this);
 
@@ -292,6 +293,10 @@
             this.ui.setCustomSelectionTools?.(Array.isArray(tools) ? tools : []);
         }
 
+        setExplainPageContextEnabled(enabled) {
+            this.explainPageContextEnabled = enabled !== false;
+        }
+
         handleContextAction(mode) {
             this.currentMode = mode;
 
@@ -299,6 +304,8 @@
                 this.showGlobalInput(false);
             } else if (mode === 'page_chat') {
                 this.showGlobalInput(true);
+            } else if (mode === 'summarize_page') {
+                this.handleSummarizePage();
             } else if (mode === 'read_page') {
                 this.readPageAloud();
             } else if (mode === 'read_selection') {
@@ -307,6 +314,83 @@
             } else {
                 this.sendCaptureInitiationRequest();
             }
+        }
+
+        async handleSummarizePage() {
+            try {
+                const response = await new Promise((resolve) => {
+                    const timeout = setTimeout(() => resolve(null), 150);
+                    chrome.runtime.sendMessage({ action: 'CHECK_SIDE_PANEL_OPEN' }, (res) => {
+                        clearTimeout(timeout);
+                        if (chrome.runtime.lastError) {
+                            resolve(null);
+                        } else {
+                            resolve(res);
+                        }
+                    });
+                });
+
+                if (response?.isOpen) {
+                    const provider = this.ui.getProvider ? this.ui.getProvider() : 'web';
+                    const message = {
+                        action: 'QUICK_ASK',
+                        text: this.ui.t.prompts.summarizePage,
+                        model: this.ui.getSelectedModel(),
+                        includePageContext: true,
+                        provider,
+                    };
+                    if (provider === 'web' && this.ui.getWebThinkingLevel) {
+                        message.webThinkingLevel = this.ui.getWebThinkingLevel();
+                    }
+                    this.actions.sendRuntimeMessage(message);
+                    return;
+                }
+            } catch (error) {
+                console.warn(
+                    'Failed to check side panel state, falling back to floating window',
+                    error
+                );
+            }
+
+            const viewportW = window.innerWidth;
+            const viewportH = window.innerHeight;
+            const width = 400;
+            const height = 100;
+            const left = (viewportW - width) / 2;
+            const top = viewportH / 2 - 200;
+            const rect = {
+                left,
+                top,
+                right: left + width,
+                bottom: top + height,
+                width,
+                height,
+            };
+            const strings = this.ui.t;
+            const model = this.ui.getSelectedModel();
+
+            this.ui.hide();
+            await this.ui.showAskWindow(rect, null, strings.titles.summarizePage);
+            this.ui.showLoading(strings.loading.summarizePage);
+
+            this.lastSessionId = null;
+            this.currentSelection = '';
+
+            const provider = this.ui.getProvider ? this.ui.getProvider() : 'web';
+            const message = {
+                action: 'QUICK_ASK',
+                text: strings.prompts.summarizePage,
+                model,
+                includePageContext: true,
+                provider,
+            };
+            if (provider === 'web' && this.ui.getWebThinkingLevel) {
+                message.webThinkingLevel = this.ui.getWebThinkingLevel();
+            }
+
+            this.actions.lastRequest = message;
+            this.actions.sendRuntimeMessage(message);
+            this.visible = true;
         }
 
         sendCaptureInitiationRequest() {

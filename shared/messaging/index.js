@@ -136,3 +136,43 @@ export function requestConnectionSettingsFromStorage() {
 export function saveConnectionSettingsToStorage(connectionSettings) {
     post('SAVE_CONNECTION_SETTINGS', connectionSettings);
 }
+
+export function requestOpacityFromStorage() {
+    post('GET_OPACITY');
+}
+
+export function saveOpacityToStorage(opacity) {
+    post('SAVE_OPACITY', opacity);
+}
+
+export function requestToolbarTextFromStorage() {
+    post('GET_TOOLBAR_TEXT');
+}
+
+export function saveToolbarTextToStorage(enabled) {
+    post('SAVE_TOOLBAR_TEXT', enabled);
+}
+
+export function requestBubbleEnabledFromStorage() {
+    post('GET_BUBBLE_ENABLED');
+}
+
+export function saveBubbleEnabledToStorage(enabled) {
+    post('SAVE_BUBBLE_ENABLED', enabled);
+}
+
+export function requestBubbleClickActionFromStorage() {
+    post('GET_BUBBLE_CLICK_ACTION');
+}
+
+export function saveBubbleClickActionToStorage(action) {
+    post('SAVE_BUBBLE_CLICK_ACTION', action);
+}
+
+export function requestExplainPageContextFromStorage() {
+    post('GET_EXPLAIN_PAGE_CONTEXT');
+}
+
+export function saveExplainPageContextToStorage(enabled) {
+    post('SAVE_EXPLAIN_PAGE_CONTEXT', enabled);
+}

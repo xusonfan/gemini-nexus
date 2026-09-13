@@ -31,6 +31,16 @@ vi.mock('../../../shared/messaging/index.js', () => ({
     saveTextSelectionBlacklistToStorage: vi.fn(),
     saveTextSelectionToStorage: vi.fn(),
     saveThemeToStorage: vi.fn(),
+    saveOpacityToStorage: vi.fn(),
+    saveToolbarTextToStorage: vi.fn(),
+    saveBubbleEnabledToStorage: vi.fn(),
+    saveBubbleClickActionToStorage: vi.fn(),
+    saveExplainPageContextToStorage: vi.fn(),
+    requestOpacityFromStorage: vi.fn(),
+    requestToolbarTextFromStorage: vi.fn(),
+    requestBubbleEnabledFromStorage: vi.fn(),
+    requestBubbleClickActionFromStorage: vi.fn(),
+    requestExplainPageContextFromStorage: vi.fn(),
     sendToBackground: vi.fn(),
 }));
 

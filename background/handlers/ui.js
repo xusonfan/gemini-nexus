@@ -103,6 +103,16 @@ export class UIMessageHandler {
             return true;
         }
 
+        if (request.action === 'CHECK_SIDE_PANEL_OPEN') {
+            const tabId = sender?.tab?.id;
+            const isOpen =
+                Number.isInteger(tabId) && tabId > 0
+                    ? this.sidePanelScopeManager?.isOpenForTab(tabId) === true
+                    : false;
+            sendResponse({ isOpen });
+            return false;
+        }
+
         if (request.action === 'MCP_TEST_CONNECTION') {
             handleMcpTestConnection(this.mcpManager, request, sendResponse);
             return true;

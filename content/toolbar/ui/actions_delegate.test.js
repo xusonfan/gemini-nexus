@@ -50,7 +50,9 @@ describe('ToolbarUIActions', () => {
 
         expect(event.preventDefault).toHaveBeenCalledTimes(1);
         expect(event.stopPropagation).toHaveBeenCalledTimes(1);
-        expect(manager.fireCallback).toHaveBeenCalledWith('onAction', 'translate');
+        expect(manager.fireCallback).toHaveBeenCalledWith('onAction', 'translate', {
+            modifiers: { shift: false },
+        });
     });
 
     it('copies the rendered result text and restores the copy icon', async () => {

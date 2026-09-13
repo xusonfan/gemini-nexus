@@ -37,6 +37,7 @@ export const DOM_IDS = {
     OPENAI_THINKING_LEVEL: 'openai-thinking-level-select',
     OPENAI_USE_RESPONSES_API: 'openai-use-responses-api',
     OPENAI_WEB_SEARCH: 'openai-web-search-enabled',
+    SUMMARY_MODEL: 'summary-model-input',
 
     DEDICATED_API_FIELDS: 'dedicated-api-fields',
     DEDICATED_API_BASE_URL: 'dedicated-api-base-url',
@@ -72,6 +73,12 @@ export const DOM_IDS = {
 
     THEME_SELECT: 'theme-select',
     LANGUAGE_SELECT: 'language-select',
+    OPACITY_SLIDER: 'opacity-slider',
+    OPACITY_VALUE: 'opacity-value',
+    TOOLBAR_TEXT_TOGGLE: 'toolbar-text-toggle',
+    BUBBLE_TOGGLE: 'bubble-toggle',
+    BUBBLE_CLICK_ACTION: 'bubble-click-action',
+    EXPLAIN_PAGE_CONTEXT_TOGGLE: 'explain-page-context-toggle',
     SHORTCUT_QUICK_ASK: 'shortcut-quick-ask',
     SHORTCUT_OPEN_PANEL: 'shortcut-open-panel',
     SHORTCUT_BROWSER_CONTROL: 'shortcut-browser-control',

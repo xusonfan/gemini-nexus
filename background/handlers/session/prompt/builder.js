@@ -12,7 +12,10 @@ export class PromptBuilder {
         let systemPreamble = callerSystemInstruction ? `${callerSystemInstruction}\n\n` : '';
 
         if (request.includePageContext) {
-            const targetTabId = this.controlManager ? this.controlManager.getTargetTabId() : null;
+            let targetTabId = this.controlManager ? this.controlManager.getTargetTabId() : null;
+            if (!targetTabId && request.tabId) {
+                targetTabId = request.tabId;
+            }
             const pageContent = await getActiveTabContent(targetTabId);
 
             if (pageContent) {

@@ -88,6 +88,26 @@ export class AppMessageBridge {
             this.ui.updateLanguage(payload);
             return;
         }
+        if (action === 'RESTORE_OPACITY') {
+            this.ui.settings.updateOpacity(payload);
+            return;
+        }
+        if (action === 'RESTORE_TOOLBAR_TEXT') {
+            this.ui.settings.updateToolbarText(payload);
+            return;
+        }
+        if (action === 'RESTORE_BUBBLE_ENABLED') {
+            this.ui.settings.updateBubbleEnabled(payload);
+            return;
+        }
+        if (action === 'RESTORE_BUBBLE_CLICK_ACTION') {
+            this.ui.settings.updateBubbleClickAction(payload);
+            return;
+        }
+        if (action === 'RESTORE_EXPLAIN_PAGE_CONTEXT') {
+            this.ui.settings.updateExplainPageContext(payload);
+            return;
+        }
         if (action === 'RESTORE_MODEL') {
             if (this.ui.modelSelect) {
                 const previousModelValue = this.ui.modelSelect.value;
