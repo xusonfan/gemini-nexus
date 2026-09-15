@@ -148,7 +148,9 @@ describe('SettingsController', () => {
         controller.updateShortcuts(null);
 
         expect(document.getElementById('shortcut-quick-ask').value).toBe('Alt+Q');
+        expect(document.getElementById('shortcut-page-chat').value).toBe('Alt+Shift+Q');
         expect(document.getElementById('shortcut-open-panel').value).toBe('Alt+G');
+        expect(document.getElementById('shortcut-summarize-page').value).toBe('Alt+Shift+G');
         expect(document.getElementById('shortcut-browser-control').value).toBe('Ctrl+B');
         expect(document.getElementById('shortcut-ocr-capture').value).toBe('Alt+O');
     });

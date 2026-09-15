@@ -12,14 +12,19 @@ function installControllerDependencies() {
         getSelectedModel: vi.fn(() => 'cf41b0e0dd7d53e5'),
         getWebThinkingLevel: vi.fn(() => 'high'),
         setWebThinkingLevel: vi.fn(),
-        showAskWindow: vi.fn(),
+        showAskWindow: vi.fn(async () => {}),
+        showLoading: vi.fn(),
         showError: vi.fn(),
         setCustomSelectionTools: vi.fn(),
         restoreTranslationTargets: vi.fn(),
+        setInputValue: vi.fn(),
         show: vi.fn(),
         hide: vi.fn(),
         isHost: vi.fn(() => false),
         isWindowVisible: vi.fn(() => false),
+        isWindowPinned: vi.fn(() => false),
+        isOutsideCloseSuppressed: vi.fn(() => false),
+        hideAskWindow: vi.fn(),
         showGrammarButton: vi.fn(),
     };
 
@@ -306,6 +311,106 @@ describe('GeminiToolbarController model persistence', () => {
 
         expect(ui.showAskWindow).toHaveBeenCalled();
         expect(ui.showError).toHaveBeenCalledWith('Cannot open side panel');
+    });
+
+    it('closes the ask window when clicking outside if it is not pinned', () => {
+        const controller = new window.GeminiToolbarController();
+        const dispatch = vi.fn();
+        controller.dispatcher = { dispatch };
+        ui.isWindowVisible.mockReturnValue(true);
+        ui.isWindowPinned.mockReturnValue(false);
+
+        controller.handleClick({ target: document.body });
+
+        expect(dispatch).toHaveBeenCalledWith('cancel_ask', undefined);
+        expect(ui.hide).not.toHaveBeenCalled();
+    });
+
+    it('keeps the ask window open on outside click when pinned', () => {
+        const controller = new window.GeminiToolbarController();
+        const dispatch = vi.fn();
+        controller.dispatcher = { dispatch };
+        ui.isWindowVisible.mockReturnValue(true);
+        ui.isWindowPinned.mockReturnValue(true);
+
+        controller.handleClick({ target: document.body });
+
+        expect(dispatch).not.toHaveBeenCalled();
+        expect(ui.hide).not.toHaveBeenCalled();
+    });
+
+    it('preserves page-chat context while the ask window is still opening', () => {
+        const controller = new window.GeminiToolbarController();
+        ui.isWindowVisible.mockReturnValue(false);
+
+        controller.showGlobalInput(true);
+        const hideCallsAfterOpen = ui.hide.mock.calls.length;
+        expect(controller.forcePageContext).toBe(true);
+        expect(controller.currentSelection).toBe('__PAGE_CONTEXT_FORCE__');
+
+        controller.handleSelectionClear();
+
+        expect(controller.forcePageContext).toBe(true);
+        expect(controller.currentSelection).toBe('__PAGE_CONTEXT_FORCE__');
+        expect(ui.hide).toHaveBeenCalledTimes(hideCallsAfterOpen);
+    });
+
+    it('skips outside-click dismiss briefly after opening the ask window', () => {
+        const controller = new window.GeminiToolbarController();
+        const dispatch = vi.fn();
+        controller.dispatcher = { dispatch };
+        ui.isWindowVisible.mockReturnValue(true);
+        ui.isWindowPinned.mockReturnValue(false);
+        controller.suppressOutsideCloseUntil = Date.now() + 1000;
+
+        controller.handleClick({ target: document.body });
+
+        expect(dispatch).not.toHaveBeenCalled();
+    });
+
+    it('opens the floating summarize window on every summarize shortcut press', async () => {
+        const actions = {
+            sendRuntimeMessage: vi.fn(),
+            handleCancel: vi.fn(),
+            lastRequest: null,
+        };
+        window.GeminiToolbarActions = vi.fn(() => actions);
+        window.GeminiToolbarStrings = {
+            prompts: { summarizePage: 'Summarize this page' },
+            titles: { summarizePage: 'Summarize Page' },
+            loading: { summarizePage: 'Summarizing...' },
+        };
+
+        await importController();
+        const controller = new window.GeminiToolbarController();
+
+        await controller.handleSummarizePage();
+        await controller.handleSummarizePage();
+
+        expect(actions.handleCancel).toHaveBeenCalledTimes(2);
+        expect(ui.showAskWindow).toHaveBeenCalledTimes(2);
+        expect(ui.showAskWindow).toHaveBeenCalledWith(
+            expect.any(Object),
+            null,
+            'Summarize Page',
+            null,
+            {
+                hideInput: true,
+                autoFocus: false,
+            }
+        );
+        expect(ui.showLoading).toHaveBeenCalledWith('Summarizing...');
+        expect(actions.sendRuntimeMessage).toHaveBeenCalledTimes(2);
+        expect(actions.sendRuntimeMessage).toHaveBeenCalledWith(
+            expect.objectContaining({
+                action: 'QUICK_ASK',
+                includePageContext: true,
+                text: 'Summarize this page',
+            })
+        );
+        expect(chrome.runtime.sendMessage).not.toHaveBeenCalledWith(
+            expect.objectContaining({ action: 'CHECK_SIDE_PANEL_OPEN' })
+        );
     });
 
     it('shows an extension error when screenshot capture cannot be initiated', async () => {

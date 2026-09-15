@@ -44,6 +44,7 @@
                 windowTitle: getToolbarElement('window-title'),
                 contextPreview: getToolbarElement('context-preview'),
                 askInput: getToolbarElement('ask-input'),
+                inputContainer: getToolbarElement('ask-input')?.closest('.input-container') || null,
                 translationTargets: getToolbarElement('translation-targets'),
                 translationTargetTrigger: getToolbarElement('translation-target-trigger'),
                 translationTargetMenu: getToolbarElement('translation-target-menu'),
@@ -67,6 +68,7 @@
                     generateImage: getToolbarElement('btn-generate-image'),
                     readSelection: getToolbarElement('btn-read-selection'),
                     customSelectionMore: getToolbarElement('btn-custom-selection-more'),
+                    headerPin: getToolbarElement('btn-header-pin'),
                     headerClose: getToolbarElement('btn-header-close'),
                     stop: getToolbarElement('btn-stop-gen'),
                     continue: getToolbarElement('btn-continue-chat'),
@@ -106,11 +108,20 @@
             this.widgetView.toggleCopySelectionIcon(success);
         }
 
-        showAskWindow(rect, contextText, title, resetDrag, mousePoint) {
-            return this.windowView.show(rect, contextText, title, resetDrag, mousePoint);
+        showAskWindow(rect, contextText, title, resetDrag, mousePoint, options) {
+            return this.windowView.show(rect, contextText, title, resetDrag, mousePoint, options);
         }
         hideAskWindow() {
             this.windowView.hide();
+        }
+        isWindowPinned() {
+            return this.windowView.isPinned();
+        }
+        setWindowPinned(pinned) {
+            this.windowView.setPinned(pinned);
+        }
+        toggleWindowPinned() {
+            return this.windowView.togglePinned();
         }
         showLoading(msg) {
             this.windowView.showLoading(msg);

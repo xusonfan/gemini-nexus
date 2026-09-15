@@ -4,9 +4,14 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 function createElements() {
     const resultText = document.createElement('div');
+    const askInput = document.createElement('textarea');
+    const inputContainer = document.createElement('div');
+    inputContainer.className = 'input-container';
+    inputContainer.appendChild(askInput);
     return {
         askWindow: document.createElement('div'),
-        askInput: document.createElement('textarea'),
+        askInput,
+        inputContainer,
         contextPreview: document.createElement('div'),
         resultArea: document.createElement('div'),
         resultText,
@@ -130,6 +135,65 @@ describe('WindowView', () => {
         ).resolves.toBeUndefined();
 
         expect(elements.askWindow.classList.contains('visible')).toBe(true);
+    });
+
+    it('hides the ask input and skips focus for result-only summarize windows', async () => {
+        vi.useFakeTimers();
+        const elements = createElements();
+        const focusSpy = vi.spyOn(elements.askInput, 'focus');
+        const view = new window.GeminiViewWindow(elements);
+
+        await view.show({ right: 20, bottom: 20 }, null, 'Summarize Page', null, null, {
+            hideInput: true,
+            autoFocus: false,
+        });
+        vi.runAllTimers();
+
+        expect(elements.askWindow.classList.contains('result-only')).toBe(true);
+        expect(elements.inputContainer.classList.contains('hidden')).toBe(true);
+        expect(elements.askInput.disabled).toBe(true);
+        expect(focusSpy).not.toHaveBeenCalled();
+        vi.useRealTimers();
+    });
+
+    it('does not auto-scroll to the bottom while streaming in floating windows', async () => {
+        const elements = createElements();
+        Object.defineProperty(elements.resultArea, 'scrollHeight', {
+            configurable: true,
+            get: () => 800,
+        });
+        Object.defineProperty(elements.resultArea, 'clientHeight', {
+            configurable: true,
+            get: () => 200,
+        });
+        elements.resultArea.scrollTop = 0;
+        const view = new window.GeminiViewWindow(elements);
+
+        await view.show({ right: 20, bottom: 20 }, null, 'Ask');
+        view.showResult('<p>chunk one</p>', null, true);
+        expect(elements.resultArea.scrollTop).toBe(0);
+
+        elements.resultArea.scrollTop = 120;
+        view.showResult('<p>chunk one</p><p>chunk two</p>', null, true);
+        expect(elements.resultArea.scrollTop).toBe(120);
+    });
+
+    it('toggles the pinned state for outside-click dismissal', async () => {
+        const elements = createElements();
+        elements.buttons.headerPin = document.createElement('button');
+        const view = new window.GeminiViewWindow(elements);
+
+        await view.show({ right: 20, bottom: 20 }, null, 'Ask');
+        expect(view.isPinned()).toBe(false);
+
+        view.togglePinned();
+        expect(view.isPinned()).toBe(true);
+        expect(elements.buttons.headerPin.classList.contains('is-pinned')).toBe(true);
+        expect(elements.askWindow.classList.contains('is-pinned')).toBe(true);
+
+        view.hide();
+        expect(view.isPinned()).toBe(false);
+        expect(elements.buttons.headerPin.classList.contains('is-pinned')).toBe(false);
     });
 
     it('summarizes selected translation targets in the dropdown trigger', () => {

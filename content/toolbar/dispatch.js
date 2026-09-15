@@ -224,15 +224,19 @@
                         break;
 
                     case 'submit_ask':
-                        const question = actionPayload;
-                        const context = this.controller.currentSelection;
-                        if (question) {
-                            this.actions.handleSubmitAsk(
-                                question,
-                                context,
-                                this.controller.lastSessionId,
-                                currentModel
-                            );
+                        {
+                            const question = actionPayload;
+                            const context = this.controller.forcePageContext
+                                ? '__PAGE_CONTEXT_FORCE__'
+                                : this.controller.currentSelection;
+                            if (question) {
+                                this.actions.handleSubmitAsk(
+                                    question,
+                                    context,
+                                    this.controller.lastSessionId,
+                                    currentModel
+                                );
+                            }
                         }
                         break;
 
@@ -245,6 +249,11 @@
                         this.ui.hideAskWindow();
                         this.controller.visible = false;
                         this.controller.lastSessionId = null;
+                        this.controller.clearForcePageContext?.();
+                        break;
+
+                    case 'toggle_pin':
+                        this.ui.toggleWindowPinned?.();
                         break;
 
                     case 'stop_ask':
@@ -257,6 +266,7 @@
                         this.ui.hideAskWindow();
                         this.controller.visible = false;
                         this.controller.lastSessionId = null;
+                        this.controller.clearForcePageContext?.();
                         break;
                 }
             } catch (error) {

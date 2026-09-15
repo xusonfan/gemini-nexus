@@ -90,6 +90,22 @@
                 return true;
             }
 
+            if (request.action === 'SHOW_PAGE_CHAT') {
+                if (this.toolbarController) {
+                    this.toolbarController.handleContextAction?.('page_chat');
+                }
+                sendResponse({ status: 'ok' });
+                return true;
+            }
+
+            if (request.action === 'SUMMARIZE_PAGE') {
+                if (this.toolbarController) {
+                    this.toolbarController.handleSummarizePage?.();
+                }
+                sendResponse({ status: 'ok' });
+                return true;
+            }
+
             if (request.action === 'HIDE_FOR_CAPTURE') {
                 // Pre-capture hide: toolbar host sits at z-index 2147483647 and would
                 // otherwise be baked into captureVisibleTab output.

@@ -120,6 +120,9 @@
     class WindowView {
         constructor(elements) {
             this.elements = elements;
+            this.hideInput = false;
+            this.autoFocus = true;
+            this.pinned = false;
             this.imagePreview = new window.GeminiImagePreviewController({
                 resultText: this.elements.resultText,
                 askWindow: this.elements.askWindow,
@@ -127,8 +130,12 @@
             this.translationTargets = new window.GeminiTranslationTargetView(this.elements);
         }
 
-        async show(rect, contextText, title, resetDrag = null, mousePoint = null) {
+        async show(rect, contextText, title, resetDrag = null, mousePoint = null, options = {}) {
             if (!this.elements.askWindow) return;
+
+            const opts = options && typeof options === 'object' ? options : {};
+            this.hideInput = opts.hideInput === true;
+            this.autoFocus = opts.autoFocus !== false && !this.hideInput;
 
             const savedSize = await getSavedWindowSize();
             if (savedSize) {
@@ -156,18 +163,69 @@
                 this.elements.contextPreview.classList.add('hidden');
             }
 
-            this.elements.askInput.value = '';
+            if (this.elements.askInput) this.elements.askInput.value = '';
             this.elements.resultText.innerHTML = '';
             this.translationTargets.hide();
+            this.setInputVisible(!this.hideInput);
 
             if (this.elements.windowFooter) this.elements.windowFooter.classList.add('hidden');
 
+            this.elements.askWindow.classList.toggle('result-only', this.hideInput);
             this.elements.askWindow.classList.add('visible');
-            setTimeout(() => this.elements.askInput.focus(), 50);
+            this.setPinned(false);
+            if (this.autoFocus && this.elements.askInput) {
+                setTimeout(() => this.elements.askInput.focus(), 50);
+            }
+        }
+
+        setInputVisible(visible) {
+            const inputContainer =
+                this.elements.inputContainer || this.elements.askInput?.closest?.('.input-container');
+            if (inputContainer) {
+                inputContainer.classList.toggle('hidden', !visible);
+            }
+            if (this.elements.askInput) {
+                this.elements.askInput.disabled = !visible;
+                this.elements.askInput.tabIndex = visible ? 0 : -1;
+            }
         }
 
         hide() {
-            if (this.elements.askWindow) this.elements.askWindow.classList.remove('visible');
+            if (this.elements.askWindow) {
+                this.elements.askWindow.classList.remove('visible');
+                this.elements.askWindow.classList.remove('result-only');
+            }
+            this.setInputVisible(true);
+            this.hideInput = false;
+            this.autoFocus = true;
+            this.setPinned(false);
+        }
+
+        isPinned() {
+            return this.pinned === true;
+        }
+
+        setPinned(pinned) {
+            this.pinned = pinned === true;
+            const pinButton = this.elements.buttons?.headerPin;
+            const strings = window.GeminiToolbarStrings || {};
+            if (pinButton) {
+                pinButton.classList.toggle('is-pinned', this.pinned);
+                pinButton.setAttribute('aria-pressed', this.pinned ? 'true' : 'false');
+                const label = this.pinned
+                    ? strings.unpinWindow || 'Unpin window'
+                    : strings.pinWindow || 'Pin window';
+                pinButton.title = label;
+                pinButton.setAttribute('aria-label', label);
+            }
+            if (this.elements.askWindow) {
+                this.elements.askWindow.classList.toggle('is-pinned', this.pinned);
+            }
+        }
+
+        togglePinned() {
+            this.setPinned(!this.pinned);
+            return this.pinned;
         }
 
         showLoading(msg) {
@@ -193,16 +251,6 @@
 
             if (title) this.elements.windowTitle.textContent = title;
 
-            const resultArea = this.elements.resultArea;
-            let shouldScrollBottom = false;
-
-            if (resultArea && isStreaming) {
-                const threshold = 50;
-                const distanceToBottom =
-                    resultArea.scrollHeight - resultArea.scrollTop - resultArea.clientHeight;
-                shouldScrollBottom = distanceToBottom <= threshold;
-            }
-
             this.elements.resultText.innerHTML = htmlContent;
 
             if (this.elements.windowFooter) this.elements.windowFooter.classList.remove('hidden');
@@ -213,14 +261,9 @@
                 if (this.elements.windowFooter) this.elements.windowFooter.classList.add('hidden');
             }
 
-            if (resultArea) {
-                if (isStreaming) {
-                    if (shouldScrollBottom) {
-                        resultArea.scrollTop = resultArea.scrollHeight;
-                    }
-                } else {
-                    resultArea.scrollTop = 0;
-                }
+            // Floating windows never auto-scroll during streaming; reset to top when finished.
+            if (this.elements.resultArea && !isStreaming) {
+                this.elements.resultArea.scrollTop = 0;
             }
         }
 

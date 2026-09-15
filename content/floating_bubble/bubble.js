@@ -16,7 +16,11 @@
         this.menuItems = null;
         this.closeBtn = null;
         this.settingsBtn = null;
-        this.logoUrl = chrome.runtime.getURL("logo.png");
+        try {
+            this.logoUrl = chrome.runtime?.id ? chrome.runtime.getURL("logo.png") : "";
+        } catch (e) {
+            this.logoUrl = "";
+        }
 
         this.isDragging = false;
         this.dragOffset = { x: 0, y: 0 };
@@ -121,6 +125,7 @@
         if (!this.menuItems) return;
         var menuDefs = [
             { id: 'summarize_page', icon: 'SUMMARIZE', label: t.summarizePage || 'Summarize' },
+            { id: 'page_chat', icon: 'ASK', label: t.chatWithPage || 'Chat with Page' },
             { id: 'ask', icon: 'CHAT_BUBBLE', label: t.askAi || 'Ask' },
             { type: 'divider' },
             { id: 'ocr', icon: 'SCAN_TEXT', label: (t.titles && t.titles.ocr) || t.ocr || 'OCR' },
@@ -206,8 +211,7 @@
         if (this.settingsBtn) {
             this.settingsBtn.addEventListener('click', function(e) {
                 e.preventDefault(); e.stopPropagation();
-                chrome.storage.local.set({ gemini_open_settings: true });
-                chrome.runtime.sendMessage({ action: 'OPEN_SIDE_PANEL' });
+                chrome.runtime.sendMessage({ action: 'OPEN_SIDE_PANEL', openSettings: true });
             });
         }
     };
@@ -488,6 +492,9 @@
         switch (actionId) {
             case 'summarize_page':
                 if (this.controller && this.controller.handleContextAction) this.controller.handleContextAction('summarize_page');
+                break;
+            case 'page_chat':
+                if (this.controller && this.controller.handleContextAction) this.controller.handleContextAction('page_chat');
                 break;
             case 'ask':
                 if (this.controller && this.controller.showGlobalInput) this.controller.showGlobalInput(false);

@@ -47,6 +47,18 @@ export async function showQuickAskForTab(tab) {
     await sendMessageWithContentRefresh(tab, { action: 'SHOW_QUICK_ASK' }, 'ok');
 }
 
+export async function showPageChatForTab(tab) {
+    if (!isValidTab(tab)) return;
+
+    await sendMessageWithContentRefresh(tab, { action: 'SHOW_PAGE_CHAT' }, 'ok');
+}
+
+export async function summarizePageForTab(tab) {
+    if (!isValidTab(tab)) return;
+
+    await sendMessageWithContentRefresh(tab, { action: 'SUMMARIZE_PAGE' }, 'ok');
+}
+
 export async function startAreaOcrForTab(tab, imageManager) {
     if (!isValidTab(tab)) return;
 

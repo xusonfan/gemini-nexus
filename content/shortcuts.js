@@ -9,6 +9,8 @@
     const DEFAULT_SHORTCUTS = nexusConfig.DEFAULT_SHORTCUTS || {
         quickAsk: 'Alt+Q',
         openPanel: 'Alt+G',
+        summarizePage: 'Alt+Shift+G',
+        pageChat: 'Alt+Shift+Q',
         browserControl: 'Ctrl+B',
         ocrCapture: 'Alt+O',
     };
@@ -235,7 +237,22 @@
             ) {
                 event.preventDefault();
                 event.stopPropagation();
-                this.toolbarController?.handleSummarizePage?.();
+                if (this.toolbarController) {
+                    this.toolbarController.handleSummarizePage?.();
+                } else {
+                    sendRuntimeMessage({ action: 'SUMMARIZE_PAGE_FROM_SHORTCUT' });
+                }
+                return;
+            }
+
+            if (this.appShortcuts.pageChat && this.match(event, this.appShortcuts.pageChat)) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (this.toolbarController) {
+                    this.toolbarController.handleContextAction?.('page_chat');
+                } else {
+                    sendRuntimeMessage({ action: 'SHOW_PAGE_CHAT_FROM_SHORTCUT' });
+                }
                 return;
             }
 

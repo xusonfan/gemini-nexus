@@ -47,6 +47,8 @@
 
     function init(toolbar) {
         if (!toolbar) return;
+        if (window.GeminiContentSettingsSyncInitialized === true) return;
+        window.GeminiContentSettingsSyncInitialized = true;
 
         const selectionState = {
             enabled: true,

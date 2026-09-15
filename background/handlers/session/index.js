@@ -44,9 +44,14 @@ export class SessionMessageHandler {
 
         // --- CONTROL ---
         if (request.action === 'CANCEL_PROMPT') {
-            const cancelled = this.sessionManager.cancelCurrentRequest('prompt');
-            // Ensure the prompt loop logic also stops
-            this.promptHandler.cancel();
+            const tabId = sender?.tab?.id;
+            let cancelled = false;
+            if (Number.isInteger(tabId) && tabId > 0) {
+                cancelled = this.sessionManager.cancelCurrentRequest(`quickAsk:${tabId}`);
+            } else {
+                cancelled = this.sessionManager.cancelCurrentRequest('prompt');
+                this.promptHandler.cancel();
+            }
             sendResponse({ status: cancelled ? 'cancelled' : 'no_active_request' });
             return false;
         }

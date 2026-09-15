@@ -28,6 +28,11 @@
             this.manager.fireCallback('onAction', 'cancel_ask');
         }
 
+        togglePin(event) {
+            consumeEvent(event);
+            this.manager.fireCallback('onAction', 'toggle_pin');
+        }
+
         stopAsk(event) {
             consumeEvent(event);
             this.manager.fireCallback('onAction', 'stop_ask');

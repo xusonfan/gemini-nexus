@@ -76,9 +76,15 @@ describe('data management helpers', () => {
                 settings: {
                     geminiTheme: 'light',
                     unrelated: 'ignored',
+                    gemini_bubble_enabled: false,
+                    geminiExplainPageContextEnabled: false,
                 },
             })
-        ).toEqual({ geminiTheme: 'light' });
+        ).toEqual({
+            geminiTheme: 'light',
+            gemini_bubble_enabled: false,
+            geminiExplainPageContextEnabled: false,
+        });
     });
 
     it('does not import settings secrets from external files', () => {

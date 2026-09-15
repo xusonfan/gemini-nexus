@@ -442,6 +442,38 @@ describe('UIMessageHandler browser control tab ownership', () => {
         ]);
     });
 
+    it('queues opening settings when the side panel is opened from the bubble gear', async () => {
+        globalThis.chrome = {
+            storage: {
+                local: {
+                    set: vi.fn(() => Promise.resolve()),
+                    remove: vi.fn(() => Promise.resolve()),
+                },
+            },
+            runtime: {
+                sendMessage: vi.fn(() => Promise.resolve()),
+            },
+            sidePanel: {
+                open: vi.fn(() => Promise.resolve()),
+                setOptions: vi.fn(() => Promise.resolve()),
+            },
+        };
+        const sendResponse = vi.fn();
+        const handler = new UIMessageHandler({}, controlManager, null, null);
+
+        const handled = handler.handle(
+            { action: 'OPEN_SIDE_PANEL', openSettings: true },
+            { tab: { id: 9, windowId: 4 } },
+            sendResponse
+        );
+
+        expect(handled).toBe(true);
+        await vi.waitFor(() => expect(sendResponse).toHaveBeenCalledWith({ status: 'opened' }));
+        expect(chrome.storage.local.set).toHaveBeenCalledWith({
+            pendingOpenSettings: true,
+        });
+    });
+
     it('continues opening the side panel when pending action storage fails', async () => {
         vi.spyOn(console, 'warn').mockImplementation(() => {});
         globalThis.chrome = {

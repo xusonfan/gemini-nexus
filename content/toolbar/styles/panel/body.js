@@ -20,6 +20,11 @@
             flex-shrink: 0;
         }
 
+        .input-container.hidden,
+        .ask-window.result-only .input-container {
+            display: none;
+        }
+
         input[type="text"]#ask-input {
             width: 100%;
             padding: 10px 12px;

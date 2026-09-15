@@ -392,6 +392,26 @@ describe('StateManager tab ownership', () => {
         expect(chrome.storage.local.remove).toHaveBeenCalledWith('pendingSessionId');
     });
 
+    it('opens settings when a pending settings request arrives after side panel initialization', () => {
+        const listeners = setupChromeWithLocalData({});
+        const frame = createFrame();
+        const manager = new StateManager(frame);
+
+        manager.init();
+        manager.markUiReady();
+        frame.postMessage.mockClear();
+
+        listeners.storageChanged(
+            {
+                pendingOpenSettings: { newValue: true },
+            },
+            'local'
+        );
+
+        expect(frame.postMessage).toHaveBeenCalledWith({ action: 'OPEN_SETTINGS_MODAL' });
+        expect(chrome.storage.local.remove).toHaveBeenCalledWith('pendingOpenSettings');
+    });
+
     it('logs storage failures when clearing consumed pending actions', async () => {
         setupChromeWithLocalData({
             pendingSessionId: 'session-1',

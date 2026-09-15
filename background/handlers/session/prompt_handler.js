@@ -126,7 +126,7 @@ export class PromptHandler {
 
     async getSummaryModel() {
         const settings = await getConnectionSettings();
-        return settings.summaryModel || '';
+        return settings.summaryModel || settings.selectedModel || '';
     }
 
     async generateFollowUpQuestions(sessionId, aiText) {
@@ -195,7 +195,7 @@ ${aiText}`;
             const summaryModel = await this.getSummaryModel();
             if (!summaryModel) {
                 console.info(
-                    '[Gemini Nexus] AI Title generation skipped: No summary model configured.'
+                    '[Gemini Nexus] AI Title generation skipped: No chat or summary model configured.'
                 );
                 return;
             }

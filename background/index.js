@@ -13,6 +13,8 @@ import { setupContentScriptInjection } from './content_injection.js';
 import { setupPageShortcutCommands } from './page_shortcut_commands.js';
 import {
     showQuickAskForTab,
+    showPageChatForTab,
+    summarizePageForTab,
     startAreaOcrForTab as startAreaOcrForTabWithManager,
 } from './page_shortcut_tab_actions.js';
 
@@ -165,6 +167,8 @@ chrome.commands?.onCommand?.addListener((command, tab) => {
 
 setupPageShortcutCommands({
     showQuickAskForTab,
+    showPageChatForTab,
+    summarizePageForTab,
     startAreaOcrForTab,
 });
 

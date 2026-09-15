@@ -13,12 +13,17 @@ const BLOCKED_WEB_ORIGINS = new Set([
 
 const DEFAULT_CONTENT_SCRIPT_WORLD = 'ISOLATED';
 
-function hasGeminiNexusContentScript() {
-    return Boolean(
-        window.GeminiNexusContentReady === true ||
-        window.GeminiMessageRouter ||
-        document.getElementById('gemini-nexus-toolbar-host')
-    );
+export function hasGeminiNexusContentScript() {
+    try {
+        // Leftover page DOM from an invalidated extension context must not count
+        // as "already injected". After a developer reload the toolbar host can
+        // still sit in the page while the isolated world is empty or orphaned.
+        if (!chrome.runtime?.id) return false;
+    } catch {
+        return false;
+    }
+
+    return Boolean(window.GeminiNexusContentReady === true || window.GeminiMessageRouter);
 }
 
 function hasGeminiNexusWatermarkPageScript() {
@@ -253,7 +258,10 @@ export async function injectContentScriptsIntoOpenTabs(options = {}) {
 const INSTALL_INJECT_DELAY_MS = 750;
 
 function initializeOpenTabs(reason) {
-    injectContentScriptsIntoOpenTabs().catch((error) => {
+    // Always force after install/update/reload. Orphaned content-script state can
+    // still look "ready" (GeminiNexusContentReady) while closures point at the
+    // previous extension context, which then throws "Extension context invalidated".
+    injectContentScriptsIntoOpenTabs({ force: true }).catch((error) => {
         console.warn(`[Gemini Nexus] Failed to initialize existing tabs${reason}:`, error);
     });
 }

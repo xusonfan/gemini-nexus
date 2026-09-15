@@ -54,6 +54,7 @@ export const AppearanceSettingsTemplate = `
             <select id="bubble-click-action" class="settings-input settings-select">
                 <option value="open_menu" data-i18n="bubbleClickOpenMenu">Open Menu</option>
                 <option value="summarize_page" data-i18n="shortcutSummarizePage">Summarize Page</option>
+                <option value="page_chat" data-i18n="chatWithPage">Chat with Page</option>
                 <option value="ask" data-i18n="quickAsk">Quick Ask</option>
                 <option value="ocr" data-i18n="shortcutOcrCapture">Area OCR</option>
                 <option value="snip" data-i18n="snipLabel">Capture as image</option>

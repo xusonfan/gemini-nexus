@@ -391,15 +391,22 @@
             rect,
             contextText,
             title = getStrings().ask || 'Ask Gemini',
-            mousePoint = null
+            mousePoint = null,
+            options = {}
         ) {
+            this.outsideCloseSuppressedUntil = Date.now() + 400;
             return this.view.showAskWindow(
                 rect,
                 contextText,
                 title,
                 () => this.dragController.reset(),
-                mousePoint
+                mousePoint,
+                options
             );
+        }
+
+        isOutsideCloseSuppressed() {
+            return Date.now() < (this.outsideCloseSuppressedUntil || 0);
         }
 
         showLoading(msg) {
@@ -436,6 +443,15 @@
         hideAskWindow() {
             this.view.hideAskWindow();
             this.resetGrammarMode();
+            this.outsideCloseSuppressedUntil = 0;
+        }
+
+        isWindowPinned() {
+            return this.view?.isWindowPinned?.() === true;
+        }
+
+        toggleWindowPinned() {
+            return this.view?.toggleWindowPinned?.();
         }
 
         setInputValue(text) {

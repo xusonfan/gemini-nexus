@@ -14,6 +14,8 @@
     const DEFAULT_SHORTCUTS = Object.freeze({
         quickAsk: 'Alt+Q',
         openPanel: 'Alt+G',
+        summarizePage: 'Alt+Shift+G',
+        pageChat: 'Alt+Shift+Q',
         browserControl: 'Ctrl+B',
         ocrCapture: 'Alt+O',
     });
@@ -64,6 +66,7 @@
             });
         }
 
+        // Preserve explicit empty strings so users can disable individual shortcuts.
         return { ...DEFAULT_SHORTCUTS, ...migrated };
     }
 

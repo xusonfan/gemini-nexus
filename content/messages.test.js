@@ -172,6 +172,33 @@ describe('GeminiMessageRouter capture routing', () => {
         expect(sendResponse).toHaveBeenCalledWith({ status: 'ok' });
     });
 
+    it('opens page chat when requested by the background shortcut command', async () => {
+        const router = await installMessageRouter();
+        const { overlay, toolbar } = createHarness();
+        router.init(toolbar, overlay);
+        const sendResponse = vi.fn();
+
+        const handled = router.handle({ action: 'SHOW_PAGE_CHAT' }, {}, sendResponse);
+
+        expect(handled).toBe(true);
+        expect(toolbar.handleContextAction).toHaveBeenCalledWith('page_chat');
+        expect(sendResponse).toHaveBeenCalledWith({ status: 'ok' });
+    });
+
+    it('summarizes the page when requested by the background shortcut command', async () => {
+        const router = await installMessageRouter();
+        const { overlay, toolbar } = createHarness();
+        toolbar.handleSummarizePage = vi.fn();
+        router.init(toolbar, overlay);
+        const sendResponse = vi.fn();
+
+        const handled = router.handle({ action: 'SUMMARIZE_PAGE' }, {}, sendResponse);
+
+        expect(handled).toBe(true);
+        expect(toolbar.handleSummarizePage).toHaveBeenCalled();
+        expect(sendResponse).toHaveBeenCalledWith({ status: 'ok' });
+    });
+
     it('removes the previous router listener when content scripts are reinjected', async () => {
         const firstRouter = await installMessageRouter();
         const { overlay, toolbar } = createHarness();

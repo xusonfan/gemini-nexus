@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { injectContentScriptsIntoTab } from './content_injection.js';
-import { showQuickAskForTab, startAreaOcrForTab } from './page_shortcut_tab_actions.js';
+import {
+    showQuickAskForTab,
+    showPageChatForTab,
+    summarizePageForTab,
+    startAreaOcrForTab,
+} from './page_shortcut_tab_actions.js';
 
 vi.mock('./content_injection.js', () => ({
     injectContentScriptsIntoTab: vi.fn(() => Promise.resolve({ status: 'already-injected' })),
@@ -24,6 +29,24 @@ describe('page shortcut tab actions', () => {
 
         expect(injectContentScriptsIntoTab).toHaveBeenCalledWith(tab);
         expect(chrome.tabs.sendMessage).toHaveBeenCalledWith(9, { action: 'SHOW_QUICK_ASK' });
+    });
+
+    it('opens page chat through the content script', async () => {
+        const tab = { id: 13, url: 'https://example.com/' };
+
+        await showPageChatForTab(tab);
+
+        expect(injectContentScriptsIntoTab).toHaveBeenCalledWith(tab);
+        expect(chrome.tabs.sendMessage).toHaveBeenCalledWith(13, { action: 'SHOW_PAGE_CHAT' });
+    });
+
+    it('summarizes the page through the content script', async () => {
+        const tab = { id: 10, url: 'https://example.com/' };
+
+        await summarizePageForTab(tab);
+
+        expect(injectContentScriptsIntoTab).toHaveBeenCalledWith(tab);
+        expect(chrome.tabs.sendMessage).toHaveBeenCalledWith(10, { action: 'SUMMARIZE_PAGE' });
     });
 
     it('force-refreshes old page content when quick ask messaging fails', async () => {

@@ -29,6 +29,11 @@ export const SETTINGS_STORAGE_KEYS = [
     'geminiToolbarOpenaiSelectedModel',
     'geminiTranslationTargets',
     'gemini_nexus_window_size',
+    'gemini_nexus_opacity',
+    'geminiToolbarTextEnabled',
+    'gemini_bubble_enabled',
+    'gemini_bubble_click_action',
+    'geminiExplainPageContextEnabled',
     ...CONNECTION_STORAGE_KEYS,
 ];
 

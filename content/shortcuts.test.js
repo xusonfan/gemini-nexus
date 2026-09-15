@@ -180,6 +180,8 @@ describe('ShortcutManager', () => {
             geminiShortcuts: {
                 quickAsk: 'Alt+Q',
                 openPanel: 'Alt+G',
+                summarizePage: 'Alt+Shift+G',
+                pageChat: 'Alt+Shift+Q',
                 browserControl: 'Ctrl+B',
                 ocrCapture: 'Alt+O',
             },
@@ -215,6 +217,8 @@ describe('ShortcutManager', () => {
             geminiShortcuts: {
                 quickAsk: 'Alt+Q',
                 openPanel: 'Alt+G',
+                summarizePage: 'Alt+Shift+G',
+                pageChat: 'Alt+Shift+Q',
                 browserControl: 'Ctrl+B',
                 ocrCapture: 'Alt+O',
             },
@@ -295,6 +299,52 @@ describe('ShortcutManager', () => {
 
         expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
             action: 'SHOW_QUICK_ASK_FROM_SHORTCUT',
+        });
+    });
+
+    it('summarizes the page when the configured shortcut is pressed', () => {
+        const controller = {
+            handleSummarizePage: vi.fn(),
+        };
+        window.GeminiShortcuts.setController(controller);
+
+        document.dispatchEvent(
+            createKeyboardEvent('G', { altKey: true, shiftKey: true, code: 'KeyG' })
+        );
+
+        expect(controller.handleSummarizePage).toHaveBeenCalled();
+    });
+
+    it('opens page chat when the configured shortcut is pressed', () => {
+        const controller = {
+            handleContextAction: vi.fn(),
+        };
+        window.GeminiShortcuts.setController(controller);
+
+        document.dispatchEvent(
+            createKeyboardEvent('Q', { altKey: true, shiftKey: true, code: 'KeyQ' })
+        );
+
+        expect(controller.handleContextAction).toHaveBeenCalledWith('page_chat');
+    });
+
+    it('routes summarize page through the background shortcut command when no controller is attached', () => {
+        document.dispatchEvent(
+            createKeyboardEvent('G', { altKey: true, shiftKey: true, code: 'KeyG' })
+        );
+
+        expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+            action: 'SUMMARIZE_PAGE_FROM_SHORTCUT',
+        });
+    });
+
+    it('routes page chat through the background shortcut command when no controller is attached', () => {
+        document.dispatchEvent(
+            createKeyboardEvent('Q', { altKey: true, shiftKey: true, code: 'KeyQ' })
+        );
+
+        expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+            action: 'SHOW_PAGE_CHAT_FROM_SHORTCUT',
         });
     });
 

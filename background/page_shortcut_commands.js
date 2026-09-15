@@ -14,13 +14,36 @@ function respondWithShortcutTask(sendResponse, task, errorMessage) {
         });
 }
 
-export function createPageShortcutCommandHandler({ showQuickAskForTab, startAreaOcrForTab }) {
+export function createPageShortcutCommandHandler({
+    showQuickAskForTab,
+    showPageChatForTab,
+    summarizePageForTab,
+    startAreaOcrForTab,
+}) {
     return (request, sender, sendResponse) => {
         if (request.action === 'SHOW_QUICK_ASK_FROM_SHORTCUT') {
             respondWithShortcutTask(
                 sendResponse,
                 () => showQuickAskForTab(sender.tab),
                 'Could not open quick ask from shortcut'
+            );
+            return true;
+        }
+
+        if (request.action === 'SHOW_PAGE_CHAT_FROM_SHORTCUT') {
+            respondWithShortcutTask(
+                sendResponse,
+                () => showPageChatForTab(sender.tab),
+                'Could not open page chat from shortcut'
+            );
+            return true;
+        }
+
+        if (request.action === 'SUMMARIZE_PAGE_FROM_SHORTCUT') {
+            respondWithShortcutTask(
+                sendResponse,
+                () => summarizePageForTab(sender.tab),
+                'Could not summarize page from shortcut'
             );
             return true;
         }

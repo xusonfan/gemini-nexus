@@ -1,6 +1,15 @@
 (function () {
     const Templates = window.GeminiToolbarTemplates;
 
+    function getExtensionResourceUrl(path) {
+        try {
+            if (!chrome.runtime?.id) return '';
+            return chrome.runtime.getURL(path);
+        } catch {
+            return '';
+        }
+    }
+
     class ToolbarDOM {
         constructor() {
             this.host = null;
@@ -44,15 +53,21 @@
         }
 
         _loadMathLibs() {
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = chrome.runtime.getURL('vendor/katex/katex.min.css');
-            this.shadow.appendChild(link);
+            const katexHref = getExtensionResourceUrl('vendor/katex/katex.min.css');
+            if (katexHref) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = katexHref;
+                this.shadow.appendChild(link);
+            }
 
-            const hljsLink = document.createElement('link');
-            hljsLink.rel = 'stylesheet';
-            hljsLink.href = chrome.runtime.getURL('vendor/highlight.js/atom-one-dark.min.css');
-            this.shadow.appendChild(hljsLink);
+            const hljsHref = getExtensionResourceUrl('vendor/highlight.js/atom-one-dark.min.css');
+            if (hljsHref) {
+                const hljsLink = document.createElement('link');
+                hljsLink.rel = 'stylesheet';
+                hljsLink.href = hljsHref;
+                this.shadow.appendChild(hljsLink);
+            }
         }
     }
 

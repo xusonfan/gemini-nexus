@@ -82,6 +82,42 @@ describe('shortcut frame bridge', () => {
         });
     });
 
+    it('routes summarize page shortcuts from iframes to the background command', async () => {
+        const frame = document.createElement('iframe');
+        document.body.appendChild(frame);
+        await installBridge(frame.contentWindow);
+
+        const event = createKeyboardEvent(frame.contentWindow, 'G', {
+            altKey: true,
+            shiftKey: true,
+            code: 'KeyG',
+        });
+        frame.contentDocument.dispatchEvent(event);
+
+        expect(event.defaultPrevented).toBe(true);
+        expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+            action: 'SUMMARIZE_PAGE_FROM_SHORTCUT',
+        });
+    });
+
+    it('routes page chat shortcuts from iframes to the background command', async () => {
+        const frame = document.createElement('iframe');
+        document.body.appendChild(frame);
+        await installBridge(frame.contentWindow);
+
+        const event = createKeyboardEvent(frame.contentWindow, 'Q', {
+            altKey: true,
+            shiftKey: true,
+            code: 'KeyQ',
+        });
+        frame.contentDocument.dispatchEvent(event);
+
+        expect(event.defaultPrevented).toBe(true);
+        expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+            action: 'SHOW_PAGE_CHAT_FROM_SHORTCUT',
+        });
+    });
+
     it('routes macOS option-modified OCR shortcuts from iframes by physical key code', async () => {
         const frame = document.createElement('iframe');
         document.body.appendChild(frame);

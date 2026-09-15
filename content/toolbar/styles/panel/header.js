@@ -310,5 +310,12 @@
             background: var(--gnx-surface-hover);
             color: var(--gnx-fg);
         }
+        .icon-btn.is-pinned {
+            color: var(--gnx-accent, #2563eb);
+            background: var(--gnx-surface-hover);
+        }
+        .icon-btn.is-pinned svg {
+            fill: currentColor;
+        }
     `;
 })();

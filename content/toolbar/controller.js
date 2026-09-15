@@ -188,6 +188,8 @@
             // once on blacklisted pages.
             this.isSelectionEnabled = false;
             this.explainPageContextEnabled = true;
+            this.forcePageContext = false;
+            this.suppressOutsideCloseUntil = 0;
 
             this.handleAction = this.handleAction.bind(this);
 
@@ -317,40 +319,10 @@
         }
 
         async handleSummarizePage() {
-            try {
-                const response = await new Promise((resolve) => {
-                    const timeout = setTimeout(() => resolve(null), 150);
-                    chrome.runtime.sendMessage({ action: 'CHECK_SIDE_PANEL_OPEN' }, (res) => {
-                        clearTimeout(timeout);
-                        if (chrome.runtime.lastError) {
-                            resolve(null);
-                        } else {
-                            resolve(res);
-                        }
-                    });
-                });
-
-                if (response?.isOpen) {
-                    const provider = this.ui.getProvider ? this.ui.getProvider() : 'web';
-                    const message = {
-                        action: 'QUICK_ASK',
-                        text: this.ui.t.prompts.summarizePage,
-                        model: this.ui.getSelectedModel(),
-                        includePageContext: true,
-                        provider,
-                    };
-                    if (provider === 'web' && this.ui.getWebThinkingLevel) {
-                        message.webThinkingLevel = this.ui.getWebThinkingLevel();
-                    }
-                    this.actions.sendRuntimeMessage(message);
-                    return;
-                }
-            } catch (error) {
-                console.warn(
-                    'Failed to check side panel state, falling back to floating window',
-                    error
-                );
-            }
+            // Always use the floating ask window so repeated shortcut presses stay
+            // visible. The old side-panel branch sent QUICK_ASK without opening UI,
+            // which looked like the shortcut stopped working after the first run.
+            this.actions.handleCancel();
 
             const viewportW = window.innerWidth;
             const viewportH = window.innerHeight;
@@ -366,12 +338,23 @@
                 width,
                 height,
             };
-            const strings = this.ui.t;
+            const strings = window.GeminiToolbarStrings || {};
             const model = this.ui.getSelectedModel();
 
             this.ui.hide();
-            await this.ui.showAskWindow(rect, null, strings.titles.summarizePage);
-            this.ui.showLoading(strings.loading.summarizePage);
+            await this.ui.showAskWindow(
+                rect,
+                null,
+                strings.titles?.summarizePage || 'Summarize Page',
+                null,
+                {
+                    hideInput: true,
+                    autoFocus: false,
+                }
+            );
+            this.suppressOutsideCloseUntil = Date.now() + 400;
+            this.forcePageContext = false;
+            this.ui.showLoading(strings.loading?.summarizePage || 'Summarizing page...');
 
             this.lastSessionId = null;
             this.currentSelection = '';
@@ -379,7 +362,9 @@
             const provider = this.ui.getProvider ? this.ui.getProvider() : 'web';
             const message = {
                 action: 'QUICK_ASK',
-                text: strings.prompts.summarizePage,
+                text:
+                    strings.prompts?.summarizePage ||
+                    'Please provide a comprehensive yet concise summary of the main content of this webpage.',
                 model,
                 includePageContext: true,
                 provider,
@@ -476,6 +461,14 @@
         handleClick(event) {
             if (this.ui.isHost(event.target)) return;
 
+            if (this.ui.isWindowVisible()) {
+                if (this.ui.isWindowPinned?.()) return;
+                if (Date.now() < (this.suppressOutsideCloseUntil || 0)) return;
+                if (this.ui.isOutsideCloseSuppressed?.()) return;
+                this.handleAction('cancel_ask');
+                return;
+            }
+
             if (this.visible && !this.ui.isWindowVisible()) {
                 this.dismissCurrentSelection();
             }
@@ -510,13 +503,16 @@
         }
 
         handleSelectionClear() {
-            if (!this.ui.isWindowVisible()) {
-                this.currentSelection = '';
-                this.currentSelectionSignature = null;
-                this.dismissedSelectionSignature = null;
-                this.inputManager.reset();
-                this.hide();
+            // Ask window show() awaits chrome.storage before becoming visible.
+            // Keep page-chat state across that gap so selectionclear cannot wipe it.
+            if (this.ui.isWindowVisible() || this.forcePageContext) {
+                return;
             }
+            this.currentSelection = '';
+            this.currentSelectionSignature = null;
+            this.dismissedSelectionSignature = null;
+            this.inputManager.reset();
+            this.hide();
         }
 
         handleModelChange(model) {
@@ -669,15 +665,20 @@
                 title = strings.chatWithPage || 'Chat with Page';
             }
 
-            this.ui.showAskWindow(rect, null, title);
-
-            this.ui.setInputValue('');
-            this.currentSelection = '';
+            this.forcePageContext = withPageContext === true;
+            this.suppressOutsideCloseUntil = Date.now() + 400;
+            this.currentSelection = withPageContext ? '__PAGE_CONTEXT_FORCE__' : '';
             this.lastSessionId = null;
             this.visible = true;
 
-            if (withPageContext) {
-                this.currentSelection = '__PAGE_CONTEXT_FORCE__';
+            void this.ui.showAskWindow(rect, null, title);
+            this.ui.setInputValue('');
+        }
+
+        clearForcePageContext() {
+            this.forcePageContext = false;
+            if (this.currentSelection === '__PAGE_CONTEXT_FORCE__') {
+                this.currentSelection = '';
             }
         }
 

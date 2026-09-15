@@ -62,6 +62,7 @@ async function openSidePanel(context, request, sender) {
     const pendingSidePanelUpdates = {};
     if (request.sessionId) pendingSidePanelUpdates.pendingSessionId = request.sessionId;
     if (request.mode) pendingSidePanelUpdates.pendingMode = request.mode;
+    if (request.openSettings === true) pendingSidePanelUpdates.pendingOpenSettings = true;
 
     const pendingKeys = Object.keys(pendingSidePanelUpdates);
     const pendingActionsStored = await storePendingSidePanelActions(

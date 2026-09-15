@@ -23,6 +23,7 @@
     ];
 
     const WINDOW_ACTIONS = [
+        ['headerPin', 'togglePin'],
         ['headerClose', 'cancelAsk'],
         ['stop', 'stopAsk'],
         ['continue', 'continueChat'],

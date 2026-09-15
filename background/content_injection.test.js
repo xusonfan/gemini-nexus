@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     getContentScriptFiles,
     getMatchingContentScriptEntries,
+    hasGeminiNexusContentScript,
     injectContentScriptsIntoOpenTabs,
     injectContentScriptsIntoTab,
     isInjectableTabUrl,
@@ -247,6 +248,24 @@ describe('content script startup injection', () => {
         expect(chrome.scripting.executeScript).toHaveBeenCalledTimes(2);
     });
 
+    it('does not treat leftover toolbar DOM as a live content script', () => {
+        const previousRuntime = globalThis.chrome;
+        const previousWindow = globalThis.window;
+        globalThis.window = {
+            GeminiNexusContentReady: undefined,
+            GeminiMessageRouter: undefined,
+        };
+        globalThis.chrome = { runtime: { id: 'ext-id' } };
+
+        try {
+            expect(hasGeminiNexusContentScript()).toBe(false);
+        } finally {
+            globalThis.chrome = previousRuntime;
+            if (previousWindow === undefined) delete globalThis.window;
+            else globalThis.window = previousWindow;
+        }
+    });
+
     it('force-injects the current content bundle over older already-injected pages', async () => {
         chrome.scripting.executeScript.mockResolvedValue([{ result: undefined }]);
 
@@ -297,12 +316,18 @@ describe('content script startup injection', () => {
         const listener = chrome.runtime.onInstalled.addListener.mock.calls[0][0];
         expect(listener).toEqual(expect.any(Function));
 
-        chrome.tabs.query.mockResolvedValue([]);
+        chrome.tabs.query.mockResolvedValue([{ id: 9, url: 'https://example.com' }]);
+        chrome.scripting.executeScript.mockResolvedValue([{ result: true }]);
         listener();
         expect(chrome.tabs.query).not.toHaveBeenCalled();
 
         await vi.advanceTimersByTimeAsync(750);
         expect(chrome.tabs.query).toHaveBeenCalledWith({});
+        // Install/reload must force reinjection even when the page looks ready.
+        expect(chrome.scripting.executeScript).toHaveBeenCalledWith({
+            target: { tabId: 9 },
+            files: ['content/page_guard.js', 'content/index.js'],
+        });
         vi.useRealTimers();
     });
 

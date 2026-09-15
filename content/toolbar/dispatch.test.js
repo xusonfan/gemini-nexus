@@ -187,6 +187,34 @@ describe('ToolbarDispatcher', () => {
         expect(controller.ui.showError).toHaveBeenCalledWith('Could not read image.');
     });
 
+    it('submits page-chat asks with includePageContext even if selection was cleared', async () => {
+        const controller = {
+            ui: {
+                getSelectedModel: vi.fn(() => 'gemini-3-pro'),
+                hideAskWindow: vi.fn(),
+            },
+            actions: {
+                handleSubmitAsk: vi.fn(),
+                handleCancel: vi.fn(),
+            },
+            imageDetector: {},
+            inputManager: {},
+            currentSelection: '',
+            forcePageContext: true,
+            lastSessionId: null,
+            clearForcePageContext: vi.fn(),
+        };
+
+        await new window.GeminiToolbarDispatcher(controller).dispatch('submit_ask', 'What is this page?');
+
+        expect(controller.actions.handleSubmitAsk).toHaveBeenCalledWith(
+            'What is this page?',
+            '__PAGE_CONTEXT_FORCE__',
+            null,
+            'gemini-3-pro'
+        );
+    });
+
     it('dispatches custom selection tools with the current selection', async () => {
         const controller = {
             ui: {

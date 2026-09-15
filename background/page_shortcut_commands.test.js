@@ -6,6 +6,8 @@ describe('page shortcut command relay', () => {
     it('opens quick ask in the sender tab', async () => {
         const handlers = {
             showQuickAskForTab: vi.fn(() => Promise.resolve()),
+            showPageChatForTab: vi.fn(),
+            summarizePageForTab: vi.fn(),
             startAreaOcrForTab: vi.fn(),
         };
         const sendResponse = vi.fn();
@@ -25,9 +27,59 @@ describe('page shortcut command relay', () => {
         });
     });
 
+    it('summarizes the page in the sender tab', async () => {
+        const handlers = {
+            showQuickAskForTab: vi.fn(),
+            showPageChatForTab: vi.fn(),
+            summarizePageForTab: vi.fn(() => Promise.resolve()),
+            startAreaOcrForTab: vi.fn(),
+        };
+        const sendResponse = vi.fn();
+        const handler = createPageShortcutCommandHandler(handlers);
+
+        const handled = handler(
+            { action: 'SUMMARIZE_PAGE_FROM_SHORTCUT' },
+            { tab: { id: 11, url: 'https://example.com/' } },
+            sendResponse
+        );
+
+        expect(handled).toBe(true);
+        await vi.waitFor(() => expect(sendResponse).toHaveBeenCalledWith({ status: 'ok' }));
+        expect(handlers.summarizePageForTab).toHaveBeenCalledWith({
+            id: 11,
+            url: 'https://example.com/',
+        });
+    });
+
+    it('opens page chat in the sender tab', async () => {
+        const handlers = {
+            showQuickAskForTab: vi.fn(),
+            showPageChatForTab: vi.fn(() => Promise.resolve()),
+            summarizePageForTab: vi.fn(),
+            startAreaOcrForTab: vi.fn(),
+        };
+        const sendResponse = vi.fn();
+        const handler = createPageShortcutCommandHandler(handlers);
+
+        const handled = handler(
+            { action: 'SHOW_PAGE_CHAT_FROM_SHORTCUT' },
+            { tab: { id: 12, url: 'https://example.com/' } },
+            sendResponse
+        );
+
+        expect(handled).toBe(true);
+        await vi.waitFor(() => expect(sendResponse).toHaveBeenCalledWith({ status: 'ok' }));
+        expect(handlers.showPageChatForTab).toHaveBeenCalledWith({
+            id: 12,
+            url: 'https://example.com/',
+        });
+    });
+
     it('starts area OCR in the sender tab', async () => {
         const handlers = {
             showQuickAskForTab: vi.fn(),
+            showPageChatForTab: vi.fn(),
+            summarizePageForTab: vi.fn(),
             startAreaOcrForTab: vi.fn(() => Promise.resolve()),
         };
         const sendResponse = vi.fn();
@@ -52,6 +104,8 @@ describe('page shortcut command relay', () => {
         const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
         const handlers = {
             showQuickAskForTab: vi.fn(() => Promise.reject(new Error('No tab'))),
+            showPageChatForTab: vi.fn(),
+            summarizePageForTab: vi.fn(),
             startAreaOcrForTab: vi.fn(),
         };
         const sendResponse = vi.fn();
@@ -72,6 +126,8 @@ describe('page shortcut command relay', () => {
     it('ignores unrelated messages', () => {
         const handler = createPageShortcutCommandHandler({
             showQuickAskForTab: vi.fn(),
+            showPageChatForTab: vi.fn(),
+            summarizePageForTab: vi.fn(),
             startAreaOcrForTab: vi.fn(),
         });
 

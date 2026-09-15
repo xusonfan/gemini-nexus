@@ -25,7 +25,9 @@ async function installContentIndex(storageResult, options = {}) {
 
     globalThis.chrome = {
         runtime: {
+            id: 'test-extension-id',
             lastError: null,
+            getURL: vi.fn((path) => `chrome-extension://test-extension-id/${path}`),
         },
         storage: {
             local: {
@@ -56,9 +58,11 @@ describe('content index text selection blacklist', () => {
     beforeEach(() => {
         delete window.GeminiSelectionBlacklist;
         delete window.GeminiContentSettingsSync;
+        delete window.GeminiContentSettingsSyncInitialized;
         delete window.GeminiNexusContentReady;
         delete window.GeminiNexusToolbarControllerInstance;
         delete window.GeminiNexusSelectionOverlayInstance;
+        document.body.innerHTML = '';
     });
 
     it('disables selection toolbar on blacklisted current pages', async () => {
@@ -97,12 +101,26 @@ describe('content index text selection blacklist', () => {
         expect(controller.setSelectionEnabled).toHaveBeenCalledWith(true);
     });
 
+    it('removes leftover toolbar hosts before creating a fresh controller', async () => {
+        document.body.innerHTML =
+            '<div id="gemini-nexus-toolbar-host"></div><div class="gemini-bubble-host"></div>';
+
+        await installContentIndex({
+            geminiTextSelectionEnabled: true,
+            geminiTextSelectionBlacklist: '',
+        });
+
+        expect(document.getElementById('gemini-nexus-toolbar-host')).toBeNull();
+        expect(document.querySelector('.gemini-bubble-host')).toBeNull();
+    });
+
     it('rebinds shortcut events and message routing when content scripts are reinjected', async () => {
         vi.resetModules();
         const controller = {};
         const selectionOverlay = {};
         const shortcuts = { setController: vi.fn() };
         const router = { init: vi.fn() };
+        document.body.innerHTML = '<div id="gemini-nexus-toolbar-host"></div>';
 
         window.GeminiNexusPageGuard = { isDisabled: false };
         window.GeminiNexusContentReady = true;
@@ -111,6 +129,12 @@ describe('content index text selection blacklist', () => {
         window.GeminiShortcuts = shortcuts;
         window.GeminiMessageRouter = router;
         window.GeminiToolbarController = vi.fn();
+        globalThis.chrome = {
+            runtime: {
+                id: 'test-extension-id',
+                getURL: vi.fn((path) => `chrome-extension://test/${path}`),
+            },
+        };
 
         await import('./index.js');
 
@@ -119,12 +143,57 @@ describe('content index text selection blacklist', () => {
         expect(router.init).toHaveBeenCalledWith(controller, selectionOverlay);
     });
 
+    it('rebuilds when a ready page still has an invalidated extension context', async () => {
+        vi.resetModules();
+        const oldController = { destroy: vi.fn() };
+        const newController = {
+            setSelectionEnabled: vi.fn(),
+            setImageToolsEnabled: vi.fn(),
+            setGeneratedImageWatermarkRemovalEnabled: vi.fn(),
+            setCustomSelectionTools: vi.fn(),
+        };
+        const selectionOverlay = {};
+        const shortcuts = { setController: vi.fn() };
+        const router = { init: vi.fn() };
+        document.body.innerHTML = '<div id="gemini-nexus-toolbar-host"></div>';
+
+        window.GeminiNexusPageGuard = { isDisabled: false };
+        window.GeminiNexusContentReady = true;
+        window.GeminiNexusToolbarControllerInstance = oldController;
+        window.GeminiNexusSelectionOverlayInstance = selectionOverlay;
+        window.GeminiShortcuts = shortcuts;
+        window.GeminiMessageRouter = router;
+        window.GeminiNexusOverlay = vi.fn(() => selectionOverlay);
+        window.GeminiToolbarController = vi.fn(() => newController);
+        window.GeminiContentSettingsSync = { init: vi.fn() };
+        globalThis.chrome = {
+            runtime: {
+                id: 'test-extension-id',
+                getURL: vi.fn(() => {
+                    throw new Error('Extension context invalidated.');
+                }),
+            },
+            storage: {
+                local: { get: vi.fn((keys, callback) => callback({})) },
+                onChanged: { addListener: vi.fn() },
+            },
+        };
+
+        await import('./index.js');
+
+        expect(oldController.destroy).toHaveBeenCalled();
+        expect(window.GeminiToolbarController).toHaveBeenCalled();
+        expect(window.GeminiNexusContentReady).toBe(true);
+        expect(shortcuts.setController).toHaveBeenCalledWith(newController);
+    });
+
     it('creates a fresh selection overlay when reinjecting over an older ready page', async () => {
         vi.resetModules();
         const controller = {};
         const overlay = {};
         const shortcuts = { setController: vi.fn() };
         const router = { init: vi.fn() };
+        document.body.innerHTML = '<div id="gemini-nexus-toolbar-host"></div>';
 
         window.GeminiNexusPageGuard = { isDisabled: false };
         window.GeminiNexusContentReady = true;
@@ -133,6 +202,12 @@ describe('content index text selection blacklist', () => {
         window.GeminiMessageRouter = router;
         window.GeminiNexusOverlay = vi.fn(() => overlay);
         window.GeminiToolbarController = vi.fn();
+        globalThis.chrome = {
+            runtime: {
+                id: 'test-extension-id',
+                getURL: vi.fn((path) => `chrome-extension://test/${path}`),
+            },
+        };
 
         await import('./index.js');
 

@@ -5,6 +5,8 @@
     const DEFAULT_SHORTCUTS = Object.freeze({
         quickAsk: 'Alt+Q',
         openPanel: 'Alt+G',
+        summarizePage: 'Alt+Shift+G',
+        pageChat: 'Alt+Shift+Q',
         browserControl: 'Ctrl+B',
         ocrCapture: 'Alt+O',
     });
@@ -142,6 +144,25 @@
                 event.stopPropagation();
                 event.stopImmediatePropagation?.();
                 sendRuntimeMessage({ action: 'SHOW_QUICK_ASK_FROM_SHORTCUT' });
+                return;
+            }
+
+            if (
+                this.appShortcuts.summarizePage &&
+                matchShortcut(event, this.appShortcuts.summarizePage)
+            ) {
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation?.();
+                sendRuntimeMessage({ action: 'SUMMARIZE_PAGE_FROM_SHORTCUT' });
+                return;
+            }
+
+            if (this.appShortcuts.pageChat && matchShortcut(event, this.appShortcuts.pageChat)) {
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation?.();
+                sendRuntimeMessage({ action: 'SHOW_PAGE_CHAT_FROM_SHORTCUT' });
                 return;
             }
 

@@ -113,6 +113,7 @@ export class StateManager {
                 'geminiGroups',
                 'pendingSessionId',
                 'pendingMode',
+                'pendingOpenSettings',
                 'geminiShortcuts',
                 'pendingImage',
                 'geminiSidebarBehavior',
@@ -313,6 +314,12 @@ export class StateManager {
             });
             safeRemoveStorage(chrome.storage.local, 'pendingMode');
             delete this.localStorageData.pendingMode;
+        }
+
+        if (this.localStorageData.pendingOpenSettings === true) {
+            this.frame.postMessage({ action: 'OPEN_SETTINGS_MODAL' });
+            safeRemoveStorage(chrome.storage.local, 'pendingOpenSettings');
+            delete this.localStorageData.pendingOpenSettings;
         }
     }
 
