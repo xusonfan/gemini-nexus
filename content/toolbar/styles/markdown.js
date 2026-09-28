@@ -93,15 +93,18 @@
             border: none;
         }
 
-        .markdown-body code {
+        .markdown-body :not(pre) > code {
             font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
             font-size: 0.9em;
             background: var(--gnx-inline-code-bg);
             padding: 2px 4px;
             border-radius: 4px;
-            color: #1f1f1f;
+            color: var(--gnx-fg);
+            font-weight: 500;
         }
         .markdown-body pre code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.9em;
             background: transparent;
             padding: 0;
             border: none;

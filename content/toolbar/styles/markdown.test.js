@@ -22,4 +22,16 @@ describe('content toolbar markdown styles', () => {
         expect(css).toMatch(/\.generated-image\s*{[^}]*max-width:\s*100%/s);
         expect(css).toMatch(/\.generated-image\s*{[^}]*box-sizing:\s*border-box/s);
     });
+
+    it('keeps inline code readable under dark prefers-color-scheme', async () => {
+        await import('./markdown.js?inline-code-contrast-test');
+
+        const css = window.GeminiStyles.Markdown;
+        // Must follow the theme token — a hardcoded light-theme hex (e.g. #1f1f1f)
+        // washes out against --gnx-bg / --gnx-inline-code-bg in dark mode.
+        expect(css).toMatch(
+            /\.markdown-body :not\(pre\) > code\s*{[^}]*color:\s*var\(--gnx-fg\)/s
+        );
+        expect(css).not.toMatch(/\.markdown-body[^{]*code[^{]*{[^}]*color:\s*#1f1f1f/s);
+    });
 });

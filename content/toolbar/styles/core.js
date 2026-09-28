@@ -67,7 +67,7 @@
                 --gnx-toolbar-fg-hover: #e3e3e3;
                 --gnx-code-bg: #28292a;
                 --gnx-code-header: #333537;
-                --gnx-inline-code-bg: rgba(255, 255, 255, 0.08);
+                --gnx-inline-code-bg: rgba(255, 255, 255, 0.12);
                 --gnx-link: #a8c7fa;
                 --gnx-error: #f2b8b5;
                 --gnx-shadow-panel: 0 10px 30px rgba(0, 0, 0, 0.5);
