@@ -61,6 +61,16 @@ export function createHistoryItemMenu(controller, session) {
         label: t('renameChat'),
         onClick: () => controller.startSessionTitleEdit(session),
     });
+    const regenerateTitleItem = createMenuItem({
+        icon: TemplateIcons.REFRESH,
+        label: t('regenerateTitle'),
+        onClick: () => {
+            if (controller.itemCallbacks?.onRegenerateTitle) {
+                controller.itemCallbacks.onRegenerateTitle(session.id);
+            }
+            controller.closeItemMenu();
+        },
+    });
     const pinItem = createMenuItem({
         icon: session.isPinned === true ? TemplateIcons.PIN_OFF : TemplateIcons.PIN,
         label: session.isPinned === true ? t('unpinChat') : t('pinChat'),
@@ -124,6 +134,7 @@ export function createHistoryItemMenu(controller, session) {
     });
 
     menu.appendChild(renameItem);
+    menu.appendChild(regenerateTitleItem);
     menu.appendChild(pinItem);
     menu.appendChild(duplicateItem);
     menu.appendChild(shareItem);

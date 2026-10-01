@@ -282,7 +282,11 @@ export class PromptController {
         }
 
         if (session.messages.length === 0) {
-            const titleUpdate = this.sessionManager.updateTitle(currentId, text || t('imageSent'));
+            const pageTitle =
+                this.app.pageContextActive === true ? this.app.currentTabTitle || '' : '';
+            const titleUpdate = this.sessionManager.updateTitle(currentId, text || t('imageSent'), {
+                pageTitle,
+            });
             if (titleUpdate) this.app.sessionFlow.refreshHistoryUI();
         }
 

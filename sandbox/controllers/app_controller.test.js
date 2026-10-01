@@ -224,7 +224,7 @@ describe('AppController session restore behavior', () => {
             [expect.objectContaining({ id: 'group-1' })],
             sessionManager.currentSessionId,
             expect.objectContaining({ onAddGroup: expect.any(Function) }),
-            { isGenerating: false, generatingSessionId: null }
+            { isGenerating: false, generatingSessionId: null, retitlingSessionId: null }
         );
     });
 

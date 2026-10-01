@@ -91,8 +91,9 @@ export function createGroupElement(controller, group, sessions) {
 
 export function createSessionRow(controller, session) {
     const isGeneratingSession =
-        controller.renderState.isGenerating &&
-        controller.renderState.generatingSessionId === session.id;
+        (controller.renderState.isGenerating &&
+            controller.renderState.generatingSessionId === session.id) ||
+        controller.renderState.retitlingSessionId === session.id;
     const isMenuOpen =
         controller.activeMenuType === 'session' && controller.activeMenuId === session.id;
     const sessionRow = document.createElement('div');

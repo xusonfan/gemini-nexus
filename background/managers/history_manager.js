@@ -416,3 +416,30 @@ export async function invalidateSessionContextSummary(sessionId) {
         }
     });
 }
+
+export async function updateSessionTitle(sessionId, title) {
+    const cleanTitle = String(title || '')
+        .replace(/[\r\n]+/g, ' ')
+        .trim();
+    if (!sessionId || !cleanTitle) return false;
+
+    return withSerializedWrite(async () => {
+        try {
+            const geminiSessions = await readSessions();
+            const sessionIndex = geminiSessions.findIndex(
+                (storedSession) => storedSession.id === sessionId
+            );
+            if (sessionIndex === -1) return false;
+
+            geminiSessions[sessionIndex] = {
+                ...geminiSessions[sessionIndex],
+                title: cleanTitle,
+            };
+            await saveSessionsAndNotify(geminiSessions);
+            return true;
+        } catch (error) {
+            console.error('Error updating session title:', error);
+            return false;
+        }
+    });
+}

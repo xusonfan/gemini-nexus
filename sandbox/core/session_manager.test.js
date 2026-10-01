@@ -127,6 +127,18 @@ describe('SessionManager draft and persistence state', () => {
         expect(duplicate.messages).toEqual([{ role: 'user', text: 'Hello' }]);
     });
 
+    it('uses page title for provisional titles when provided', () => {
+        const manager = new SessionManager();
+        const session = manager.createSession();
+
+        expect(
+            manager.updateTitle(session.id, '请对当前网页的主要内容进行全面而简洁的总结。', {
+                pageTitle: '央行降息后的房贷策略分析',
+            })
+        ).toBe(true);
+        expect(session.title).toBe('央行降息后的房贷策略分析');
+    });
+
     it('stores full user attachment metadata while keeping image compatibility fields', () => {
         const manager = new SessionManager();
         const session = manager.createSession();

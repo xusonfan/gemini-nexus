@@ -3,6 +3,7 @@ import {
     getImageAttachmentDataUrls,
     normalizeUserAttachments,
 } from '../../shared/attachments/index.js';
+import { buildProvisionalSessionTitle } from '../../shared/session_title.js';
 
 export class SessionManager {
     constructor() {
@@ -208,12 +209,12 @@ export class SessionManager {
         return true;
     }
 
-    updateTitle(id, text) {
+    updateTitle(id, text, options = {}) {
         const session = this.sessions.find((storedSession) => storedSession.id === id);
         if (session) {
-            const cleanText = (text || '').replace(/[\r\n]+/g, ' ').trim();
-            if (cleanText) {
-                session.title = cleanText.substring(0, 30) + (cleanText.length > 30 ? '...' : '');
+            const title = buildProvisionalSessionTitle(text, options);
+            if (title) {
+                session.title = title;
                 return true;
             }
         }

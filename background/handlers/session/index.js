@@ -56,6 +56,13 @@ export class SessionMessageHandler {
             return false;
         }
 
+        if (request.action === 'REGENERATE_SESSION_TITLE') {
+            this.promptHandler
+                .regenerateSessionTitle(request.sessionId, request.model || '')
+                .finally(() => sendResponse({ status: 'completed' }));
+            return true;
+        }
+
         // --- CONTEXT ---
         if (request.action === 'SET_CONTEXT') {
             return this.contextHandler.handleSetContext(request, sendResponse);

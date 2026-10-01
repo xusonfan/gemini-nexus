@@ -82,6 +82,9 @@ export class MessageHandler {
             case 'FOLLOW_UP_QUESTIONS':
                 this.handleFollowUpQuestions(request);
                 return;
+            case 'SESSION_TITLE_RESULT':
+                this.app.sessionFlow?.handleSessionTitleResult?.(request);
+                return;
             default:
                 return;
         }

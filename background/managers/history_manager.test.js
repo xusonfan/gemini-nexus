@@ -5,6 +5,7 @@ import {
     appendUserMessage,
     replaceSessionSnapshot,
     updateSessionContextSummary,
+    updateSessionTitle,
 } from './history_manager.js';
 
 describe('history_manager', () => {
@@ -360,5 +361,28 @@ describe('history_manager', () => {
         await expect(
             appendTurnToHistory('session-1', 'hi', { status: 'success', text: 'hi' })
         ).resolves.toBeNull();
+    });
+
+    it('updates a session title through the serialized write queue', async () => {
+        const sessions = [{ id: 'session-1', title: 'Old', messages: [], context: null }];
+        const sendMessage = vi.fn(() => Promise.resolve());
+        globalThis.chrome = {
+            runtime: { sendMessage },
+            storage: {
+                local: {
+                    get: vi.fn(async () => ({ geminiSessions: sessions })),
+                    set: vi.fn(async () => {}),
+                },
+            },
+        };
+
+        await expect(updateSessionTitle('session-1', '新标题')).resolves.toBe(true);
+        expect(chrome.storage.local.set).toHaveBeenCalledWith({
+            geminiSessions: [expect.objectContaining({ id: 'session-1', title: '新标题' })],
+        });
+        expect(sendMessage).toHaveBeenCalledWith({
+            action: 'SESSIONS_UPDATED',
+            sessions: [expect.objectContaining({ title: '新标题' })],
+        });
     });
 });

@@ -477,6 +477,7 @@ export class SidebarController {
         this.renderState = {
             isGenerating: nextRenderState?.isGenerating === true,
             generatingSessionId: nextRenderState?.generatingSessionId || null,
+            retitlingSessionId: nextRenderState?.retitlingSessionId || null,
         };
 
         if (this.isCollapsedRecentOpen) {

@@ -101,7 +101,7 @@ describe('SessionFlowController', () => {
                 onSwitch: expect.any(Function),
                 onDelete: expect.any(Function),
             }),
-            { isGenerating: false, generatingSessionId: null }
+            { isGenerating: false, generatingSessionId: null, retitlingSessionId: null }
         );
     });
 
@@ -401,6 +401,29 @@ describe('SessionFlowController', () => {
         expect(ui.renderHistoryList).toHaveBeenCalled();
     });
 
+    it('requests AI title regeneration for existing sessions', () => {
+        const { app, controller, sessionManager, ui } = createSessionFlowHarness();
+        sessionManager.setSessions([realSession()]);
+
+        controller.handleRegenerateSessionTitle('session-1');
+
+        expect(controller.retitlingSessionId).toBe('session-1');
+        expect(ui.updateStatus).toHaveBeenCalledWith('regeneratingTitle');
+        expect(sendToBackground).toHaveBeenCalledWith({
+            action: 'REGENERATE_SESSION_TITLE',
+            sessionId: 'session-1',
+            model: 'gemini-test',
+        });
+        expect(app.getSelectedModel).toHaveBeenCalled();
+
+        controller.handleSessionTitleResult({
+            sessionId: 'session-1',
+            status: 'success',
+        });
+        expect(controller.retitlingSessionId).toBeNull();
+        expect(ui.updateStatus).toHaveBeenLastCalledWith('');
+    });
+
     it('exports sessions as txt and json downloads', () => {
         const { controller, sessionManager } = createSessionFlowHarness();
         sessionManager.setSessions([
@@ -492,7 +515,7 @@ describe('SessionFlowController', () => {
                 onDeleteGroup: expect.any(Function),
                 onMoveSessionToGroup: expect.any(Function),
             }),
-            { isGenerating: false, generatingSessionId: null }
+            { isGenerating: false, generatingSessionId: null, retitlingSessionId: null }
         );
     });
 

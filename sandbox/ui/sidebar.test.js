@@ -19,6 +19,7 @@ vi.mock('../core/i18n.js', () => ({
             generating: 'Generating',
             moreOptions: 'More options',
             renameChat: 'Rename',
+            regenerateTitle: 'Regenerate title',
             pinChat: 'Pin',
             unpinChat: 'Unpin',
             pinnedChat: 'Pinned',
@@ -436,9 +437,10 @@ describe('SidebarController', () => {
         expect(listEl.querySelector('.history-item-menu')).toBeNull();
     });
 
-    it('renames, pins, duplicates, and exports sessions from the history item menu', () => {
+    it('renames, regenerates titles, pins, duplicates, and exports sessions from the history item menu', () => {
         const listEl = document.getElementById('history-list');
         const onRename = vi.fn();
+        const onRegenerateTitle = vi.fn();
         const onTogglePin = vi.fn();
         const onDuplicate = vi.fn();
         const onShare = vi.fn();
@@ -457,6 +459,7 @@ describe('SidebarController', () => {
             onSwitch: vi.fn(),
             onDelete: vi.fn(),
             onRename,
+            onRegenerateTitle,
             onTogglePin,
             onDuplicate,
             onShare,
@@ -475,6 +478,7 @@ describe('SidebarController', () => {
             [...listEl.querySelectorAll('.history-menu-item span')].map((item) => item.textContent)
         ).toEqual([
             'Rename',
+            'Regenerate title',
             'Pin',
             'Duplicate',
             'Copy share text',
@@ -491,6 +495,16 @@ describe('SidebarController', () => {
         expect(onRename).toHaveBeenCalledWith('active', 'Research');
 
         controller.renderList(
+            [{ id: 'active', title: 'Research', messages: [{ role: 'user', text: 'Hi' }] }],
+            'active',
+            callbacks,
+            {}
+        );
+        listEl.querySelector('.history-menu-trigger').click();
+        listEl.querySelectorAll('.history-menu-item')[1].click();
+        expect(onRegenerateTitle).toHaveBeenCalledWith('active');
+
+        controller.renderList(
             [{ id: 'active', title: 'Research', isPinned: true, messages: [] }],
             'active',
             callbacks,
@@ -498,8 +512,8 @@ describe('SidebarController', () => {
         );
         expect(listEl.querySelector('.history-pin-badge')).not.toBeNull();
         listEl.querySelector('.history-menu-trigger').click();
-        expect(listEl.querySelectorAll('.history-menu-item span')[1].textContent).toBe('Unpin');
-        listEl.querySelectorAll('.history-menu-item')[1].click();
+        expect(listEl.querySelectorAll('.history-menu-item span')[2].textContent).toBe('Unpin');
+        listEl.querySelectorAll('.history-menu-item')[2].click();
         expect(onTogglePin).toHaveBeenCalledWith('active');
 
         controller.renderList(
@@ -509,7 +523,7 @@ describe('SidebarController', () => {
             {}
         );
         listEl.querySelector('.history-menu-trigger').click();
-        listEl.querySelectorAll('.history-menu-item')[2].click();
+        listEl.querySelectorAll('.history-menu-item')[3].click();
         expect(onDuplicate).toHaveBeenCalledWith('active');
 
         controller.renderList(
@@ -519,7 +533,7 @@ describe('SidebarController', () => {
             {}
         );
         listEl.querySelector('.history-menu-trigger').click();
-        listEl.querySelectorAll('.history-menu-item')[3].click();
+        listEl.querySelectorAll('.history-menu-item')[4].click();
         expect(onShare).toHaveBeenCalledWith('active');
 
         controller.renderList(
@@ -529,7 +543,7 @@ describe('SidebarController', () => {
             {}
         );
         listEl.querySelector('.history-menu-trigger').click();
-        listEl.querySelectorAll('.history-menu-item')[4].click();
+        listEl.querySelectorAll('.history-menu-item')[5].click();
         expect(onExport).toHaveBeenCalledWith('active', 'txt');
 
         controller.renderList(
@@ -539,7 +553,7 @@ describe('SidebarController', () => {
             {}
         );
         listEl.querySelector('.history-menu-trigger').click();
-        listEl.querySelectorAll('.history-menu-item')[5].click();
+        listEl.querySelectorAll('.history-menu-item')[6].click();
         expect(onExport).toHaveBeenCalledWith('active', 'json');
     });
 

@@ -20,6 +20,7 @@ export class SessionFlowController {
         this.sessionManager = sessionManager;
         this.ui = uiController;
         this.app = appController;
+        this.retitlingSessionId = null;
     }
 
     handleNewChat() {
@@ -147,6 +148,7 @@ export class SessionFlowController {
                 onSwitch: (id) => this.switchToSession(id),
                 onDelete: (id) => this.handleDeleteSession(id),
                 onRename: (id, title) => this.handleRenameSession(id, title),
+                onRegenerateTitle: (id) => this.handleRegenerateSessionTitle(id),
                 onTogglePin: (id) => this.handleTogglePinSession(id),
                 onDuplicate: (id) => this.handleDuplicateSession(id),
                 onShare: (id) => this.handleShareSession(id),
@@ -161,6 +163,7 @@ export class SessionFlowController {
             {
                 isGenerating: this.app.isGenerating,
                 generatingSessionId: this.app.generatingSessionId,
+                retitlingSessionId: this.retitlingSessionId,
             }
         );
     }
@@ -283,6 +286,46 @@ export class SessionFlowController {
             fields: ['title'],
         });
         this.refreshHistoryUI();
+    }
+
+    handleRegenerateSessionTitle(sessionId) {
+        const session = this.sessionManager.getSessionById(sessionId);
+        if (!session) return;
+
+        const messages = Array.isArray(session.messages) ? session.messages : [];
+        const hasContent = messages.some((message) => String(message?.text || '').trim());
+        if (!hasContent) {
+            this.ui.updateStatus?.(t('regenerateTitleEmpty'));
+            setTimeout(() => this.ui.updateStatus?.(''), 2500);
+            return;
+        }
+
+        this.retitlingSessionId = sessionId;
+        this.refreshHistoryUI();
+        this.ui.updateStatus?.(t('regeneratingTitle'));
+
+        sendToBackground({
+            action: 'REGENERATE_SESSION_TITLE',
+            sessionId,
+            model: this.app.getSelectedModel?.() || '',
+        });
+    }
+
+    handleSessionTitleResult(request) {
+        if (!request || request.sessionId !== this.retitlingSessionId) return;
+
+        this.retitlingSessionId = null;
+        this.refreshHistoryUI();
+
+        if (request.status === 'success') {
+            this.ui.updateStatus?.('');
+            return;
+        }
+
+        const statusKey =
+            request.status === 'empty' ? 'regenerateTitleEmpty' : 'regenerateTitleFailed';
+        this.ui.updateStatus?.(t(statusKey));
+        setTimeout(() => this.ui.updateStatus?.(''), 2500);
     }
 
     handleTogglePinSession(sessionId) {

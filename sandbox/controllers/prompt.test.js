@@ -44,6 +44,7 @@ function createPromptHarness({ text = 'Hello', files = [], liveArtifactsEnabled 
         isGenerating: false,
         generatingSessionId: null,
         boundSessionId: null,
+        currentTabTitle: '',
         liveArtifactsEnabled,
         getSelectedModel: vi.fn(() => 'gemini-test'),
         saveCurrentTabSessionBinding: vi.fn(),
@@ -174,6 +175,18 @@ describe('PromptController.send', () => {
         );
         // No RESET_CONTEXT on ordinary send when session.context is null.
         expect(sendToBackground).not.toHaveBeenCalledWith({ action: 'RESET_CONTEXT' });
+    });
+
+    it('uses the bound page title as the provisional session title', async () => {
+        const { app, controller, sessionManager } = createPromptHarness({
+            text: '请对当前网页的主要内容进行全面而简洁的总结。',
+        });
+        app.pageContextActive = true;
+        app.currentTabTitle = '央行降息后的房贷策略分析';
+
+        await controller.send();
+
+        expect(sessionManager.getCurrentSession().title).toBe('央行降息后的房贷策略分析');
     });
 
     it('sets background context when the session already has one, without resetting', async () => {

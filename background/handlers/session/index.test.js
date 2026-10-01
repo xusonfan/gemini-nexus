@@ -37,4 +37,30 @@ describe('SessionMessageHandler cancel routing', () => {
         expect(handler.promptHandler.cancel).toHaveBeenCalled();
         expect(sendResponse).toHaveBeenCalledWith({ status: 'cancelled' });
     });
+
+    it('routes regenerate-title requests to the prompt handler', async () => {
+        const sessionManager = {
+            cancelCurrentRequest: vi.fn(() => true),
+        };
+        const handler = new SessionMessageHandler(sessionManager, {}, {}, {});
+        handler.promptHandler.regenerateSessionTitle = vi.fn(() => Promise.resolve(true));
+        const sendResponse = vi.fn();
+
+        const handled = handler.handle(
+            {
+                action: 'REGENERATE_SESSION_TITLE',
+                sessionId: 'session-1',
+                model: 'gemini-test',
+            },
+            {},
+            sendResponse
+        );
+
+        expect(handled).toBe(true);
+        await vi.waitFor(() => expect(sendResponse).toHaveBeenCalledWith({ status: 'completed' }));
+        expect(handler.promptHandler.regenerateSessionTitle).toHaveBeenCalledWith(
+            'session-1',
+            'gemini-test'
+        );
+    });
 });

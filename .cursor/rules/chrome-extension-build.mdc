@@ -1,0 +1,12 @@
+---
+description: Chrome 扩展编译输出路径
+alwaysApply: true
+---
+
+# Chrome 扩展打包路径
+
+用户要求「编译 / 打包扩展」时：
+
+1. 执行：`npm run package:extension`
+2. 输出目录固定为：`D:\myProjects\gemini-nexus\artifacts\chrome-extension`
+3. 不要改到其他 artifacts 子目录，除非用户明确指定

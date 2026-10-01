@@ -3,6 +3,7 @@ import {
     appendAiMessageIfDisplayable,
     invalidateSessionContextSummary,
     replaceSessionSnapshot,
+    updateSessionTitle,
 } from '../../managers/history_manager.js';
 import { PromptBuilder } from './prompt/builder.js';
 import { ToolExecutor } from './prompt/tool_executor.js';
@@ -21,6 +22,12 @@ import {
 import { toControlTabSummary } from '../../control/tabs.js';
 import { classifyProviderError } from '../../managers/session/error_classifier.js';
 import { getConnectionSettings } from '../../managers/session/settings_store.js';
+import {
+    getDedicatedApiDefaultModel,
+    getDedicatedApiRuntimeSettings,
+    isDedicatedApiProvider,
+} from '../../../shared/settings/dedicated_providers.js';
+import { truncateSessionTitle } from '../../../shared/session_title.js';
 
 export { hasInlinePageSnapshot } from './prompt/tool_loop.js';
 
@@ -124,14 +131,34 @@ export class PromptHandler {
         return !run || run.cancelled || this.activeRun !== run;
     }
 
-    async getSummaryModel() {
+    async getSummaryModel(fallbackModel = '') {
         const settings = await getConnectionSettings();
-        return settings.summaryModel || settings.selectedModel || '';
+        const configuredSummary = String(settings.summaryModel || '').trim();
+        if (configuredSummary) return configuredSummary;
+
+        const fallback = String(fallbackModel || '').trim();
+        if (fallback) return fallback;
+
+        if (settings.provider === 'official') {
+            return settings.officialModel?.split(',')?.[0]?.trim() || '';
+        }
+        if (settings.provider === 'openai') {
+            return settings.openaiModel?.split(',')?.[0]?.trim() || '';
+        }
+        if (isDedicatedApiProvider(settings.provider)) {
+            const providerSettings = getDedicatedApiRuntimeSettings(settings, settings.provider);
+            return (
+                providerSettings?.model?.split(',')?.[0]?.trim() ||
+                getDedicatedApiDefaultModel(settings.provider) ||
+                ''
+            );
+        }
+        return '';
     }
 
-    async generateFollowUpQuestions(sessionId, aiText) {
+    async generateFollowUpQuestions(sessionId, aiText, fallbackModel = '') {
         try {
-            const summaryModel = await this.getSummaryModel();
+            const summaryModel = await this.getSummaryModel(fallbackModel);
             if (!summaryModel) return;
 
             const isZh = chrome.i18n.getUILanguage().startsWith('zh');
@@ -186,24 +213,39 @@ ${aiText}`;
         }
     }
 
-    async generateAiTitle(sessionId, userText, aiText) {
+    async generateAiTitle(sessionId, userText, aiText, fallbackModel = '', options = {}) {
         try {
-            const { geminiSessions = [] } = await chrome.storage.local.get(['geminiSessions']);
-            const session = geminiSessions.find((item) => item.id === sessionId);
-            if (session?.messages && session.messages.length > 1) return;
+            if (!sessionId) return false;
 
-            const summaryModel = await this.getSummaryModel();
+            const { geminiSessions = [] } = await chrome.storage.local.get(['geminiSessions']);
+            const sessions = Array.isArray(geminiSessions) ? geminiSessions : [];
+            const session = sessions.find((item) => item.id === sessionId);
+            if (!session) return false;
+
+            // Called after the first final AI reply is appended. Intermediate
+            // agent rows use suppressCopy and must not block title generation.
+            // Forced regeneration (sidebar menu) skips this first-turn guard.
+            if (options.force !== true) {
+                const aiCount = (session.messages || []).filter(
+                    (message) => message?.role === 'ai' && message.suppressCopy !== true
+                ).length;
+                if (aiCount > 1) return false;
+            }
+
+            const summaryModel = await this.getSummaryModel(fallbackModel);
             if (!summaryModel) {
                 console.info(
                     '[Gemini Nexus] AI Title generation skipped: No chat or summary model configured.'
                 );
-                return;
+                return false;
             }
 
             const isZh = chrome.i18n.getUILanguage().startsWith('zh');
+            const clippedUser = String(userText || '').slice(0, 500);
+            const clippedAi = String(aiText || '').slice(0, 800);
             const prompt = isZh
-                ? `请根据以下对话内容，总结一个简短的标题（不超过10个字）。直接输出标题，不要有任何解释或标点符号。\n\n用户: ${userText}\nAI: ${aiText}`
-                : `Generate a very short title (max 6 words) for this conversation. Output ONLY the title text.\n\nUser: ${userText}\nAI: ${aiText}`;
+                ? `请根据以下对话内容，总结一个简短的标题（不超过10个字）。直接输出标题，不要有任何解释或标点符号。\n\n用户: ${clippedUser}\nAI: ${clippedAi}`
+                : `Generate a very short title (max 6 words) for this conversation. Output ONLY the title text.\n\nUser: ${clippedUser}\nAI: ${clippedAi}`;
 
             const result = await this.sessionManager.handleSendPrompt(
                 {
@@ -216,23 +258,86 @@ ${aiText}`;
                 AUXILIARY_ABORT_KEY
             );
 
-            if (result?.status !== 'success' || !result.text) return;
+            if (result?.status !== 'success' || !result.text) return false;
 
-            let title = result.text.trim().replace(/["'“”‘’]/g, '');
-            if (title.length > 40) title = `${title.substring(0, 40)}...`;
+            const title = truncateSessionTitle(
+                result.text.trim().replace(/["'“”‘’]/g, ''),
+                40
+            );
+            if (!title) return false;
 
-            const sessions = Array.isArray(geminiSessions) ? [...geminiSessions] : [];
-            const sessionIndex = sessions.findIndex((item) => item.id === sessionId);
-            if (sessionIndex === -1) return;
-
-            sessions[sessionIndex] = { ...sessions[sessionIndex], title };
-            await chrome.storage.local.set({ geminiSessions: sessions });
-            await sendRuntimeMessage({
-                action: 'SESSIONS_UPDATED',
-                sessions,
-            });
+            await updateSessionTitle(sessionId, title);
+            return true;
         } catch (error) {
             console.error('Error generating AI title:', error);
+            return false;
+        }
+    }
+
+    async regenerateSessionTitle(sessionId, fallbackModel = '') {
+        try {
+            if (!sessionId) {
+                await sendRuntimeMessage({
+                    action: 'SESSION_TITLE_RESULT',
+                    sessionId: null,
+                    status: 'error',
+                });
+                return false;
+            }
+
+            const { geminiSessions = [] } = await chrome.storage.local.get(['geminiSessions']);
+            const sessions = Array.isArray(geminiSessions) ? geminiSessions : [];
+            const session = sessions.find((item) => item.id === sessionId);
+            if (!session) {
+                await sendRuntimeMessage({
+                    action: 'SESSION_TITLE_RESULT',
+                    sessionId,
+                    status: 'missing',
+                });
+                return false;
+            }
+
+            const messages = Array.isArray(session.messages) ? session.messages : [];
+            const userText =
+                messages.find((message) => message?.role === 'user' && message.text)?.text || '';
+            const aiText =
+                messages.find(
+                    (message) =>
+                        message?.role === 'ai' &&
+                        message.suppressCopy !== true &&
+                        String(message.text || '').trim()
+                )?.text || '';
+
+            if (!String(userText).trim() && !String(aiText).trim()) {
+                await sendRuntimeMessage({
+                    action: 'SESSION_TITLE_RESULT',
+                    sessionId,
+                    status: 'empty',
+                });
+                return false;
+            }
+
+            const updated = await this.generateAiTitle(
+                sessionId,
+                userText,
+                aiText,
+                fallbackModel,
+                { force: true }
+            );
+            await sendRuntimeMessage({
+                action: 'SESSION_TITLE_RESULT',
+                sessionId,
+                status: updated ? 'success' : 'error',
+            });
+            return updated;
+        } catch (error) {
+            console.error('Error regenerating session title:', error);
+            await sendRuntimeMessage({
+                action: 'SESSION_TITLE_RESULT',
+                sessionId,
+                status: 'error',
+            });
+            return false;
         }
     }
 
@@ -510,13 +615,16 @@ ${aiText}`;
                             this.generateAiTitle(
                                 request.sessionId,
                                 currentHistoryText,
-                                result.text
+                                result.text,
+                                request.model
                             ).catch((error) =>
                                 console.error('AI Title generation failed:', error)
                             );
-                            this.generateFollowUpQuestions(request.sessionId, result.text).catch(
-                                (error) => console.error('Follow-up generation failed:', error)
-                            );
+                            this.generateFollowUpQuestions(
+                                request.sessionId,
+                                result.text,
+                                request.model
+                            ).catch((error) => console.error('Follow-up generation failed:', error));
                         }
 
                         keepLooping = false;
