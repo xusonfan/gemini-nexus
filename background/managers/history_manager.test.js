@@ -4,6 +4,7 @@ import {
     appendTurnToHistory,
     appendUserMessage,
     replaceSessionSnapshot,
+    saveToHistory,
     updateSessionContextSummary,
     updateSessionTitle,
 } from './history_manager.js';
@@ -383,6 +384,31 @@ describe('history_manager', () => {
         expect(sendMessage).toHaveBeenCalledWith({
             action: 'SESSIONS_UPDATED',
             sessions: [expect.objectContaining({ title: '新标题' })],
+        });
+    });
+
+    it('prefers the page title for new quick-ask history sessions', async () => {
+        const sendMessage = vi.fn(() => Promise.resolve());
+        globalThis.chrome = {
+            runtime: { sendMessage },
+            storage: {
+                local: {
+                    get: vi.fn(async () => ({ geminiSessions: [] })),
+                    set: vi.fn(async () => {}),
+                },
+            },
+        };
+
+        const saved = await saveToHistory(
+            '请对当前网页的主要内容进行全面而简洁的总结。',
+            { status: 'success', text: '摘要', context: null },
+            null,
+            { pageTitle: '央行降息政策解读' }
+        );
+
+        expect(saved.title).toBe('央行降息政策解读');
+        expect(chrome.storage.local.set).toHaveBeenCalledWith({
+            geminiSessions: [expect.objectContaining({ title: '央行降息政策解读' })],
         });
     });
 });

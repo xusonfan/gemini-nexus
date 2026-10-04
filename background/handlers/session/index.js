@@ -7,7 +7,7 @@ export class SessionMessageHandler {
     constructor(sessionManager, imageHandler, controlManager, mcpManager) {
         this.sessionManager = sessionManager;
         this.promptHandler = new PromptHandler(sessionManager, controlManager, mcpManager);
-        this.quickAskHandler = new QuickAskHandler(sessionManager, imageHandler);
+        this.quickAskHandler = new QuickAskHandler(sessionManager, imageHandler, this.promptHandler);
         this.contextHandler = new ContextHandler(sessionManager);
         this.ttsHandler = new TtsHandler(sessionManager);
     }

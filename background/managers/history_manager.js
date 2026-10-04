@@ -3,6 +3,7 @@ import {
     getImageAttachmentDataUrls,
     normalizeUserAttachments,
 } from '../../shared/attachments/index.js';
+import { buildProvisionalSessionTitle } from '../../shared/session_title.js';
 
 async function saveSessionsAndNotify(geminiSessions) {
     await chrome.storage.local.set({ geminiSessions });
@@ -89,16 +90,20 @@ function mergeCurrentSessionMetadata(currentSession, sessionSnapshot) {
  * @param {string} text - The user's prompt.
  * @param {object} result - The result object from the session manager.
  * @param {Array|object} filesObj - Optional file data { base64 } or array of such objects.
+ * @param {{ pageTitle?: string }} [options] - Optional provisional title hints.
  * @returns {object} The new session object or null on error.
  */
-export async function saveToHistory(text, result, filesObj = null) {
+export async function saveToHistory(text, result, filesObj = null, options = {}) {
     return withSerializedWrite(async () => {
         try {
             const geminiSessions = await readSessions();
 
             const safeText = typeof text === 'string' ? text : String(text ?? '');
             const sessionId = generateUUID();
-            const title = safeText.length > 30 ? safeText.substring(0, 30) + '...' : safeText;
+            const title =
+                buildProvisionalSessionTitle(safeText, {
+                    pageTitle: options?.pageTitle || '',
+                }) || 'Quick Ask';
 
             const storedAttachments = normalizeStoredAttachments(filesObj);
             const imageDataUrls = storedAttachments
@@ -108,7 +113,7 @@ export async function saveToHistory(text, result, filesObj = null) {
 
             const newSession = {
                 id: sessionId,
-                title: title || 'Quick Ask',
+                title,
                 timestamp: Date.now(),
                 messages: [
                     {

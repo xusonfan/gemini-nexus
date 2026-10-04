@@ -464,7 +464,7 @@ describe('PromptHandler AI title generation', () => {
                 text: expect.stringContaining('请根据以下对话内容'),
             }),
             expect.any(Function),
-            'auxiliary'
+            'auxiliary:title'
         );
         expect(updateSessionTitle).toHaveBeenCalledWith('session-1', '央行降息与房贷策略');
     });
@@ -509,8 +509,45 @@ describe('PromptHandler AI title generation', () => {
         expect(sessionManager.handleSendPrompt).toHaveBeenCalledWith(
             expect.objectContaining({ model: 'gemini-3.8-flash' }),
             expect.any(Function),
-            'auxiliary'
+            'auxiliary:title'
         );
+    });
+
+    it('uses distinct abort keys so title and follow-up do not cancel each other', async () => {
+        const sessionManager = {
+            handleSendPrompt: vi.fn(async (request) => {
+                if (String(request?.systemInstruction || '').includes('follow-up')) {
+                    return {
+                        status: 'success',
+                        text: '还有哪些相关风险？\n如何落地执行？\n下一步该关注什么？',
+                    };
+                }
+                return { status: 'success', text: '央行降息与房贷策略' };
+            }),
+        };
+        updateSessionTitle.mockResolvedValue(true);
+        const handler = new PromptHandler(sessionManager, null, null);
+
+        await Promise.all([
+            handler.generateAiTitle(
+                'session-1',
+                '请对当前网页的主要内容进行总结',
+                '这是关于央行降息与房贷的分析。',
+                'gemini-3.5-flash'
+            ),
+            handler.generateFollowUpQuestions(
+                'session-1',
+                '这是关于央行降息与房贷的分析。',
+                'gemini-3.5-flash'
+            ),
+        ]);
+
+        const abortKeys = sessionManager.handleSendPrompt.mock.calls.map((call) => call[2]);
+        expect(abortKeys).toEqual(
+            expect.arrayContaining(['auxiliary:title', 'auxiliary:follow-up'])
+        );
+        expect(new Set(abortKeys).size).toBe(2);
+        expect(updateSessionTitle).toHaveBeenCalledWith('session-1', '央行降息与房贷策略');
     });
 
     it('force-regenerates titles for existing multi-turn sessions', async () => {

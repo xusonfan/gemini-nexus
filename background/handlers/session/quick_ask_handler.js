@@ -20,9 +20,10 @@ function createErrorResult(error) {
 }
 
 export class QuickAskHandler {
-    constructor(sessionManager, imageHandler) {
+    constructor(sessionManager, imageHandler, promptHandler = null) {
         this.sessionManager = sessionManager;
         this.imageHandler = imageHandler;
+        this.promptHandler = promptHandler;
         // Track multiple concurrent quick-ask tabs instead of a single id
         this.activeTabIds = new Set();
     }
@@ -89,7 +90,32 @@ export class QuickAskHandler {
         this._sendToTab(tabId, payload);
     }
 
-    async _saveSuccessfulResult(text, result, filesObj = null, sessionId = null) {
+    async _getTabTitle(tabId) {
+        if (!Number.isInteger(tabId) || tabId <= 0) return '';
+        try {
+            const tab = await chrome.tabs.get(tabId);
+            return String(tab?.title || '').trim();
+        } catch {
+            return '';
+        }
+    }
+
+    async _resolveProvisionalPageTitle(request, tabId, isNewSession) {
+        if (!isNewSession) return '';
+
+        const fromRequest = String(request?.pageTitle || '').trim();
+        if (fromRequest) return fromRequest;
+
+        // Page-context asks and YouTube summaries are about the current tab;
+        // prefer its title over the fixed prompt template as the temporary label.
+        if (request?.includePageContext === true || request?.source === 'youtube-summary') {
+            return await this._getTabTitle(tabId);
+        }
+
+        return '';
+    }
+
+    async _saveSuccessfulResult(text, result, filesObj = null, sessionId = null, options = {}) {
         if (result && result.status === 'success') {
             if (sessionId) {
                 const existingSession = await appendTurnToHistory(
@@ -100,9 +126,27 @@ export class QuickAskHandler {
                 );
                 if (existingSession) return existingSession;
             }
-            return await saveToHistory(text, result, filesObj);
+            return await saveToHistory(text, result, filesObj, {
+                pageTitle: options.pageTitle || '',
+            });
         }
         return null;
+    }
+
+    _maybeGenerateAiTitle(savedSession, userText, result, model = '') {
+        if (!savedSession?.id || result?.status !== 'success') return;
+        if (typeof this.promptHandler?.generateAiTitle !== 'function') return;
+
+        this.promptHandler
+            .generateAiTitle(savedSession.id, userText, result.text, model || '')
+            .catch((error) => console.error('AI Title generation failed:', error));
+    }
+
+    _shouldGenerateAiTitle(savedSession, requestedSessionId = null) {
+        if (!savedSession?.id) return false;
+        // Cover both intentional new sessions and the rare fallback where
+        // appendTurnToHistory fails and saveToHistory creates a fresh session.
+        return !requestedSessionId || savedSession.id !== requestedSessionId;
     }
 
     async handleQuickAsk(request, sender) {
@@ -110,6 +154,13 @@ export class QuickAskHandler {
 
         try {
             const promptRequest = await this._withPageContext(request, tabId);
+            const requestedSessionId = promptRequest.sessionId || null;
+            const isNewSession = !requestedSessionId;
+            const pageTitle = await this._resolveProvisionalPageTitle(
+                request,
+                tabId,
+                isNewSession
+            );
 
             if (!promptRequest.sessionId) {
                 await this.sessionManager.resetContext();
@@ -128,9 +179,13 @@ export class QuickAskHandler {
                 request.text,
                 result,
                 null,
-                promptRequest.sessionId || null
+                requestedSessionId,
+                { pageTitle }
             );
             this._sendStreamDone(tabId, result, savedSession, request);
+            if (this._shouldGenerateAiTitle(savedSession, requestedSessionId)) {
+                this._maybeGenerateAiTitle(savedSession, request.text, result, request.model);
+            }
         } catch (error) {
             console.error('[Gemini Nexus] Quick ask failed:', error);
             this._sendStreamDone(tabId, createErrorResult(error), undefined, request);
@@ -173,6 +228,12 @@ export class QuickAskHandler {
                     },
                 ],
             };
+            const requestedSessionId = promptRequest.sessionId || null;
+            const pageTitle = await this._resolveProvisionalPageTitle(
+                request,
+                tabId,
+                !requestedSessionId
+            );
 
             if (!promptRequest.sessionId) {
                 await this.sessionManager.resetContext();
@@ -192,9 +253,18 @@ export class QuickAskHandler {
                 request.text,
                 normalizedResult,
                 [{ base64: imgRes.base64 }],
-                promptRequest.sessionId || null
+                requestedSessionId,
+                { pageTitle }
             );
             this._sendStreamDone(tabId, normalizedResult, savedSession, request);
+            if (this._shouldGenerateAiTitle(savedSession, requestedSessionId)) {
+                this._maybeGenerateAiTitle(
+                    savedSession,
+                    request.text,
+                    normalizedResult,
+                    request.model
+                );
+            }
         } catch (error) {
             console.error('[Gemini Nexus] Image quick ask failed:', error);
             this._sendStreamDone(tabId, createErrorResult(error), undefined, request);

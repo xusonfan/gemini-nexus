@@ -326,6 +326,7 @@
                     source: REQUEST_SOURCE,
                     requestId,
                     text: createSummaryPrompt(videoUrl),
+                    pageTitle: String(document.title || '').trim(),
                 };
                 if (summaryConfig?.provider) message.provider = summaryConfig.provider;
                 if (summaryConfig?.model) message.model = summaryConfig.model;

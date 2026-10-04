@@ -19,6 +19,7 @@ describe('QuickAskHandler', () => {
         globalThis.chrome = {
             tabs: {
                 sendMessage: vi.fn(() => Promise.resolve()),
+                get: vi.fn(async () => ({ id: 42, title: 'Example Page Title' })),
             },
         };
     });
@@ -367,7 +368,7 @@ describe('QuickAskHandler', () => {
         };
         expect(saveToHistory).toHaveBeenCalledWith('remove background', expectedResult, [
             { base64: 'data:image/png;base64,AAAA' },
-        ]);
+        ], { pageTitle: '' });
         expect(chrome.tabs.sendMessage).toHaveBeenCalledWith(7, {
             action: 'GEMINI_STREAM_DONE',
             result: expectedResult,
@@ -473,11 +474,142 @@ describe('QuickAskHandler', () => {
         };
         expect(saveToHistory).toHaveBeenCalledWith('extract text', expectedResult, [
             { base64: 'data:image/png;base64,AAAA' },
-        ]);
+        ], { pageTitle: '' });
         expect(chrome.tabs.sendMessage).toHaveBeenCalledWith(7, {
             action: 'GEMINI_STREAM_DONE',
             result: expectedResult,
             sessionId: 'saved-ocr-session',
         });
+    });
+
+    it('generates an AI title after saving a new page-summary quick ask session', async () => {
+        saveToHistory.mockResolvedValue({ id: 'summarize-session' });
+        const generateAiTitle = vi.fn(() => Promise.resolve(true));
+        const sessionManager = {
+            resetContext: vi.fn(),
+            ensureInitialized: vi.fn(),
+            handleSendPrompt: vi.fn(async () => ({
+                status: 'success',
+                text: '这是网页摘要。',
+            })),
+        };
+        const handler = new QuickAskHandler(sessionManager, {}, { generateAiTitle });
+
+        await handler.handleQuickAsk(
+            {
+                text: '请对当前网页的主要内容进行全面而简洁的总结。',
+                model: 'gemini-3.5-flash',
+                includePageContext: true,
+            },
+            { tab: { id: 42 } }
+        );
+
+        expect(chrome.tabs.get).toHaveBeenCalledWith(42);
+        expect(saveToHistory).toHaveBeenCalledWith(
+            '请对当前网页的主要内容进行全面而简洁的总结。',
+            { status: 'success', text: '这是网页摘要。' },
+            null,
+            { pageTitle: 'Example Page Title' }
+        );
+        expect(generateAiTitle).toHaveBeenCalledWith(
+            'summarize-session',
+            '请对当前网页的主要内容进行全面而简洁的总结。',
+            '这是网页摘要。',
+            'gemini-3.5-flash'
+        );
+    });
+
+    it('uses request.pageTitle or YouTube tab title for provisional titles', async () => {
+        saveToHistory.mockResolvedValue({ id: 'youtube-session' });
+        const generateAiTitle = vi.fn(() => Promise.resolve(true));
+        const sessionManager = {
+            resetContext: vi.fn(),
+            ensureInitialized: vi.fn(),
+            handleSendPrompt: vi.fn(async () => ({
+                status: 'success',
+                text: '视频摘要',
+            })),
+        };
+        const handler = new QuickAskHandler(sessionManager, {}, { generateAiTitle });
+
+        await handler.handleQuickAsk(
+            {
+                text: '请总结这个 YouTube 视频',
+                model: 'gemini-3.5-flash',
+                source: 'youtube-summary',
+                pageTitle: '自定义视频标题',
+            },
+            { tab: { id: 42 } }
+        );
+
+        expect(saveToHistory).toHaveBeenCalledWith(
+            '请总结这个 YouTube 视频',
+            { status: 'success', text: '视频摘要' },
+            null,
+            { pageTitle: '自定义视频标题' }
+        );
+        expect(generateAiTitle).toHaveBeenCalledWith(
+            'youtube-session',
+            '请总结这个 YouTube 视频',
+            '视频摘要',
+            'gemini-3.5-flash'
+        );
+    });
+
+    it('still generates a title when continuing fails and a new session is created', async () => {
+        appendTurnToHistory.mockResolvedValue(null);
+        saveToHistory.mockResolvedValue({ id: 'fallback-session' });
+        const generateAiTitle = vi.fn(() => Promise.resolve(true));
+        const sessionManager = {
+            resetContext: vi.fn(),
+            ensureInitialized: vi.fn(),
+            handleSendPrompt: vi.fn(async () => ({
+                status: 'success',
+                text: 'fallback answer',
+            })),
+        };
+        const handler = new QuickAskHandler(sessionManager, {}, { generateAiTitle });
+
+        await handler.handleQuickAsk(
+            {
+                text: 'follow-up question',
+                model: 'gemini-test',
+                sessionId: 'missing-session',
+            },
+            { tab: { id: 42 } }
+        );
+
+        expect(saveToHistory).toHaveBeenCalled();
+        expect(generateAiTitle).toHaveBeenCalledWith(
+            'fallback-session',
+            'follow-up question',
+            'fallback answer',
+            'gemini-test'
+        );
+    });
+
+    it('does not regenerate titles when appending a continuing quick ask turn', async () => {
+        appendTurnToHistory.mockResolvedValue({ id: 'existing-session' });
+        const generateAiTitle = vi.fn(() => Promise.resolve(true));
+        const sessionManager = {
+            resetContext: vi.fn(),
+            ensureInitialized: vi.fn(),
+            handleSendPrompt: vi.fn(async () => ({
+                status: 'success',
+                text: 'follow-up answer',
+            })),
+        };
+        const handler = new QuickAskHandler(sessionManager, {}, { generateAiTitle });
+
+        await handler.handleQuickAsk(
+            {
+                text: 'follow-up question',
+                model: 'gemini-test',
+                sessionId: 'existing-session',
+            },
+            { tab: { id: 42 } }
+        );
+
+        expect(generateAiTitle).not.toHaveBeenCalled();
     });
 });

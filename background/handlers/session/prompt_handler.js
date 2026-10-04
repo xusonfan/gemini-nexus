@@ -31,7 +31,12 @@ import { truncateSessionTitle } from '../../../shared/session_title.js';
 
 export { hasInlinePageSnapshot } from './prompt/tool_loop.js';
 
-const AUXILIARY_ABORT_KEY = 'auxiliary';
+// Title and follow-up generation run in parallel after the first reply.
+// They must use distinct abort keys — handleSendPrompt aborts any prior
+// in-flight request that shares the same key, which previously let follow-up
+// cancel auto title generation (manual regenerate was unaffected).
+const AUXILIARY_TITLE_ABORT_KEY = 'auxiliary:title';
+const AUXILIARY_FOLLOWUP_ABORT_KEY = 'auxiliary:follow-up';
 
 // One free retry when the model narrates a browser step without tool JSON.
 const MAX_NARRATION_NUDGES = 1;
@@ -187,7 +192,7 @@ ${aiText}`;
                         'You are a helpful assistant that generates relevant follow-up questions.',
                 },
                 () => {},
-                AUXILIARY_ABORT_KEY
+                AUXILIARY_FOLLOWUP_ABORT_KEY
             );
 
             if (result?.status !== 'success' || !result.text) return;
@@ -255,7 +260,7 @@ ${aiText}`;
                         'You are a helpful assistant that summarizes conversation titles.',
                 },
                 () => {},
-                AUXILIARY_ABORT_KEY
+                AUXILIARY_TITLE_ABORT_KEY
             );
 
             if (result?.status !== 'success' || !result.text) return false;
