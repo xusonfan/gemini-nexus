@@ -3,6 +3,7 @@ import { cleanupLiveArtifacts } from './artifacts.js';
 import { createCopyButton } from './copy_button.js';
 import { createMessageEditControl } from './message_edit.js';
 import { createGeneratedImagesGrid, createUserImagesGrid } from './message_media.js';
+import { findAdjacentAiMessage, scrollHistoryToMessageStart } from './message_nav.js';
 import { getMessageSpacingKind, isToolMessageKind, syncMessageSpacing } from './message_spacing.js';
 import { cleanupStructuredSourceText, createSourcesElement } from './sources.js';
 import { createThoughtsBlock } from './thoughts_block.js';
@@ -225,6 +226,9 @@ export function appendMessage(
                 if (typeof options.onDelete === 'function') {
                     options.onDelete(messageElement);
                 } else {
+                    // Capture neighbors before remove() detaches the node.
+                    const prevAi = findAdjacentAiMessage(messageElement, 'prev');
+                    const nextAi = findAdjacentAiMessage(messageElement, 'next');
                     // Release Live Artifact listeners/iframes before dropping
                     // the node: remove() alone would leak them.
                     cleanupLiveArtifacts(messageElement);
@@ -233,6 +237,8 @@ export function appendMessage(
                     const next = messageElement.nextElementSibling;
                     if (prev?.__messageController) prev.__messageController.syncCompactSpacing();
                     if (next?.__messageController) next.__messageController.syncCompactSpacing();
+                    prevAi?.__syncAiNavButtons?.();
+                    nextAi?.__syncAiNavButtons?.();
                 }
             });
             return btn;
@@ -272,12 +278,33 @@ export function appendMessage(
                     } else {
                         actionsHostEl.insertBefore(retryBtn, deleteBtn);
                     }
+
+                    // Prev/next AI answer jumpers (hover-revealed with the rail).
+                    const { prevBtn, nextBtn, syncNavButtons } = createAiNavButtons(
+                        container,
+                        messageElement
+                    );
+                    messageElement.__syncAiNavButtons = syncNavButtons;
+                    const firstAction = actionsHostEl.firstChild;
+                    if (firstAction) {
+                        actionsHostEl.insertBefore(prevBtn, firstAction);
+                        actionsHostEl.insertBefore(nextBtn, firstAction);
+                    } else {
+                        actionsHostEl.appendChild(prevBtn);
+                        actionsHostEl.appendChild(nextBtn);
+                    }
+                    messageElement.addEventListener('mouseenter', syncNavButtons);
+                    syncNavButtons();
                 }
             }
         }
     }
 
     container.appendChild(messageElement);
+    if (role === 'ai') {
+        // Newly appended answers unlock "next" on earlier AI rows.
+        refreshAdjacentAiNavButtons(messageElement);
+    }
     syncCompactSpacing();
 
     // Instead of scrolling to bottom, we scroll to the top of the NEW message.
@@ -430,6 +457,46 @@ export function appendMessage(
     function getMessageActionsHost() {
         return actionsHost?.querySelector('.message-actions') || messageElement;
     }
+}
+
+function refreshAdjacentAiNavButtons(messageElement) {
+    const prev = findAdjacentAiMessage(messageElement, 'prev');
+    const next = findAdjacentAiMessage(messageElement, 'next');
+    prev?.__syncAiNavButtons?.();
+    next?.__syncAiNavButtons?.();
+    messageElement?.__syncAiNavButtons?.();
+}
+
+function createAiNavButtons(container, messageElement) {
+    const createNavButton = (direction) => {
+        const isPrev = direction === 'prev';
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = isPrev ? 'nav-ai-btn nav-ai-prev-btn' : 'nav-ai-btn nav-ai-next-btn';
+        const label = isPrev ? t('previousAiReply') : t('nextAiReply');
+        btn.title = label;
+        btn.setAttribute('aria-label', label);
+        btn.innerHTML = isPrev ? TemplateIcons.CHEVRON_UP : TemplateIcons.CHEVRON_DOWN;
+        btn.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            syncNavButtons();
+            const target = findAdjacentAiMessage(messageElement, direction);
+            if (!target) return;
+            scrollHistoryToMessageStart(container, target, 'smooth');
+        });
+        return btn;
+    };
+
+    const prevBtn = createNavButton('prev');
+    const nextBtn = createNavButton('next');
+
+    const syncNavButtons = () => {
+        prevBtn.disabled = !findAdjacentAiMessage(messageElement, 'prev');
+        nextBtn.disabled = !findAdjacentAiMessage(messageElement, 'next');
+    };
+
+    return { prevBtn, nextBtn, syncNavButtons };
 }
 
 function createToolMessageRail() {

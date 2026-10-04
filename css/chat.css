@@ -392,7 +392,8 @@ body.layout-wide .msg.ai .message-content-container {
 .message-actions .copy-btn,
 .message-actions .edit-btn,
 .message-actions .delete-btn,
-.message-actions .retry-btn {
+.message-actions .retry-btn,
+.message-actions .nav-ai-btn {
     display: flex;
     width: 28px;
     height: 28px;
@@ -414,7 +415,8 @@ body.layout-wide .msg.ai .message-content-container {
 
 .message-actions .copy-btn:hover,
 .message-actions .edit-btn:hover,
-.message-actions .retry-btn:hover {
+.message-actions .retry-btn:hover,
+.message-actions .nav-ai-btn:hover:not(:disabled) {
     background: var(--btn-hover);
     color: var(--text-primary);
     opacity: 1;
@@ -426,10 +428,16 @@ body.layout-wide .msg.ai .message-content-container {
     opacity: 1;
 }
 
+.message-actions .nav-ai-btn:disabled {
+    cursor: default;
+    opacity: 0.28;
+}
+
 .message-actions .copy-btn svg,
 .message-actions .edit-btn svg,
 .message-actions .delete-btn svg,
-.message-actions .retry-btn svg {
+.message-actions .retry-btn svg,
+.message-actions .nav-ai-btn svg {
     width: 16px;
     height: 16px;
 }

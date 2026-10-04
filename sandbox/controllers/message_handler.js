@@ -271,7 +271,10 @@ export class MessageHandler {
             return;
         }
 
-        this.app.prompt.forceClearGenerating();
+        // Keep the streaming bubble so renderGeminiReply can finalize it in
+        // place. Clearing the stream here would remove the bubble, append a
+        // fresh message, and cause a bottom→start scroll jump.
+        this.app.prompt.forceClearGenerating({ clearStream: false });
         this.clearStreamState(this.getRequestSessionId(request));
 
         if (!this.isCurrentSessionMessage(request)) {
@@ -324,6 +327,7 @@ export class MessageHandler {
             }
             this.streamingBubble = null;
             this.streamingBubbleSessionId = null;
+            this.ui.clearStreamingAnchor?.();
         }
 
         this.clearStreamState(sessionId);

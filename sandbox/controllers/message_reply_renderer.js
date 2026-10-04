@@ -99,6 +99,10 @@ export function renderGeminiReply(handler, session, request) {
             }
 
             handler.streamingBubble = null;
+            handler.streamingBubbleSessionId = null;
+            // Drop the stream scroll anchor without forcing a bottom jump —
+            // the viewport should remain at the answer start.
+            handler.ui.clearStreamingAnchor?.();
             return;
         }
 

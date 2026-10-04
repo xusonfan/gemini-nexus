@@ -122,24 +122,59 @@ describe('ChatController streaming scroll following', () => {
         });
     });
 
-    it('keeps following the bottom while streamed content grows', () => {
+    it('keeps the viewport pinned to the streaming answer start as content grows', () => {
         const { controller, historyDiv } = createController();
+        const answer = document.createElement('div');
+        Object.defineProperty(answer, 'offsetTop', { configurable: true, value: 480 });
+        historyDiv.appendChild(answer);
+        controller.setStreamingAnchor(answer);
+
+        // Near bottom initially so follow mode stays armed.
         setScrollMetrics(historyDiv, {
-            scrollHeight: 1000,
+            scrollHeight: 900,
             clientHeight: 400,
-            scrollTop: 600,
+            scrollTop: 820,
         });
 
         controller.handleHistoryScroll();
+        expect(controller.shouldFollowBottom).toBe(true);
+
         setScrollMetrics(historyDiv, {
-            scrollHeight: 1300,
+            scrollHeight: 1600,
             clientHeight: 400,
-            scrollTop: 600,
+            scrollTop: 460,
         });
         controller.followStreamingContent();
 
         expect(historyDiv.scrollTo).toHaveBeenCalledWith({
-            top: 1300,
+            top: 460,
+            behavior: 'instant',
+        });
+    });
+
+    it('falls back to the last message start when the stream anchor is cleared', () => {
+        const { controller, historyDiv } = createController();
+        const answer = document.createElement('div');
+        Object.defineProperty(answer, 'offsetTop', { configurable: true, value: 520 });
+        historyDiv.appendChild(answer);
+
+        setScrollMetrics(historyDiv, {
+            scrollHeight: 1400,
+            clientHeight: 400,
+            scrollTop: 1320,
+        });
+        controller.handleHistoryScroll();
+        expect(controller.shouldFollowBottom).toBe(true);
+
+        controller.clearStreamingAnchor();
+        controller.followStreamingContent();
+
+        expect(historyDiv.scrollTo).toHaveBeenCalledWith({
+            top: 500,
+            behavior: 'instant',
+        });
+        expect(historyDiv.scrollTo).not.toHaveBeenCalledWith({
+            top: 1400,
             behavior: 'instant',
         });
     });
@@ -161,6 +196,33 @@ describe('ChatController streaming scroll following', () => {
         controller.followStreamingContent();
 
         expect(historyDiv.scrollTo).not.toHaveBeenCalled();
+    });
+
+    it('does not disable follow mode when programmatic pin-to-start scrolls fire', () => {
+        const { controller, historyDiv } = createController();
+        const answer = document.createElement('div');
+        Object.defineProperty(answer, 'offsetTop', { configurable: true, value: 200 });
+        historyDiv.appendChild(answer);
+        controller.setStreamingAnchor(answer);
+
+        setScrollMetrics(historyDiv, {
+            scrollHeight: 800,
+            clientHeight: 400,
+            scrollTop: 380,
+        });
+        controller.handleHistoryScroll();
+        expect(controller.shouldFollowBottom).toBe(true);
+
+        // Simulate a pin-to-start scroll that leaves the viewport far from bottom.
+        setScrollMetrics(historyDiv, {
+            scrollHeight: 1600,
+            clientHeight: 400,
+            scrollTop: 180,
+        });
+        controller.withProgrammaticScroll(() => {
+            controller.handleHistoryScroll();
+        });
+        expect(controller.shouldFollowBottom).toBe(true);
     });
 
     it('releases artifact resources when clearing history', () => {

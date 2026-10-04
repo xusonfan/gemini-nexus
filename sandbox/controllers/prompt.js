@@ -169,8 +169,15 @@ export class PromptController {
     /**
      * Hard-reset generating UI/state. Safe to call multiple times.
      * Does not send CANCEL_PROMPT (caller may do that).
+     *
+     * @param {object} [options]
+     * @param {string} [options.status]
+     * @param {number} [options.keepStatusMs]
+     * @param {boolean} [options.clearStream=true] Remove the live streaming
+     *   bubble. Pass false when the caller will finalize that bubble in place
+     *   (e.g. GEMINI_REPLY) so we do not tear it down and recreate it.
      */
-    forceClearGenerating({ status = '', keepStatusMs = 2500 } = {}) {
+    forceClearGenerating({ status = '', keepStatusMs = 2500, clearStream = true } = {}) {
         if (this._generationWatchdogTimer) {
             clearTimeout(this._generationWatchdogTimer);
             this._generationWatchdogTimer = null;
@@ -180,7 +187,9 @@ export class PromptController {
         this.generationStartedAt = 0;
         this.lastGenerationActivityAt = 0;
         this.ui.setLoading(false);
-        this.app.messageHandler?.clearActiveStream?.();
+        if (clearStream !== false) {
+            this.app.messageHandler?.clearActiveStream?.();
+        }
         this.app.sessionFlow?.refreshHistoryUI?.();
         if (status) {
             this.ui.updateStatus(status);

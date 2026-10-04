@@ -111,7 +111,10 @@ describe('appendMessage copy button', () => {
         expect(aiRow?.children[1]?.classList.contains('message-content-container')).toBe(true);
         expect(aiController.div.querySelector('.message-avatar-ai')).not.toBeNull();
         expect(aiController.div.querySelector('.message-actions .copy-btn')).not.toBeNull();
+        expect(aiController.div.querySelector('.message-actions .nav-ai-prev-btn')).not.toBeNull();
+        expect(aiController.div.querySelector('.message-actions .nav-ai-next-btn')).not.toBeNull();
         expect(aiController.div.querySelector(':scope > .copy-btn')).toBeNull();
+        expect(userController.div.querySelector('.message-actions .nav-ai-prev-btn')).toBeNull();
 
         const userRow = userController.div.querySelector(':scope > .msg-row');
         expect(userController.div.dataset.messageRole).toBe('user');
@@ -144,6 +147,46 @@ describe('appendMessage copy button', () => {
             'tool-status',
             expect.objectContaining({ toolName: 'navigate_page' })
         );
+    });
+
+    it('jumps between AI answers from the hover nav buttons', () => {
+        const container = document.createElement('div');
+        container.scrollTo = vi.fn();
+
+        const first = appendMessage(container, 'First answer', 'ai', null, '', null, {
+            autoScroll: false,
+        });
+        appendMessage(container, 'User question', 'user', null, '', null, {
+            autoScroll: false,
+        });
+        const second = appendMessage(container, 'Second answer', 'ai', null, '', null, {
+            autoScroll: false,
+        });
+
+        Object.defineProperty(first.div, 'offsetTop', { configurable: true, value: 120 });
+        Object.defineProperty(second.div, 'offsetTop', { configurable: true, value: 640 });
+
+        const firstPrev = first.div.querySelector('.nav-ai-prev-btn');
+        const firstNext = first.div.querySelector('.nav-ai-next-btn');
+        const secondPrev = second.div.querySelector('.nav-ai-prev-btn');
+        const secondNext = second.div.querySelector('.nav-ai-next-btn');
+
+        expect(firstPrev.disabled).toBe(true);
+        expect(firstNext.disabled).toBe(false);
+        expect(secondPrev.disabled).toBe(false);
+        expect(secondNext.disabled).toBe(true);
+
+        firstNext.click();
+        expect(container.scrollTo).toHaveBeenCalledWith({
+            top: 620,
+            behavior: 'smooth',
+        });
+
+        secondPrev.click();
+        expect(container.scrollTo).toHaveBeenLastCalledWith({
+            top: 100,
+            behavior: 'smooth',
+        });
     });
 
     it('groups consecutive normal messages from the same role like AMC', () => {

@@ -17,6 +17,7 @@ export class ChatController {
         this.shouldFollowBottom = true;
         this.streamingAnchorEl = null;
         this.scrollFrame = null;
+        this.isProgrammaticScroll = false;
         this.exportPdfBtn = document.getElementById('export-pdf-btn');
         this.resizeObserver = null;
         this.footerResizeObserver = null;
@@ -185,6 +186,10 @@ export class ChatController {
     }
 
     handleHistoryScroll() {
+        // Ignore scrolls we initiated ourselves (pin-to-answer-start during
+        // streaming). Those leave the viewport far from the absolute bottom
+        // once the answer grows, and must not disable follow mode.
+        if (this.isProgrammaticScroll) return;
         const isNearBottom = this.isNearBottom();
         if (isNearBottom !== null) {
             this.shouldFollowBottom = isNearBottom;
@@ -223,6 +228,20 @@ export class ChatController {
         });
     }
 
+    withProgrammaticScroll(run) {
+        this.isProgrammaticScroll = true;
+        try {
+            run();
+        } finally {
+            // Instant scrolls fire the scroll event synchronously inside
+            // scrollTo; smooth ones may land later — clear on the next frame
+            // so a trailing scroll event still sees the flag.
+            window.requestAnimationFrame(() => {
+                this.isProgrammaticScroll = false;
+            });
+        }
+    }
+
     scheduleBottomScroll(behavior = 'instant') {
         if (!this.historyDiv) return;
         if (this.scrollFrame !== null) return;
@@ -230,9 +249,11 @@ export class ChatController {
         this.scrollFrame = window.requestAnimationFrame(() => {
             this.scrollFrame = null;
             if (!this.historyDiv) return;
-            this.historyDiv.scrollTo({
-                top: this.historyDiv.scrollHeight,
-                behavior,
+            this.withProgrammaticScroll(() => {
+                this.historyDiv.scrollTo({
+                    top: this.historyDiv.scrollHeight,
+                    behavior,
+                });
             });
         });
     }
@@ -245,7 +266,9 @@ export class ChatController {
             this.scrollFrame = null;
             if (!this.historyDiv || !messageEl) return;
             const top = Math.max(0, messageEl.offsetTop - 20);
-            this.historyDiv.scrollTo({ top, behavior });
+            this.withProgrammaticScroll(() => {
+                this.historyDiv.scrollTo({ top, behavior });
+            });
         });
     }
 
@@ -261,6 +284,13 @@ export class ChatController {
         if (!this.shouldFollowBottom) return;
         if (this.streamingAnchorEl) {
             this.scheduleMessageStartScroll(this.streamingAnchorEl, 'instant');
+            return;
+        }
+        // Prefer the last message start over the absolute bottom so finishing
+        // a stream does not jump to the end and then back to the answer top.
+        const lastMsg = this.historyDiv?.lastElementChild;
+        if (lastMsg) {
+            this.scheduleMessageStartScroll(lastMsg, 'instant');
             return;
         }
         this.scheduleBottomScroll('instant');
@@ -297,12 +327,11 @@ export class ChatController {
                 // Scroll to the start of the last message to ensure visibility from the beginning
                 const lastMsg = this.historyDiv.lastElementChild;
                 if (lastMsg) {
-                    this.historyDiv.scrollTo({
-                        top: lastMsg.offsetTop - 20,
-                        behavior: 'smooth',
-                    });
+                    this.scheduleMessageStartScroll(lastMsg, 'smooth');
                 } else {
-                    this.historyDiv.scrollTop = this.historyDiv.scrollHeight;
+                    this.withProgrammaticScroll(() => {
+                        this.historyDiv.scrollTop = this.historyDiv.scrollHeight;
+                    });
                 }
             }, 50);
         }
@@ -311,7 +340,8 @@ export class ChatController {
     scrollToMessageStart(messageEl, force = false) {
         if (!this.historyDiv || !messageEl) return;
         if (!force && !this.shouldFollowBottom) return;
-        this.scheduleMessageStartScroll(messageEl, 'smooth');
+        // Instant: avoid smooth animations fighting the stream follow loop.
+        this.scheduleMessageStartScroll(messageEl, 'instant');
     }
 
     exportToPDF() {

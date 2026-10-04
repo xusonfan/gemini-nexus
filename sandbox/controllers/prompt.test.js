@@ -67,12 +67,24 @@ describe('PromptController generation recovery', () => {
         const { app, controller, ui } = createPromptHarness();
         app.isGenerating = true;
         app.generatingSessionId = 's1';
+        app.messageHandler = { clearActiveStream: vi.fn() };
         controller.generationStartedAt = Date.now() - 60_000;
         controller.forceClearGenerating({ status: 'cleared' });
         expect(app.isGenerating).toBe(false);
         expect(app.generatingSessionId).toBeNull();
         expect(ui.setLoading).toHaveBeenCalledWith(false);
         expect(ui.updateStatus).toHaveBeenCalledWith('cleared');
+        expect(app.messageHandler.clearActiveStream).toHaveBeenCalled();
+    });
+
+    it('forceClearGenerating can keep the streaming bubble for in-place finalize', () => {
+        const { app, controller } = createPromptHarness();
+        app.isGenerating = true;
+        app.generatingSessionId = 's1';
+        app.messageHandler = { clearActiveStream: vi.fn() };
+        controller.forceClearGenerating({ clearStream: false });
+        expect(app.messageHandler.clearActiveStream).not.toHaveBeenCalled();
+        expect(app.isGenerating).toBe(false);
     });
 
     it('isGenerationLikelyStuck after silence window', () => {

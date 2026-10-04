@@ -48,6 +48,9 @@ function createMessageHandlerHarness() {
         historyDiv: document.createElement('div'),
         followStreamingContent: vi.fn(),
         scrollToBottom: vi.fn(),
+        scrollToMessageStart: vi.fn(),
+        setStreamingAnchor: vi.fn(),
+        clearStreamingAnchor: vi.fn(),
         setLoading: vi.fn(),
     };
 
@@ -160,6 +163,33 @@ describe('MessageHandler.handleGeminiReply', () => {
         });
 
         expect(appendMessage).not.toHaveBeenCalled();
+    });
+
+    it('finalizes the streaming bubble in place and clears the scroll anchor', () => {
+        const { handler, ui } = createMessageHandlerHarness();
+
+        handler.handleStreamUpdate({
+            action: 'GEMINI_STREAM_UPDATE',
+            sessionId: 'session-1',
+            text: 'Partial answer',
+        });
+        const streamingController = appendMessage.mock.results[0].value;
+
+        handler.handleGeminiReply({
+            action: 'GEMINI_REPLY',
+            sessionId: 'session-1',
+            status: 'success',
+            text: 'Final answer',
+            thoughts: 'Done',
+            thoughtsDurationSeconds: 3,
+        });
+
+        expect(streamingController.finalize).toHaveBeenCalledWith('Final answer', 'Done', {
+            thoughtsDurationSeconds: 3,
+        });
+        expect(appendMessage).toHaveBeenCalledTimes(1);
+        expect(ui.clearStreamingAnchor).toHaveBeenCalled();
+        expect(handler.streamingBubble).toBeNull();
     });
 
     it('removes the streaming bubble instead of adding duplicate images after storage already rendered it', () => {
