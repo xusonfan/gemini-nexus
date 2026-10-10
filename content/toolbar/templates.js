@@ -109,9 +109,11 @@
             <div class="ask-header" id="ask-header">
                 <div class="header-title-group">
                     <span class="window-title" id="window-title">${toolbarStrings.windowTitle}</span>
+                    <span class="context-preview hidden" id="context-preview"></span>
                     ${buildTranslationTargetMarkup(toolbarStrings)}
                 </div>
                 <div class="header-actions">
+                    <div class="model-picker">
                     <select id="ask-provider-select" class="ask-provider-select" title="${toolbarStrings.toolbarProviderLabel || 'Popup provider'}">
                         <option value="web">${toolbarStrings.providerWebShort || 'Web'}</option>
                         <option value="official">${toolbarStrings.providerOfficialShort || 'API'}</option>
@@ -123,9 +125,11 @@
                         <option value="anthropic">${toolbarStrings.providerAnthropicShort || 'Anthropic'}</option>
                         <option value="zhipu">${toolbarStrings.providerZhipuShort || 'Zhipu'}</option>
                     </select>
+                    <span class="model-picker-divider" aria-hidden="true">/</span>
                     <select id="ask-model-select" class="ask-model-select">
                         ${WEB_MODEL_OPTIONS}
                     </select>
+                    </div>
                     <button class="ask-thinking-toggle" id="ask-thinking-toggle" type="button" hidden title="${toolbarStrings.toolbarThinkingToggleAria || 'Toggle thinking level'}" aria-label="${toolbarStrings.toolbarThinkingToggleAria || 'Toggle thinking level'}" aria-pressed="false">
                         ${ICONS.ZAP}
                     </button>
@@ -137,43 +141,40 @@
             </div>
 
             <div class="window-body">
-                <div class="input-container">
-                    <input type="text" id="ask-input" placeholder="${toolbarStrings.askPlaceholder}" autocomplete="off">
-                </div>
-
-                <div class="context-preview hidden" id="context-preview"></div>
-
                 <div class="result-area" id="result-area">
                     <div class="markdown-body" id="result-text"></div>
                 </div>
             </div>
 
             <div class="window-footer" id="window-footer">
+                <div class="input-container">
+                    <input type="text" id="ask-input" placeholder="${toolbarStrings.askPlaceholder}" autocomplete="off">
+                </div>
                 <div class="footer-actions hidden" id="footer-actions">
                     <div class="footer-left">
-                        <button class="footer-btn" id="btn-retry" title="${toolbarStrings.retry}">
+                        <button class="footer-btn" id="btn-retry" title="${toolbarStrings.retry}" aria-label="${toolbarStrings.retry}">
                             ${ICONS.RETRY}
                         </button>
-                        <button class="footer-btn text-btn" id="btn-continue-chat" title="${toolbarStrings.openSidebar}">
-                            ${ICONS.CONTINUE} <span>${toolbarStrings.chat}</span>
+                        <button class="footer-btn" id="btn-continue-chat" title="${toolbarStrings.openSidebar}" aria-label="${toolbarStrings.chat}">
+                            ${ICONS.CONTINUE}
                         </button>
                     </div>
                     <div class="footer-right">
-                        <button class="footer-btn text-btn hidden" id="btn-insert" title="${toolbarStrings.insertTooltip}">
-                            ${ICONS.INSERT} <span>${toolbarStrings.insert}</span>
+                        <button class="footer-btn action-btn hidden" id="btn-insert" title="${toolbarStrings.insertTooltip}" aria-label="${toolbarStrings.insert}">
+                            ${ICONS.INSERT}
                         </button>
-                        <button class="footer-btn text-btn hidden" id="btn-replace" title="${toolbarStrings.replaceTooltip}">
-                            ${ICONS.REPLACE} <span>${toolbarStrings.replace}</span>
+                        <button class="footer-btn action-btn hidden" id="btn-replace" title="${toolbarStrings.replaceTooltip}" aria-label="${toolbarStrings.replace}">
+                            ${ICONS.REPLACE}
                         </button>
-                         <button class="footer-btn" id="btn-copy-result" title="${toolbarStrings.copyResult}">
+                        <button class="footer-btn" id="btn-copy-result" title="${toolbarStrings.copyResult}" aria-label="${toolbarStrings.copyResult}">
                             ${ICONS.COPY}
                         </button>
                     </div>
                 </div>
 
                 <div class="footer-stop hidden" id="footer-stop">
-                    <button class="stop-pill-btn" id="btn-stop-gen">
-                        ${ICONS.STOP} ${toolbarStrings.stopGenerating}
+                    <button class="footer-btn stop-btn" id="btn-stop-gen" title="${toolbarStrings.stopGenerating}" aria-label="${toolbarStrings.stopGenerating}">
+                        ${ICONS.STOP}
                     </button>
                 </div>
             </div>

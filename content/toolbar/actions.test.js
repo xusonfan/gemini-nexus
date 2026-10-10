@@ -450,7 +450,7 @@ describe('ToolbarActions', () => {
             'Formal',
             null
         );
-        expect(ui.setInputValue).toHaveBeenCalledWith('Formal');
+        expect(ui.setInputValue).toHaveBeenCalledWith('');
         expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
             action: 'QUICK_ASK',
             text: 'Rewrite formally:\nHello world',
@@ -487,7 +487,7 @@ describe('ToolbarActions', () => {
         );
         expect(ui.setTranslationTargetMode).toHaveBeenCalledWith(false);
         expect(ui.showLoading).toHaveBeenCalledWith('loading generate image');
-        expect(ui.setInputValue).toHaveBeenCalledWith('input generate image');
+        expect(ui.setInputValue).toHaveBeenCalledWith('');
         expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
             action: 'QUICK_ASK',
             text: 'generate image from A glass city floating above the ocean',

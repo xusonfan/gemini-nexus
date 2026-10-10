@@ -167,8 +167,7 @@
             this.elements.resultText.innerHTML = '';
             this.translationTargets.hide();
             this.setInputVisible(!this.hideInput);
-
-            if (this.elements.windowFooter) this.elements.windowFooter.classList.add('hidden');
+            this.setFooterState({ stop: false, actions: false });
 
             this.elements.askWindow.classList.toggle('result-only', this.hideInput);
             this.elements.askWindow.classList.add('visible');
@@ -188,6 +187,29 @@
                 this.elements.askInput.disabled = !visible;
                 this.elements.askInput.tabIndex = visible ? 0 : -1;
             }
+            this.inputVisible = visible;
+            this.syncFooterVisibility();
+        }
+
+        setFooterState({ stop, actions }) {
+            if (this.elements.footerStop) this.elements.footerStop.classList.toggle('hidden', !stop);
+            if (this.elements.footerActions) {
+                this.elements.footerActions.classList.toggle('hidden', !actions);
+            }
+            this.syncFooterVisibility();
+        }
+
+        // The footer hosts the follow-up input, so it stays visible whenever the input
+        // or any footer control is shown.
+        syncFooterVisibility() {
+            const footer = this.elements.windowFooter;
+            if (!footer) return;
+            const isShown = (element) => !!element && !element.classList.contains('hidden');
+            const visible =
+                this.inputVisible !== false ||
+                isShown(this.elements.footerStop) ||
+                isShown(this.elements.footerActions);
+            footer.classList.toggle('hidden', !visible);
         }
 
         hide() {
@@ -241,9 +263,7 @@
                 this.elements.resultText.innerHTML = '';
             }
 
-            if (this.elements.windowFooter) this.elements.windowFooter.classList.remove('hidden');
-            if (this.elements.footerStop) this.elements.footerStop.classList.remove('hidden');
-            if (this.elements.footerActions) this.elements.footerActions.classList.add('hidden');
+            this.setFooterState({ stop: true, actions: false });
         }
 
         showResult(htmlContent, title, isStreaming = false) {
@@ -253,12 +273,10 @@
 
             this.elements.resultText.innerHTML = htmlContent;
 
-            if (this.elements.windowFooter) this.elements.windowFooter.classList.remove('hidden');
-
             this.updateStreamingState(isStreaming);
 
             if (!isStreaming && !htmlContent) {
-                if (this.elements.windowFooter) this.elements.windowFooter.classList.add('hidden');
+                this.setFooterState({ stop: false, actions: false });
             }
 
             // Floating windows never auto-scroll during streaming; reset to top when finished.
@@ -271,13 +289,9 @@
             if (!this.elements.askWindow) return;
 
             if (isStreaming) {
-                if (this.elements.footerStop) this.elements.footerStop.classList.remove('hidden');
-                if (this.elements.footerActions)
-                    this.elements.footerActions.classList.add('hidden');
+                this.setFooterState({ stop: true, actions: false });
             } else {
-                if (this.elements.footerStop) this.elements.footerStop.classList.add('hidden');
-                if (this.elements.footerActions)
-                    this.elements.footerActions.classList.remove('hidden');
+                this.setFooterState({ stop: false, actions: true });
                 if (this.elements.buttons.copy) this.elements.buttons.copy.innerHTML = ICONS.COPY;
             }
         }
@@ -289,9 +303,7 @@
             this.elements.resultText.replaceChildren(card);
             appendErrorText(body, text);
 
-            if (this.elements.windowFooter) this.elements.windowFooter.classList.remove('hidden');
-            if (this.elements.footerStop) this.elements.footerStop.classList.add('hidden');
-            if (this.elements.footerActions) this.elements.footerActions.classList.remove('hidden');
+            this.setFooterState({ stop: false, actions: true });
         }
 
         toggleCopyIcon(success) {

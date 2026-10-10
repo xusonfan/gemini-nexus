@@ -167,7 +167,7 @@
             const measurementSpan = document.createElement('span');
             measurementSpan.style.visibility = 'hidden';
             measurementSpan.style.position = 'absolute';
-            measurementSpan.style.fontSize = '13px'; // Match CSS
+            measurementSpan.style.fontSize = '12px'; // Match CSS
             measurementSpan.style.fontWeight = '500'; // Match CSS
             measurementSpan.style.fontFamily = window.getComputedStyle(select).fontFamily;
             measurementSpan.style.whiteSpace = 'nowrap';
@@ -178,7 +178,7 @@
                 const measuredWidth = measurementSpan.getBoundingClientRect().width;
                 select.parentNode.removeChild(measurementSpan);
 
-                const horizontalPaddingAndBuffer = 34;
+                const horizontalPaddingAndBuffer = 14;
                 select.style.width = `${measuredWidth + horizontalPaddingAndBuffer}px`;
             }
         },

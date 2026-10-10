@@ -7,10 +7,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 16px 4px 16px;
+            gap: 8px;
+            height: 36px;
+            padding: 0 6px 0 12px;
             cursor: move;
             user-select: none;
             background: var(--gnx-bg);
+            border-bottom: 1px solid var(--gnx-border);
+            box-sizing: border-box;
             flex-shrink: 0;
         }
 
@@ -22,21 +26,37 @@
 
         .window-title {
             font-weight: 600;
-            font-size: 15px;
+            font-size: 13px;
             color: var(--gnx-fg);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 120px;
+            max-width: 96px;
+            flex-shrink: 0;
         }
 
         .header-title-group {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             min-width: 0;
             flex: 1 1 auto;
         }
+
+        .context-preview {
+            flex: 1 1 auto;
+            min-width: 0;
+            font-size: 12px;
+            color: var(--gnx-fg-subtle);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .context-preview::before {
+            content: "·";
+            margin-right: 6px;
+        }
+        .context-preview.hidden { display: none; }
 
         .ask-header .translation-targets {
             display: flex;
@@ -208,47 +228,62 @@
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 2px;
             flex-shrink: 0;
         }
 
-        /* Provider and model selectors in header */
+        /* Provider and model selectors share one compact pill */
+        .model-picker {
+            display: inline-flex;
+            align-items: center;
+            height: 24px;
+            padding: 0 2px;
+            margin-right: 2px;
+            border-radius: 6px;
+            background: var(--gnx-surface);
+            box-sizing: border-box;
+            min-width: 0;
+        }
+        .model-picker-divider {
+            font-size: 11px;
+            color: var(--gnx-fg-subtle);
+            user-select: none;
+        }
         .ask-provider-select,
         .ask-model-select {
             appearance: none;
             -webkit-appearance: none;
-            background: var(--gnx-surface);
-            border: 1px solid transparent;
-            border-radius: 18px; /* Pill shape */
-            padding: 0 12px;
-            font-size: 13px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            padding: 0 6px;
+            font-size: 12px;
             font-weight: 500;
             color: var(--gnx-fg-muted);
             outline: none;
             cursor: pointer;
-            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            transition: background 0.2s, color 0.2s;
             font-family: inherit;
-            height: 32px;
-            line-height: 30px; /* Ensure vertical centering */
+            height: 22px;
+            line-height: 22px;
             box-sizing: border-box;
             text-align: center;
-            max-width: 140px;
+            max-width: 120px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         .ask-provider-select {
-            max-width: 88px;
+            max-width: 72px;
         }
+        .ask-provider-select:hover,
         .ask-model-select:hover {
             background: var(--gnx-surface-hover);
             color: var(--gnx-fg);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
-        .ask-provider-select:hover {
-            background: var(--gnx-surface-hover);
-            color: var(--gnx-fg);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        .ask-provider-select:focus-visible,
+        .ask-model-select:focus-visible {
+            box-shadow: 0 0 0 2px var(--gnx-primary-ring);
         }
         .ask-provider-select option,
         .ask-model-select option {
@@ -257,11 +292,11 @@
         }
 
         .ask-thinking-toggle {
-            width: 32px;
-            height: 32px;
-            flex: 0 0 32px;
+            width: 24px;
+            height: 24px;
+            flex: 0 0 24px;
             border: 1px solid transparent;
-            border-radius: 10px;
+            border-radius: 8px;
             background: transparent;
             color: var(--gnx-fg-subtle);
             cursor: pointer;
@@ -275,8 +310,8 @@
             display: none !important;
         }
         .ask-thinking-toggle svg {
-            width: 18px;
-            height: 18px;
+            width: 15px;
+            height: 15px;
             transition: fill 0.2s;
         }
         .ask-thinking-toggle:hover {
@@ -299,12 +334,18 @@
             border: none;
             color: var(--gnx-fg-subtle);
             cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: background 0.2s, color 0.2s;
+        }
+        .icon-btn svg {
+            width: 14px;
+            height: 14px;
         }
         .icon-btn:hover {
             background: var(--gnx-surface-hover);

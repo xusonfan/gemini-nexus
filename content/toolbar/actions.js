@@ -240,32 +240,27 @@
         ) {
             const includePageContext = options.includePageContext === true;
             const strings = this.t;
-            let prompt, title, inputPlaceholder, loadingMessage;
+            let prompt, title, loadingMessage;
 
             if (actionType === 'translate') {
                 prompt = this.buildTextTranslatePrompt(selection);
                 title = strings.titles.textTranslate;
-                inputPlaceholder = strings.inputs.textTranslate;
                 loadingMessage = strings.loading.translate;
             } else if (actionType === 'summarize') {
                 prompt = strings.prompts.summarize(selection);
                 title = strings.titles.summarize;
-                inputPlaceholder = strings.inputs.summarize;
                 loadingMessage = strings.loading.summarize;
             } else if (actionType === 'grammar') {
                 prompt = strings.prompts.grammar(selection);
                 title = strings.titles.grammar;
-                inputPlaceholder = strings.inputs.grammar;
                 loadingMessage = strings.loading.grammar;
             } else if (actionType === 'explain') {
                 prompt = strings.prompts.explain(selection);
                 title = strings.titles.explain;
-                inputPlaceholder = strings.inputs.explain;
                 loadingMessage = strings.loading.explain;
             } else {
                 prompt = selection;
                 title = 'AI';
-                inputPlaceholder = '';
                 loadingMessage = strings.loading.analyze;
             }
 
@@ -273,8 +268,8 @@
             await this.ui.showAskWindow(rect, selection, title, mousePoint);
             this.ui.setTranslationTargetMode?.(actionType === 'translate');
             this.ui.showLoading(loadingMessage);
-
-            this.ui.setInputValue(inputPlaceholder);
+            // Keep input empty for follow-up; title + context already describe the action.
+            this.ui.setInputValue('');
 
             const provider = this.getCurrentProvider();
             const message = withProviderOptions(
@@ -303,7 +298,7 @@
             await this.ui.showAskWindow(rect, selection, title, mousePoint);
             this.ui.setTranslationTargetMode?.(false);
             this.ui.showLoading(this.t.loading.generateImage);
-            this.ui.setInputValue(this.t.inputs.generateImage);
+            this.ui.setInputValue('');
 
             const provider = this.getCurrentProvider();
             const message = withProviderOptions(
@@ -329,7 +324,7 @@
             await this.ui.showAskWindow(rect, selection, title, mousePoint);
             this.ui.setTranslationTargetMode?.(false);
             this.ui.showLoading(this.t.loading.customSelectionTool || this.t.loading.analyze);
-            this.ui.setInputValue(title);
+            this.ui.setInputValue('');
 
             const provider = this.getCurrentProvider();
             const message = withProviderOptions(

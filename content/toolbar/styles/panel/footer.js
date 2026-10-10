@@ -1,102 +1,106 @@
 (function () {
     window.GeminiStyles = window.GeminiStyles || {};
     window.GeminiStyles.PanelFooter = `
-        /* --- Footer Styles --- */
+        /* --- Footer: follow-up input + icon actions in one row --- */
 
         .window-footer {
             flex-shrink: 0;
             background: var(--gnx-bg);
-            padding: 8px 16px;
-            min-height: 48px;
+            border-top: 1px solid var(--gnx-border);
+            padding: 6px 6px 6px 8px;
             display: flex;
             align-items: center;
-            justify-content: center; /* Centered by default for Stop button */
+            gap: 4px;
             box-sizing: border-box;
         }
 
         .window-footer.hidden { display: none; }
 
-        .footer-actions {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .input-container {
+            flex: 1 1 auto;
+            min-width: 0;
         }
 
-        .footer-actions.hidden { display: none; }
+        .input-container.hidden,
+        .ask-window.result-only .input-container {
+            display: none;
+        }
+
+        input[type="text"]#ask-input {
+            width: 100%;
+            height: 28px;
+            padding: 0 10px;
+            font-size: 13px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            outline: none;
+            color: var(--gnx-fg);
+            background: var(--gnx-surface);
+            box-sizing: border-box;
+            transition: border-color 0.2s, background 0.2s;
+            font-family: inherit;
+        }
+        input[type="text"]#ask-input:focus {
+            border-color: var(--gnx-primary);
+            background: var(--gnx-bg);
+        }
+
+        .footer-actions,
+        .footer-stop {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .footer-actions.hidden,
+        .footer-stop.hidden { display: none; }
 
         .footer-left, .footer-right {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 1px;
         }
 
         .footer-btn {
             background: transparent;
             border: none;
             cursor: pointer;
-            padding: 6px;
-            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            border-radius: 6px;
             color: var(--gnx-fg-subtle);
             display: flex;
             align-items: center;
             justify-content: center;
             transition: background 0.2s, color 0.2s;
         }
+        .footer-btn.hidden { display: none; }
+        .footer-btn svg {
+            width: 15px;
+            height: 15px;
+        }
         .footer-btn:hover {
             background: var(--gnx-surface);
             color: var(--gnx-primary);
         }
 
-        .footer-btn.text-btn {
-            padding: 6px 10px;
-            gap: 6px;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .footer-btn.text-btn.primary {
-            background: var(--gnx-primary);
-            color: var(--gnx-on-primary);
-        }
-        .footer-btn.text-btn.primary:hover {
-            background: var(--gnx-primary-hover);
-        }
-
-        #btn-insert, #btn-replace {
-            background: var(--gnx-chip-bg);
+        .footer-btn.action-btn {
             color: var(--gnx-primary);
-            border: 1px solid var(--gnx-primary);
         }
-        #btn-insert:hover, #btn-replace:hover {
+        .footer-btn.action-btn:hover {
             background: var(--gnx-chip-bg-hover);
         }
 
-        .footer-stop {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-        }
-        .footer-stop.hidden { display: none; }
-
-        .stop-pill-btn {
-            background: var(--gnx-bg);
+        .footer-btn.stop-btn {
             color: var(--gnx-fg);
-            border: 1px solid var(--gnx-border);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: background 0.2s, box-shadow 0.2s;
-        }
-        .stop-pill-btn:hover {
             background: var(--gnx-surface);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+        .footer-btn.stop-btn:hover {
+            background: var(--gnx-surface-hover);
+            color: var(--gnx-error);
         }
     `;
 })();

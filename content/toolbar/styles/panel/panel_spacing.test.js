@@ -7,12 +7,26 @@ describe('content toolbar panel spacing', () => {
         window.GeminiStyles = {};
     });
 
-    it('keeps the title-to-input vertical gap compact', async () => {
+    it('uses a slim single-row header and compact body padding', async () => {
         await import('./header.js?compact-spacing-test');
         await import('./body.js?compact-spacing-test');
 
-        expect(window.GeminiStyles.PanelHeader).toContain('padding: 8px 16px 4px 16px;');
-        expect(window.GeminiStyles.PanelBody).toContain('padding: 4px 16px 16px 16px;');
+        expect(window.GeminiStyles.PanelHeader).toContain('height: 36px;');
+        expect(window.GeminiStyles.PanelBody).toContain('padding: 8px 12px;');
+    });
+
+    it('shows the selection context inline in the header without a Context label', async () => {
+        await import('./header.js?context-preview-label-test');
+
+        const css = window.GeminiStyles.PanelHeader;
+        expect(css).toContain('.context-preview {');
+        expect(css).not.toContain('content: "Context:"');
+    });
+
+    it('hides footer buttons marked hidden', async () => {
+        await import('./footer.js?footer-hidden-test');
+
+        expect(window.GeminiStyles.PanelFooter).toContain('.footer-btn.hidden { display: none; }');
     });
 
     it('lets the full-screen image preview receive pointer events inside the toolbar host', async () => {

@@ -7,62 +7,11 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 4px 16px 16px 16px;
+            padding: 8px 12px;
             overflow: hidden; /* Crucial for internal scroll */
             background: var(--gnx-bg);
             position: relative;
             min-height: 0;
-        }
-
-        /* Input Styles */
-        .input-container {
-            margin-bottom: 12px;
-            flex-shrink: 0;
-        }
-
-        .input-container.hidden,
-        .ask-window.result-only .input-container {
-            display: none;
-        }
-
-        input[type="text"]#ask-input {
-            width: 100%;
-            padding: 10px 12px;
-            font-size: 14px;
-            border: 1px solid var(--gnx-border);
-            border-radius: 8px;
-            outline: none;
-            color: var(--gnx-fg);
-            background: var(--gnx-bg);
-            box-sizing: border-box;
-            transition: border-color 0.2s;
-            font-family: inherit;
-        }
-        input[type="text"]#ask-input:focus {
-            border-color: var(--gnx-primary);
-            box-shadow: 0 0 0 2px var(--gnx-primary-ring);
-        }
-
-        .context-preview {
-            font-size: 12px;
-            color: var(--gnx-fg-muted);
-            background: var(--gnx-surface);
-            padding: 8px 12px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-        }
-        .context-preview.hidden { display: none; }
-        .context-preview::before {
-            content: "Context:";
-            font-weight: 600;
-            margin-right: 6px;
-            color: var(--gnx-primary);
         }
 
         .gemini-error-card {

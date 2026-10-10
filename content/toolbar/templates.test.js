@@ -209,4 +209,43 @@ describe('GeminiToolbarTemplates', () => {
         expect(button.getAttribute('title')).toBe('Generate image');
         expect(button.querySelector('[data-icon="IMAGE_SPARKLE"]')).not.toBeNull();
     });
+
+    it('places context in the header and the follow-up input in the footer row', () => {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = window.GeminiToolbarTemplates.mainStructure;
+
+        const header = wrapper.querySelector('.ask-header');
+        const body = wrapper.querySelector('.window-body');
+        const footer = wrapper.querySelector('#window-footer');
+
+        expect(header.contains(wrapper.querySelector('#context-preview'))).toBe(true);
+        expect(footer.contains(wrapper.querySelector('#ask-input'))).toBe(true);
+        expect(body.querySelector('#ask-input')).toBeNull();
+        expect(body.querySelector('#context-preview')).toBeNull();
+        expect(wrapper.querySelector('#btn-stop-gen').textContent.trim()).toBe('');
+        expect(wrapper.querySelector('#btn-stop-gen').getAttribute('title')).toBe(
+            'Stop generating'
+        );
+    });
+
+    it('renders ask-window footer actions as icon-only buttons', () => {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = window.GeminiToolbarTemplates.mainStructure;
+
+        const continueBtn = wrapper.querySelector('#btn-continue-chat');
+        const insertBtn = wrapper.querySelector('#btn-insert');
+        const replaceBtn = wrapper.querySelector('#btn-replace');
+
+        expect(continueBtn.querySelector('span')).toBeNull();
+        expect(insertBtn.querySelector('span')).toBeNull();
+        expect(replaceBtn.querySelector('span')).toBeNull();
+        expect(continueBtn.getAttribute('title')).toBe('Open in Sidebar');
+        expect(insertBtn.getAttribute('title')).toBe('Insert at cursor');
+        expect(replaceBtn.getAttribute('title')).toBe('Replace selected text');
+        expect(continueBtn.querySelector('[data-icon="CONTINUE"]')).not.toBeNull();
+        expect(insertBtn.querySelector('[data-icon="INSERT"]')).not.toBeNull();
+        expect(replaceBtn.querySelector('[data-icon="REPLACE"]')).not.toBeNull();
+        expect(insertBtn.classList.contains('action-btn')).toBe(true);
+        expect(replaceBtn.classList.contains('action-btn')).toBe(true);
+    });
 });

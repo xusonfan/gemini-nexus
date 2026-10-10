@@ -156,6 +156,36 @@ describe('WindowView', () => {
         vi.useRealTimers();
     });
 
+    it('keeps the footer visible for the follow-up input before any result arrives', async () => {
+        const elements = createElements();
+        const view = new window.GeminiViewWindow(elements);
+
+        await view.show({ right: 20, bottom: 20 }, null, 'Ask');
+
+        expect(elements.windowFooter.classList.contains('hidden')).toBe(false);
+        expect(elements.footerActions.classList.contains('hidden')).toBe(true);
+        expect(elements.footerStop.classList.contains('hidden')).toBe(true);
+    });
+
+    it('hides the footer in result-only mode until actions are available', async () => {
+        const elements = createElements();
+        const view = new window.GeminiViewWindow(elements);
+
+        await view.show({ right: 20, bottom: 20 }, null, 'Summarize Page', null, null, {
+            hideInput: true,
+            autoFocus: false,
+        });
+        expect(elements.windowFooter.classList.contains('hidden')).toBe(true);
+
+        view.showLoading('Loading');
+        expect(elements.windowFooter.classList.contains('hidden')).toBe(false);
+        expect(elements.footerStop.classList.contains('hidden')).toBe(false);
+
+        view.showResult('<p>done</p>', null, false);
+        expect(elements.footerStop.classList.contains('hidden')).toBe(true);
+        expect(elements.footerActions.classList.contains('hidden')).toBe(false);
+    });
+
     it('does not auto-scroll to the bottom while streaming in floating windows', async () => {
         const elements = createElements();
         Object.defineProperty(elements.resultArea, 'scrollHeight', {

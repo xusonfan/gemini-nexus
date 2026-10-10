@@ -7,10 +7,10 @@
             background: var(--gnx-bg);
             border: 1px solid var(--gnx-border);
             border-radius: 12px;
-            width: 400px;
-            height: 400px;
-            min-width: 320px;
-            min-height: 250px;
+            width: 380px;
+            height: 360px;
+            min-width: 300px;
+            min-height: 220px;
 
             /* Constraints to prevent exceeding display area */
             max-width: 90vw;
