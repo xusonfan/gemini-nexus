@@ -180,6 +180,95 @@ describe('AppController session restore behavior', () => {
         expect(sessionManager.currentSessionId).toBe('real');
     });
 
+    it('does not re-enter draft when repeated tab context has no bound session', async () => {
+        const { app, sessionManager, ui } = createAppHarness();
+        app.sidePanelScope = 'remembered_tabs';
+
+        await app.handleIncomingMessage(restoreEvent([realSession()]));
+        expect(sessionManager.currentSessionId).toBeNull();
+        ui.clearChatHistory.mockClear();
+        window.parent.postMessage.mockClear();
+
+        await app.handleIncomingMessage({
+            data: {
+                action: 'RESTORE_SIDE_PANEL_TAB_CONTEXT',
+                payload: {
+                    tabId: 123,
+                    sessionId: null,
+                },
+            },
+        });
+
+        expect(sessionManager.currentSessionId).toBeNull();
+        expect(ui.clearChatHistory).not.toHaveBeenCalled();
+        expect(window.parent.postMessage).not.toHaveBeenCalledWith(
+            expect.objectContaining({ action: 'SAVE_SIDE_PANEL_SESSION_BINDING' }),
+            '*'
+        );
+    });
+
+    it('keeps a pending SWITCH_SESSION chat when same-tab context arrives without a binding', async () => {
+        const { app, sessionManager, ui } = createAppHarness();
+        app.sidePanelScope = 'remembered_tabs';
+
+        await app.handleIncomingMessage(restoreEvent([realSession()]));
+        await app.handleIncomingMessage({
+            data: {
+                action: 'RESTORE_SIDE_PANEL_TAB_CONTEXT',
+                payload: { tabId: 123, sessionId: null },
+            },
+        });
+        await app.handleIncomingMessage({
+            data: {
+                action: 'BACKGROUND_MESSAGE',
+                payload: { action: 'SWITCH_SESSION', sessionId: 'real' },
+            },
+        });
+
+        expect(sessionManager.currentSessionId).toBe('real');
+        ui.clearChatHistory.mockClear();
+
+        await app.handleIncomingMessage({
+            data: {
+                action: 'RESTORE_SIDE_PANEL_TAB_CONTEXT',
+                payload: {
+                    tabId: 123,
+                    sessionId: null,
+                    url: 'https://example.com',
+                    title: 'Example',
+                },
+            },
+        });
+
+        expect(sessionManager.currentSessionId).toBe('real');
+        expect(ui.clearChatHistory).not.toHaveBeenCalled();
+    });
+
+    it('enters draft when switching to another tab that has no bound session', async () => {
+        const { app, sessionManager, ui } = createAppHarness();
+        app.sidePanelScope = 'remembered_tabs';
+
+        await app.handleIncomingMessage(restoreEvent([realSession()]));
+        await app.handleIncomingMessage({
+            data: {
+                action: 'BACKGROUND_MESSAGE',
+                payload: { action: 'SWITCH_SESSION', sessionId: 'real' },
+            },
+        });
+        expect(sessionManager.currentSessionId).toBe('real');
+        ui.clearChatHistory.mockClear();
+
+        await app.handleIncomingMessage({
+            data: {
+                action: 'RESTORE_SIDE_PANEL_TAB_CONTEXT',
+                payload: { tabId: 456, sessionId: null },
+            },
+        });
+
+        expect(sessionManager.currentSessionId).toBeNull();
+        expect(ui.clearChatHistory).toHaveBeenCalled();
+    });
+
     it('updates page-context availability from restored tab context', async () => {
         const { app, ui } = createAppHarness();
 

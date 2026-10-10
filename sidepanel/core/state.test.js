@@ -563,6 +563,28 @@ describe('StateManager tab ownership', () => {
         });
     });
 
+    it('ignores tab status-only updates that do not change url or title', () => {
+        const listeners = setupChrome(33);
+        const frame = createFrame();
+        const manager = new StateManager(frame);
+
+        manager.init();
+        manager.markUiReady();
+        frame.postMessage.mockClear();
+
+        listeners.updated(
+            33,
+            { status: 'loading' },
+            {
+                id: 33,
+                title: 'Tab 33',
+                url: 'https://tab-33.test/',
+            }
+        );
+
+        expect(frame.postMessage).not.toHaveBeenCalled();
+    });
+
     it('suppresses page context when the current tab navigates to an extension host page', () => {
         const listeners = setupChrome(33);
         const frame = createFrame();

@@ -443,9 +443,37 @@
         }
 
         handleContinueChat(sessionId) {
-            this.sendRuntimeMessage({
-                action: 'OPEN_SIDE_PANEL',
-                sessionId,
+            return new Promise((resolve) => {
+                try {
+                    const sendResult = chrome.runtime.sendMessage({
+                        action: 'OPEN_SIDE_PANEL',
+                        sessionId,
+                    });
+                    if (sendResult && typeof sendResult.then === 'function') {
+                        sendResult
+                            .then((response) => {
+                                if (response?.status === 'error') {
+                                    this.showRuntimeMessageError(
+                                        new Error(
+                                            response.error || 'Background request failed.'
+                                        )
+                                    );
+                                    resolve(false);
+                                    return;
+                                }
+                                resolve(true);
+                            })
+                            .catch((error) => {
+                                this.showRuntimeMessageError(error);
+                                resolve(false);
+                            });
+                        return;
+                    }
+                    resolve(true);
+                } catch (error) {
+                    this.showRuntimeMessageError(error);
+                    resolve(false);
+                }
             });
         }
     }

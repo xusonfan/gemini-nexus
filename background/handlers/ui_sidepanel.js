@@ -2,40 +2,121 @@ import { getPanelPathForTab } from '../managers/sidepanel_scope_manager.js';
 import { respondWithUiTask } from './ui_async.js';
 
 export function handleOpenSidePanel(context, request, sender, sendResponse) {
-    respondWithUiTask(sendResponse, () => openSidePanel(context, request, sender), {
-        errorLabel: 'Side panel open error',
-    });
-}
+    const pendingSidePanelUpdates = buildPendingSidePanelUpdates(request);
+    const pendingKeys = Object.keys(pendingSidePanelUpdates);
+    // Persist pendingSessionId before starting open so a fast side panel boot
+    // is more likely to see it during its initial storage read (and still has
+    // storage.onChanged as a fallback).
+    const pendingStorePromise = storePendingSidePanelActions(
+        pendingSidePanelUpdates,
+        pendingKeys
+    );
 
-export function handleToggleSidePanelControl(context, request, sender, sendResponse) {
+    // chrome.sidePanel.open() requires an active user gesture. Start the open
+    // flow synchronously in the onMessage turn — before respondWithUiTask's
+    // async IIFE — so the gesture is not lost across a microtask boundary.
+    const started = startOpenSidePanel(context, sender);
+    if (started.status === 'error') {
+        pendingStorePromise
+            .then((stored) => {
+                if (stored) clearPendingSidePanelActions(pendingKeys);
+            })
+            .catch(() => {});
+        sendResponse(started);
+        return;
+    }
+
     respondWithUiTask(
         sendResponse,
-        async () => {
-            const result = await toggleSidePanelControl(context, request, sender);
-            if (result?.status === 'error') {
-                return result;
-            }
-            return { status: 'processed' };
-        },
+        () =>
+            completeOpenSidePanel(
+                request,
+                sender,
+                started.openPromise,
+                pendingStorePromise,
+                pendingKeys
+            ),
         {
-            errorLabel: 'Side panel control toggle error',
+            errorLabel: 'Side panel open error',
         }
     );
 }
 
-export function handleToggleSidePanel(context, request, sender, sendResponse) {
-    respondWithUiTask(sendResponse, () => toggleSidePanel(context, request, sender), {
-        errorLabel: 'Side panel toggle error',
+export function handleToggleSidePanelControl(context, request, sender, sendResponse) {
+    if (!sender.tab) {
+        sendResponse({ status: 'error', error: 'No active tab for side panel.' });
+        return;
+    }
+
+    const tabId = sender.tab.id;
+    const currentLock = context.controlManager?.getTargetTabId?.() ?? null;
+
+    if (currentLock === tabId) {
+        respondWithUiTask(
+            sendResponse,
+            async () => {
+                await closeControlledSidePanel(context, tabId);
+                return { status: 'processed' };
+            },
+            {
+                errorLabel: 'Side panel control toggle error',
+            }
+        );
+        return;
+    }
+
+    if (context.controlManager) {
+        context.controlManager.setOwnerSidePanelTabId(
+            context.getTargetSidePanelTabId(request, sender)
+        );
+    }
+
+    const controlRequest = { ...request, mode: 'browser_control' };
+    handleOpenSidePanel(context, controlRequest, sender, (response) => {
+        if (response?.status === 'opened') {
+            sendResponse({ status: 'processed' });
+            return;
+        }
+        sendResponse(response);
     });
 }
 
-async function openSidePanel(context, request, sender) {
+export function handleToggleSidePanel(context, request, sender, sendResponse) {
+    if (!sender.tab) {
+        sendResponse({ status: 'error', error: 'No active tab for side panel.' });
+        return;
+    }
+
+    if (context.sidePanelScopeManager?.toggleForTab) {
+        // Invoke toggle synchronously so an open path can call
+        // chrome.sidePanel.open() before the user gesture is lost.
+        let togglePromise;
+        try {
+            togglePromise = context.sidePanelScopeManager.toggleForTab(
+                sender.tab.id,
+                sender.tab.windowId
+            );
+        } catch (error) {
+            sendResponse({ status: 'error', error: error.message || String(error) });
+            return;
+        }
+
+        respondWithUiTask(sendResponse, () => togglePromise, {
+            errorLabel: 'Side panel toggle error',
+        });
+        return;
+    }
+
+    handleOpenSidePanel(context, request, sender, sendResponse);
+}
+
+function startOpenSidePanel(context, sender) {
     if (!sender.tab) {
         return { status: 'error', error: 'No active tab for side panel.' };
     }
 
-    let openPromise;
     try {
+        let openPromise;
         if (context.sidePanelScopeManager) {
             openPromise = context.sidePanelScopeManager.openForTab(
                 sender.tab.id,
@@ -54,21 +135,29 @@ async function openSidePanel(context, request, sender) {
                 windowId: sender.tab.windowId,
             });
         }
+        return { openPromise };
     } catch (error) {
         console.error('Could not start side panel open flow:', error);
         return { status: 'error', error: error.message || String(error) };
     }
+}
 
+function buildPendingSidePanelUpdates(request) {
     const pendingSidePanelUpdates = {};
     if (request.sessionId) pendingSidePanelUpdates.pendingSessionId = request.sessionId;
     if (request.mode) pendingSidePanelUpdates.pendingMode = request.mode;
     if (request.openSettings === true) pendingSidePanelUpdates.pendingOpenSettings = true;
+    return pendingSidePanelUpdates;
+}
 
-    const pendingKeys = Object.keys(pendingSidePanelUpdates);
-    const pendingActionsStored = await storePendingSidePanelActions(
-        pendingSidePanelUpdates,
-        pendingKeys
-    );
+async function completeOpenSidePanel(
+    request,
+    sender,
+    openPromise,
+    pendingStorePromise,
+    pendingKeys
+) {
+    const pendingActionsStored = await pendingStorePromise;
 
     try {
         await openPromise;
@@ -102,39 +191,6 @@ async function storePendingSidePanelActions(pendingSidePanelUpdates, pendingKeys
 function clearPendingSidePanelActions(pendingKeys) {
     if (pendingKeys.length === 0) return;
     chrome.storage.local.remove(pendingKeys).catch(() => {});
-}
-
-async function toggleSidePanel(context, request, sender) {
-    if (!sender.tab) {
-        return { status: 'error', error: 'No active tab for side panel.' };
-    }
-
-    if (context.sidePanelScopeManager?.toggleForTab) {
-        return context.sidePanelScopeManager.toggleForTab(sender.tab.id, sender.tab.windowId);
-    }
-
-    return openSidePanel(context, request, sender);
-}
-
-async function toggleSidePanelControl(context, request, sender) {
-    if (!sender.tab) {
-        return { status: 'error', error: 'No active tab for side panel.' };
-    }
-
-    const tabId = sender.tab.id;
-    const currentLock = context.controlManager?.getTargetTabId?.() ?? null;
-
-    if (currentLock === tabId) {
-        await closeControlledSidePanel(context, tabId);
-        return { status: 'processed' };
-    }
-
-    if (context.controlManager) {
-        context.controlManager.setOwnerSidePanelTabId(
-            context.getTargetSidePanelTabId(request, sender)
-        );
-    }
-    return openSidePanel(context, { ...request, mode: 'browser_control' }, sender);
 }
 
 async function closeControlledSidePanel(context, tabId) {

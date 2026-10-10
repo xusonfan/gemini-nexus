@@ -268,6 +268,55 @@ describe('ToolbarDispatcher', () => {
         expect(controller.readSelectionAloud).toHaveBeenCalledTimes(1);
     });
 
+    it('keeps the ask window open when continue-chat cannot open the side panel', async () => {
+        const controller = {
+            ui: {
+                getSelectedModel: vi.fn(() => 'gemini-3-pro'),
+                hideAskWindow: vi.fn(),
+            },
+            actions: {
+                handleContinueChat: vi.fn(async () => false),
+            },
+            imageDetector: {},
+            inputManager: {},
+            visible: true,
+            lastSessionId: 'summary-session',
+            clearForcePageContext: vi.fn(),
+        };
+
+        await new window.GeminiToolbarDispatcher(controller).dispatch('continue_chat');
+
+        expect(controller.actions.handleContinueChat).toHaveBeenCalledWith('summary-session');
+        expect(controller.ui.hideAskWindow).not.toHaveBeenCalled();
+        expect(controller.visible).toBe(true);
+        expect(controller.lastSessionId).toBe('summary-session');
+        expect(controller.clearForcePageContext).not.toHaveBeenCalled();
+    });
+
+    it('hides the ask window after continue-chat opens the side panel', async () => {
+        const controller = {
+            ui: {
+                getSelectedModel: vi.fn(() => 'gemini-3-pro'),
+                hideAskWindow: vi.fn(),
+            },
+            actions: {
+                handleContinueChat: vi.fn(async () => true),
+            },
+            imageDetector: {},
+            inputManager: {},
+            visible: true,
+            lastSessionId: 'summary-session',
+            clearForcePageContext: vi.fn(),
+        };
+
+        await new window.GeminiToolbarDispatcher(controller).dispatch('continue_chat');
+
+        expect(controller.ui.hideAskWindow).toHaveBeenCalledTimes(1);
+        expect(controller.visible).toBe(false);
+        expect(controller.lastSessionId).toBeNull();
+        expect(controller.clearForcePageContext).toHaveBeenCalledTimes(1);
+    });
+
     it('dispatches selected-text image generation with the current selection', async () => {
         const controller = {
             ui: {

@@ -276,12 +276,26 @@ export class AppController {
         return this.boundSessionId ? this.sessionManager.getSessionById(this.boundSessionId) : null;
     }
 
-    restoreRememberedTabSession() {
+    restoreRememberedTabSession({ tabChanged = true } = {}) {
         const boundSession = this.getBoundSession();
         if (boundSession) {
             if (this.sessionManager.currentSessionId !== boundSession.id) {
                 this.switchToSession(boundSession.id);
             }
+            return;
+        }
+
+        // Same-tab context refresh with no binding yet must not wipe an active
+        // chat. pendingSessionId → SWITCH_SESSION often lands before the async
+        // tab-binding write is visible, and a follow-up RESTORE_SIDE_PANEL_TAB_CONTEXT
+        // with sessionId=null used to enterDraft() and erase the summary.
+        if (!tabChanged && this.sessionManager.getCurrentSession()) {
+            return;
+        }
+
+        // Already in an unbound draft — avoid clearChat/history refresh thrash
+        // when tab-context messages repeat during side panel boot.
+        if (this.sessionManager.currentSessionId == null && this.boundSessionId == null) {
             return;
         }
 
@@ -330,7 +344,11 @@ export class AppController {
             return;
         }
         if (action === 'RESTORE_SIDE_PANEL_TAB_CONTEXT') {
-            this.currentTabId = payload?.tabId || null;
+            const previousTabId = this.currentTabId;
+            const nextTabId = payload?.tabId || null;
+            const tabChanged = previousTabId !== nextTabId;
+
+            this.currentTabId = nextTabId;
             this.currentTabUrl = payload?.url || '';
             this.currentTabTitle = payload?.title || '';
             this.boundSessionId = payload?.sessionId || null;
@@ -344,7 +362,7 @@ export class AppController {
                 this.ui.chat?.togglePageContext?.(false);
             }
             if (this.sessionsRestored && this.sidePanelScope === DEFAULT_SIDE_PANEL_SCOPE) {
-                this.restoreRememberedTabSession();
+                this.restoreRememberedTabSession({ tabChanged });
             }
             return;
         }

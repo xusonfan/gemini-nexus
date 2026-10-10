@@ -362,12 +362,50 @@ describe('UIMessageHandler browser control tab ownership', () => {
         );
 
         expect(handled).toBe(true);
+        expect(chrome.sidePanel.open).toHaveBeenCalledWith({ tabId: 9, windowId: 4 });
         await vi.waitFor(() =>
             expect(sendResponse).toHaveBeenCalledWith({
                 status: 'error',
                 error: 'Panel unavailable',
             })
         );
+    });
+
+    it('starts pending-action storage and sidePanel.open synchronously in the message turn', async () => {
+        const callOrder = [];
+        globalThis.chrome = {
+            storage: {
+                local: {
+                    set: vi.fn(
+                        () =>
+                            new Promise((resolve) => {
+                                callOrder.push('storage.set');
+                                resolve();
+                            })
+                    ),
+                    remove: vi.fn(() => Promise.resolve()),
+                },
+            },
+            sidePanel: {
+                open: vi.fn(() => {
+                    callOrder.push('sidePanel.open');
+                    return Promise.resolve();
+                }),
+                setOptions: vi.fn(() => Promise.resolve()),
+            },
+        };
+        const sendResponse = vi.fn();
+        const handler = new UIMessageHandler({}, controlManager, null, null);
+
+        handler.handle(
+            { action: 'OPEN_SIDE_PANEL', sessionId: 'session-1' },
+            { tab: { id: 9, windowId: 4 } },
+            sendResponse
+        );
+
+        // Both start in the synchronous onMessage turn (before any await).
+        expect(callOrder).toEqual(['storage.set', 'sidePanel.open']);
+        await vi.waitFor(() => expect(sendResponse).toHaveBeenCalledWith({ status: 'opened' }));
     });
 
     it('toggles the side panel through the side panel scope manager', async () => {

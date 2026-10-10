@@ -261,13 +261,19 @@
                         this.ui.stopLoading();
                         break;
 
-                    case 'continue_chat':
-                        this.actions.handleContinueChat(this.controller.lastSessionId);
+                    case 'continue_chat': {
+                        const opened = await this.actions.handleContinueChat(
+                            this.controller.lastSessionId
+                        );
+                        if (!opened) {
+                            break;
+                        }
                         this.ui.hideAskWindow();
                         this.controller.visible = false;
                         this.controller.lastSessionId = null;
                         this.controller.clearForcePageContext?.();
                         break;
+                    }
                 }
             } catch (error) {
                 if (this._isImageAction(actionType)) {

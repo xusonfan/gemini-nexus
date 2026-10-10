@@ -63,12 +63,18 @@ export function saveSidePanelSessionBinding(payload) {
             return;
         }
 
-        const bindings =
+        const previousBindings =
             result?.geminiSidePanelSessionBindings &&
             typeof result.geminiSidePanelSessionBindings === 'object' &&
             !Array.isArray(result.geminiSidePanelSessionBindings)
-                ? { ...result.geminiSidePanelSessionBindings }
+                ? result.geminiSidePanelSessionBindings
                 : {};
+        const previousSessionId = previousBindings[tabId] || null;
+        if (previousSessionId === sessionId) {
+            return;
+        }
+
+        const bindings = { ...previousBindings };
         if (sessionId) {
             bindings[tabId] = sessionId;
         } else {

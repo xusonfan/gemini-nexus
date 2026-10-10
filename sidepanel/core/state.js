@@ -202,7 +202,10 @@ export class StateManager {
 
         chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
             if (this.currentTabId !== tabId) return;
-            if (!changeInfo?.url && !tab?.url && !changeInfo?.title && !tab?.title) return;
+            // Only react to real navigation/title changes. `tab.url`/`tab.title`
+            // are almost always present, so checking them made every onUpdated
+            // (status, favicon, …) re-post tab context and thrash the chat UI.
+            if (!changeInfo?.url && !changeInfo?.title) return;
 
             this.postTabContextMessage(tab);
         });
