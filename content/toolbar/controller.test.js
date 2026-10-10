@@ -23,6 +23,7 @@ function installControllerDependencies() {
         isHost: vi.fn(() => false),
         isWindowVisible: vi.fn(() => false),
         isWindowPinned: vi.fn(() => false),
+        isWindowCollapsed: vi.fn(() => false),
         isOutsideCloseSuppressed: vi.fn(() => false),
         hideAskWindow: vi.fn(),
         showGrammarButton: vi.fn(),
@@ -337,6 +338,20 @@ describe('GeminiToolbarController model persistence', () => {
 
         expect(dispatch).not.toHaveBeenCalled();
         expect(ui.hide).not.toHaveBeenCalled();
+    });
+
+    it('keeps the collapsed ask window open on outside click so browsing continues', () => {
+        const controller = new window.GeminiToolbarController();
+        const dispatch = vi.fn();
+        controller.dispatcher = { dispatch };
+        ui.isWindowVisible.mockReturnValue(true);
+        ui.isWindowPinned.mockReturnValue(false);
+        ui.isWindowCollapsed.mockReturnValue(true);
+
+        controller.handleClick({ target: document.body });
+
+        expect(dispatch).not.toHaveBeenCalled();
+        ui.isWindowCollapsed.mockReturnValue(false);
     });
 
     it('preserves page-chat context while the ask window is still opening', () => {

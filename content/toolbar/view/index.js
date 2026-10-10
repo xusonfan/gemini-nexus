@@ -68,6 +68,7 @@
                     generateImage: getToolbarElement('btn-generate-image'),
                     readSelection: getToolbarElement('btn-read-selection'),
                     customSelectionMore: getToolbarElement('btn-custom-selection-more'),
+                    headerExpand: getToolbarElement('btn-header-expand'),
                     headerPin: getToolbarElement('btn-header-pin'),
                     headerClose: getToolbarElement('btn-header-close'),
                     stop: getToolbarElement('btn-stop-gen'),
@@ -116,6 +117,9 @@
         }
         isWindowPinned() {
             return this.windowView.isPinned();
+        }
+        isWindowCollapsed() {
+            return this.windowView.isCollapsed();
         }
         setWindowPinned(pinned) {
             this.windowView.setPinned(pinned);

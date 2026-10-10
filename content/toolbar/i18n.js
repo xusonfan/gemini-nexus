@@ -128,6 +128,7 @@
             close: isZh ? '关闭' : 'Close',
             pinWindow: isZh ? '固定弹窗（点击外部不关闭）' : 'Pin window (keep open when clicking outside)',
             unpinWindow: isZh ? '取消固定' : 'Unpin window',
+            expandWindow: isZh ? '展开弹窗' : 'Expand window',
             askPlaceholder: isZh ? '询问 Gemini...' : 'Ask Gemini...',
             toolbarProviderLabel: isZh ? '弹窗模型来源' : 'Popup provider',
             toolbarThinkingToggleAria: isZh ? '切换思考等级' : 'Toggle thinking level',

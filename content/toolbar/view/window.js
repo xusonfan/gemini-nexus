@@ -128,6 +128,22 @@
                 askWindow: this.elements.askWindow,
             });
             this.translationTargets = new window.GeminiTranslationTargetView(this.elements);
+            this.hasResult = false;
+            this.collapsed = false;
+            this.elements.buttons?.headerExpand?.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                this.setCollapsed(false);
+            });
+        }
+
+        isCollapsed() {
+            return this.collapsed === true;
+        }
+
+        setCollapsed(collapsed) {
+            this.collapsed = collapsed === true;
+            this.elements.askWindow?.classList.toggle('is-collapsed', this.collapsed);
         }
 
         async show(rect, contextText, title, resetDrag = null, mousePoint = null, options = {}) {
@@ -168,6 +184,8 @@
             this.translationTargets.hide();
             this.setInputVisible(!this.hideInput);
             this.setFooterState({ stop: false, actions: false });
+            this.hasResult = false;
+            this.setCollapsed(false);
 
             this.elements.askWindow.classList.toggle('result-only', this.hideInput);
             this.elements.askWindow.classList.add('visible');
@@ -217,6 +235,7 @@
                 this.elements.askWindow.classList.remove('visible');
                 this.elements.askWindow.classList.remove('result-only');
             }
+            this.setCollapsed(false);
             this.setInputVisible(true);
             this.hideInput = false;
             this.autoFocus = true;
@@ -264,6 +283,9 @@
             }
 
             this.setFooterState({ stop: true, actions: false });
+            // Waiting for the first token: collapse to the header strip so the page stays readable.
+            // Follow-up questions keep the window expanded because a previous answer is on screen.
+            if (!this.hasResult) this.setCollapsed(true);
         }
 
         showResult(htmlContent, title, isStreaming = false) {
@@ -272,6 +294,11 @@
             if (title) this.elements.windowTitle.textContent = title;
 
             this.elements.resultText.innerHTML = htmlContent;
+
+            if (htmlContent || !isStreaming) {
+                this.hasResult = true;
+                this.setCollapsed(false);
+            }
 
             this.updateStreamingState(isStreaming);
 
@@ -291,6 +318,7 @@
             if (isStreaming) {
                 this.setFooterState({ stop: true, actions: false });
             } else {
+                this.setCollapsed(false);
                 this.setFooterState({ stop: false, actions: true });
                 if (this.elements.buttons.copy) this.elements.buttons.copy.innerHTML = ICONS.COPY;
             }
@@ -303,6 +331,8 @@
             this.elements.resultText.replaceChildren(card);
             appendErrorText(body, text);
 
+            this.hasResult = true;
+            this.setCollapsed(false);
             this.setFooterState({ stop: false, actions: true });
         }
 

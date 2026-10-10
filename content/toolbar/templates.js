@@ -108,6 +108,7 @@
         <div class="ask-window" id="ask-window">
             <div class="ask-header" id="ask-header">
                 <div class="header-title-group">
+                    <span class="header-spinner" aria-hidden="true"></span>
                     <span class="window-title" id="window-title">${toolbarStrings.windowTitle}</span>
                     <span class="context-preview hidden" id="context-preview"></span>
                     ${buildTranslationTargetMarkup(toolbarStrings)}
@@ -132,6 +133,9 @@
                     </div>
                     <button class="ask-thinking-toggle" id="ask-thinking-toggle" type="button" hidden title="${toolbarStrings.toolbarThinkingToggleAria || 'Toggle thinking level'}" aria-label="${toolbarStrings.toolbarThinkingToggleAria || 'Toggle thinking level'}" aria-pressed="false">
                         ${ICONS.ZAP}
+                    </button>
+                    <button class="icon-btn" id="btn-header-expand" type="button" title="${toolbarStrings.expandWindow || 'Expand window'}" aria-label="${toolbarStrings.expandWindow || 'Expand window'}">
+                        ${ICONS.EXPAND}
                     </button>
                     <button class="icon-btn" id="btn-header-pin" type="button" title="${toolbarStrings.pinWindow || 'Pin window'}" aria-label="${toolbarStrings.pinWindow || 'Pin window'}" aria-pressed="false">
                         ${ICONS.PIN}

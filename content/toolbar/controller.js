@@ -463,6 +463,8 @@
 
             if (this.ui.isWindowVisible()) {
                 if (this.ui.isWindowPinned?.()) return;
+                // The collapsed strip exists so users can keep browsing while waiting.
+                if (this.ui.isWindowCollapsed?.()) return;
                 if (Date.now() < (this.suppressOutsideCloseUntil || 0)) return;
                 if (this.ui.isOutsideCloseSuppressed?.()) return;
                 this.handleAction('cancel_ask');

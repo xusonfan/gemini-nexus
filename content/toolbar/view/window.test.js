@@ -186,6 +186,58 @@ describe('WindowView', () => {
         expect(elements.footerActions.classList.contains('hidden')).toBe(false);
     });
 
+    it('collapses while waiting for the first token and expands when content streams in', async () => {
+        const elements = createElements();
+        const view = new window.GeminiViewWindow(elements);
+
+        await view.show({ right: 20, bottom: 20 }, 'selection', 'Explain');
+        expect(view.isCollapsed()).toBe(false);
+
+        view.showLoading('Explaining...');
+        expect(view.isCollapsed()).toBe(true);
+        expect(elements.askWindow.classList.contains('is-collapsed')).toBe(true);
+
+        view.showResult('', null, true);
+        expect(view.isCollapsed()).toBe(true);
+
+        view.showResult('<p>first chunk</p>', null, true);
+        expect(view.isCollapsed()).toBe(false);
+        expect(elements.askWindow.classList.contains('is-collapsed')).toBe(false);
+    });
+
+    it('keeps the window expanded for follow-up questions after a result is shown', async () => {
+        const elements = createElements();
+        const view = new window.GeminiViewWindow(elements);
+
+        await view.show({ right: 20, bottom: 20 }, 'selection', 'Explain');
+        view.showLoading('Explaining...');
+        view.showResult('<p>answer</p>', null, false);
+
+        view.showLoading();
+        expect(view.isCollapsed()).toBe(false);
+    });
+
+    it('expands the collapsed window on error and via the expand button', async () => {
+        const elements = createElements();
+        elements.buttons.headerExpand = document.createElement('button');
+        const view = new window.GeminiViewWindow(elements);
+
+        await view.show({ right: 20, bottom: 20 }, 'selection', 'Explain');
+        view.showLoading('Explaining...');
+        elements.buttons.headerExpand.click();
+        expect(view.isCollapsed()).toBe(false);
+
+        await view.show({ right: 20, bottom: 20 }, 'selection', 'Explain');
+        view.showLoading('Explaining...');
+        view.showError('Boom');
+        expect(view.isCollapsed()).toBe(false);
+
+        await view.show({ right: 20, bottom: 20 }, 'selection', 'Explain');
+        view.showLoading('Explaining...');
+        view.hide();
+        expect(view.isCollapsed()).toBe(false);
+    });
+
     it('does not auto-scroll to the bottom while streaming in floating windows', async () => {
         const elements = createElements();
         Object.defineProperty(elements.resultArea, 'scrollHeight', {

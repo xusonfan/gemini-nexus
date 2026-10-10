@@ -177,7 +177,10 @@
 
             this.resizeObserver = new ResizeObserver((entries) => {
                 for (const entry of entries) {
-                    if (this.controller.isWindowVisible()) {
+                    if (
+                        this.controller.isWindowVisible() &&
+                        !targetElement.classList?.contains('is-collapsed')
+                    ) {
                         let width, height;
                         if (entry.borderBoxSize && entry.borderBoxSize.length > 0) {
                             width = entry.borderBoxSize[0].inlineSize;

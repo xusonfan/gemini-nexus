@@ -450,6 +450,10 @@
             return this.view?.isWindowPinned?.() === true;
         }
 
+        isWindowCollapsed() {
+            return this.view?.isWindowCollapsed?.() === true;
+        }
+
         toggleWindowPinned() {
             return this.view?.toggleWindowPinned?.();
         }
